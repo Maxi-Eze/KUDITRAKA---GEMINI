@@ -1,0 +1,516 @@
+.onboardContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: radial-gradient(circle at top right, #1a1a1a 0%, #050505 100%);
+  overflow-x: hidden;
+}
+
+.onboardContent {
+  width: 100%;
+  max-width: 800px;
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(174, 255, 0, 0.1);
+  border: 1px solid rgba(174, 255, 0, 0.2);
+  color: var(--accent-green);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.04em;
+  background: linear-gradient(to bottom, #fff 0%, #888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  margin-bottom: 3rem;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+/* Persona Screen */
+.personaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.personaCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2.5rem;
+  border-radius: 24px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.personaCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-5px);
+}
+
+.personaCard.active {
+  background: rgba(174, 255, 0, 0.05);
+  border-color: var(--accent-green);
+  box-shadow: 0 20px 40px rgba(174, 255, 0, 0.1);
+}
+
+.personaCard.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent-green);
+}
+
+.cardIcon {
+  width: 48px;
+  height: 48px;
+  background: rgba(174, 255, 0, 0.1);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-green);
+  margin-bottom: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #fff;
+}
+
+.cardText {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.toneSection {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+}
+
+.toneOptions {
+  display: flex;
+  gap: 12px;
+}
+
+.toneBtn {
+  padding: 12px 24px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toneBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.toneBtn.toneActive {
+  background: var(--accent-green);
+  color: #000;
+  border-color: var(--accent-green);
+}
+
+/* Inventory Toggle */
+.inventoryToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  margin-bottom: 2rem;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255,255,255,0.1);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--accent-green); }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Inventory Setup Screen */
+.setupOptions {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 900px) {
+  .setupOptions { grid-template-columns: 1fr; }
+  .dividerBox { display: none; }
+}
+
+.manualSetup, .aiScannerCard {
+  padding: 2rem;
+  height: 100%;
+}
+
+.stockForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 1.5rem;
+}
+
+.stockRow {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 10px;
+}
+
+.dividerBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dividerBox .line {
+  width: 1px;
+  height: 100px;
+  background: var(--border-subtle);
+}
+
+.aiScannerCard {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.scannerHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.scannerText {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.scannerActions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.scanningOverlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+}
+
+.scanLine {
+  width: 100%;
+  height: 2px;
+  background: var(--accent-green);
+  box-shadow: 0 0 15px var(--accent-green);
+  position: absolute;
+  top: 0;
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Demo Box */
+.demoBox {
+  padding: 3rem;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+}
+
+.simulationArea {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.userInput {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inputLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-green);
+  font-weight: 800;
+}
+
+.typingBox {
+  font-family: var(--font-chakra);
+  font-size: 2rem;
+  color: #fff;
+  min-height: 4rem;
+  line-height: 1.2;
+}
+
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 2rem;
+  background: var(--accent-green);
+  margin-left: 8px;
+  animation: blink 0.8s infinite;
+  vertical-align: middle;
+}
+
+.aiProcess {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 3rem;
+}
+
+.parsingAnim {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--accent-green);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.pulseIcon {
+  animation: pulse 1.5s infinite;
+}
+
+.resultCard {
+  background: rgba(174, 255, 0, 0.05);
+  border: 1px solid rgba(174, 255, 0, 0.2);
+  padding: 2rem;
+  border-radius: 24px;
+  animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resultTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  color: var(--accent-green);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.extractedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 2rem;
+}
+
+.extractItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.exValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Query Card */
+.queryCard {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 2rem;
+  border-radius: 24px;
+  animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.queryAnswer {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.queryDetails {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+/* Sandbox */
+.sandboxScreen {
+  text-align: center;
+}
+
+.sandboxForm {
+  display: flex;
+  gap: 1rem;
+  margin: 3rem 0;
+  position: relative;
+}
+
+.sandboxForm input {
+  font-size: 1.25rem;
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sandboxResult {
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(174, 255, 0, 0.1);
+  border-radius: 32px;
+  text-align: left;
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.resultHeader {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Finish */
+.finishScreen {
+  text-align: center;
+  padding: 4rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.finishIcon {
+  width: 100px;
+  height: 100px;
+  background: var(--accent-green);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  margin: 0 auto 3rem;
+  box-shadow: 0 20px 60px rgba(174, 255, 0, 0.3);
+  transform: rotate(-5deg);
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+
+@media (max-width: 600px) {
+  .personaGrid { grid-template-columns: 1fr; }
+  .title { font-size: 2.5rem; }
+  .sandboxForm { flex-direction: column; }
+  .demoBox { padding: 1.5rem; }
+  .typingBox { font-size: 1.5rem; }
+}

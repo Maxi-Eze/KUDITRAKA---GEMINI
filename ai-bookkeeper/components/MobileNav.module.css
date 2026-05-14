@@ -1,0 +1,49 @@
+.mobileNav {
+  display: none; /* Hidden by default, shown via media query */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(18, 18, 20, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-subtle);
+  padding: 0 1rem;
+  z-index: 1000;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  min-width: 64px;
+}
+
+.navLink i, .navLink svg {
+  margin-bottom: 2px;
+}
+
+.active {
+  color: #aeff00;
+}
+
+.active svg {
+  filter: drop-shadow(0 0 5px rgba(174, 255, 0, 0.4));
+}
+
+@media (max-width: 1024px) {
+  .mobileNav {
+    display: flex;
+  }
+}

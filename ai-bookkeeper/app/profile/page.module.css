@@ -1,0 +1,122 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+}
+
+.titleArea h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.titleArea p {
+  color: var(--text-secondary);
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(174, 255, 0, 0.1);
+  color: #aeff00;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid rgba(174, 255, 0, 0.2);
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.profileCard {
+  padding: 2rem;
+}
+
+.wideCard {
+  grid-column: span 2;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+}
+
+.headerIcon {
+  color: #aeff00;
+}
+
+.cardHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cacText {
+  color: #aeff00;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.placeholderBox {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 2.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+  .wideCard {
+    grid-column: span 1;
+  }
+}

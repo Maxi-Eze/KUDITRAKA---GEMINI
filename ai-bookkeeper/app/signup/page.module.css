@@ -1,0 +1,377 @@
+.authContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+  background: #0a0a0a;
+}
+
+.authDecoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glow {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 50%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(174,255,0,0.1) 0%, transparent 70%);
+  filter: blur(80px);
+}
+
+.abstractShapes {
+  position: absolute;
+  bottom: -5%;
+  left: -5%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, rgba(174,255,0,0.05) 0%, transparent 60%);
+  filter: blur(60px);
+}
+
+.authCardWrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.logoIcon {
+  width: 48px;
+  height: 48px;
+  background: var(--gradient-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  box-shadow: 0 8px 24px rgba(174,255,0,0.3);
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.authCard {
+  padding: 2.5rem;
+  border-radius: var(--radius-xl);
+}
+
+.cardHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.cardHeader h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.cardHeader p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.footerText {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.footerText a {
+  color: var(--accent-purple);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footerText a:hover {
+  text-decoration: underline;
+}
+
+.heroSection {
+  text-align: center;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.misaHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.misaAvatar {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  background: rgba(174, 255, 0, 0.1);
+  color: var(--accent-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(174, 255, 0, 0.2);
+  animation: float 6s ease-in-out infinite;
+}
+
+.misaGlow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle, var(--accent-green) 0%, transparent 70%);
+  opacity: 0.2;
+  filter: blur(10px);
+}
+
+.misaChatBubble {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem 1.5rem;
+  border-radius: 20px 20px 20px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1rem;
+  max-width: 300px;
+  line-height: 1.4;
+  font-style: italic;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.04em;
+  margin-top: -1rem;
+}
+
+.heroTitle span {
+  color: var(--accent-green);
+}
+
+.heroSubtitle {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  max-width: 500px;
+  margin-bottom: 1rem;
+}
+
+.misaConversational {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+}
+
+.misaHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.smallAvatar {
+  width: 36px;
+  height: 36px;
+  background: var(--accent-green);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.misaStatus {
+  display: flex;
+  flex-direction: column;
+}
+
+.misaName {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-green);
+}
+
+.chatMessage {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+  min-height: 4rem;
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.stepProgress {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.dotActive {
+  background: var(--accent-green);
+  box-shadow: 0 0 10px rgba(174, 255, 0, 0.5);
+}
+
+.inputWrapper {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--accent-green);
+  background: rgba(174, 255, 0, 0.05);
+  color: var(--accent-green);
+}
+
+.transparentInput, .transparentSelect {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+  width: 100%;
+  outline: none;
+}
+
+.transparentSelect option {
+  background: #111;
+  color: #fff;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 1rem;
+}
+
+.animateIn {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.heroFooter {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.heroFooter a {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+@media (max-width: 580px) {
+  .heroTitle { font-size: 2.5rem; }
+  .chatMessage { font-size: 1.2rem; }
+}

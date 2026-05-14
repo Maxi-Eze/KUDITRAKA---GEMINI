@@ -1,0 +1,153 @@
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+.statIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.statLabel {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.statValue {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+.searchWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  margin-bottom: 1.25rem;
+  transition: all var(--transition);
+}
+.searchWrap:focus-within {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+.searchInput::placeholder { color: var(--text-muted); }
+
+.cardGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.customerCard {
+  padding: 1.25rem;
+  cursor: default;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+}
+
+.customerInfo { flex: 1; min-width: 0; }
+.customerName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.customerMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.customerStats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+.totalAmount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+.toggleIcon { color: var(--text-muted); }
+
+.txList { animation: fadeInUp 0.2s ease both; }
+.txListTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+.txRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.txRow:last-child { border-bottom: none; }
+.txDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.incDot { background: var(--accent-green); }
+.expDot { background: var(--accent-red); }
+.txInfo { flex: 1; min-width: 0; }
+.txItem {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.txDate {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.txIncome { font-size: 0.85rem; font-weight: 700; color: var(--accent-green); flex-shrink: 0; }
+.txExpense { font-size: 0.85rem; font-weight: 700; color: var(--accent-red); flex-shrink: 0; }
