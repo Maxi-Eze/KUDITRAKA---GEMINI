@@ -1,9 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, MessageSquare, ArrowLeftRight,
-  BarChart3, Users, Zap, TrendingUp, LogOut, User, Package
+  BarChart3, Users, Zap, TrendingUp, LogOut, User, Package, History, Sun, Moon
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 import { useAuth } from '@/context/AuthContext';
@@ -11,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/chat', label: 'AI Input', icon: MessageSquare },
+  { href: '/chat-history', label: 'Chat History', icon: History },
   { href: '/inventory', label: 'Inventory', icon: Package, inventory: true },
   { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
@@ -21,6 +23,24 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuth();
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light';
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
   
   const filteredNavItems = navItems.filter(item => {
     if (item.inventory && !user?.inventoryEnabled) return false;
@@ -70,6 +90,14 @@ export default function Sidebar() {
         <div className={styles.businessTag}>
           <TrendingUp size={14} />
           <span>SME Edition</span>
+        </div>
+        <div className={styles.themeToggle} onClick={toggleTheme} title="Switch Theme">
+          <span className={styles.themeLabel}>
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </span>
+          <span className={styles.themeIcon}>
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+          </span>
         </div>
         <button className={styles.logoutBtn} onClick={logout}>
           <LogOut size={16} />

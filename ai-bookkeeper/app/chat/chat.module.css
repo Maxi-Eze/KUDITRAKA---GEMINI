@@ -1,0 +1,7 @@
+﻿
+.sessionItem { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; cursor: pointer; border-radius: 0.5rem; margin-bottom: 0.25rem; transition: all 0.2s; }
+.activeSession { background: rgba(163, 230, 53, 0.1); border: 1px solid var(--primary); }
+.sessionTitle { flex: 1; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sessionRenameBtn { opacity: 0; padding: 0.25rem; border-radius: 0.25rem; color: var(--text-muted); transition: all 0.2s; background: none; border: none; }
+.sessionItem:hover .sessionRenameBtn { opacity: 1; }
+.sessionRenameBtn:hover { color: var(--primary); background: rgba(163, 230, 53, 0.1); }

@@ -1,12 +1,13 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useInventory } from '@/context/InventoryContext';
 import { apiClient } from '@/lib/apiClient';
 import { parseTransaction, formatAmount, generateId, getTodayDate } from '@/lib/aiParser';
 import { ChatMessage, ParsedTransaction } from '@/lib/types';
-import { Send, Bot, User, CheckCircle, XCircle, Sparkles, RotateCcw } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, XCircle, Sparkles, RotateCcw, MessageSquare, History, Plus, Edit2 } from 'lucide-react';
 import styles from './page.module.css';
 
 const EXAMPLES = [
@@ -55,21 +56,19 @@ function ParsedCard({ parsed, onConfirm, onDiscard }: {
           <span className={styles.parsedValue}>{parsed.item}</span>
         </div>
         <div className={styles.parsedField}>
-          <span className={styles.parsedLabel}>Qty</span>
-          <span className={styles.parsedValue}>{parsed.quantity || 1}</span>
-        </div>
-        <div className={styles.parsedField}>
-          <span className={styles.parsedLabel}>Customer</span>
-          <span className={styles.parsedValue}>{parsed.customer || '—'}</span>
-        </div>
-        <div className={styles.parsedField}>
           <span className={styles.parsedLabel}>Payment</span>
-          <span className="badge badge-payment">{parsed.payment_method}</span>
+          <span className={styles.parsedValue}>{parsed.payment_method}</span>
         </div>
+        {parsed.customer && (
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Customer</span>
+            <span className={styles.parsedValue}>{parsed.customer}</span>
+          </div>
+        )}
       </div>
       <div className={styles.parsedActions}>
         <button className="btn btn-primary btn-sm" onClick={onConfirm}>
-          <CheckCircle size={14} /> Save Transaction
+          <CheckCircle size={14} /> Confirm & Save
         </button>
         <button className="btn btn-ghost btn-sm" onClick={onDiscard}>
           <XCircle size={14} /> Discard
@@ -79,20 +78,57 @@ function ParsedCard({ parsed, onConfirm, onDiscard }: {
   );
 }
 
-export default function ChatPage() {
-  const { state, addTransaction, addChatMessage, clearChat } = useApp();
+function ChatContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams ? searchParams.get('sessionId') : '';
+
+  const {
+    state,
+    addTransaction,
+    addChatMessage,
+    createNewChatSession,
+    renameChatSession,
+    switchSession,
+    undoLastTransaction,
+    clearChat
+  } = useApp();
   const { user } = useAuth();
   const { items, updateStock } = useInventory();
-  const { chatHistory } = state;
+  const { chatHistory, chatSessions, activeSessionId } = state;
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [pendingParsed, setPendingParsed] = useState<{ msgId: string; parsed: ParsedTransaction } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [newChatTitle, setNewChatTitle] = useState('');
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isThinking]);
+
+  useEffect(() => {
+    if (sessionId && sessionId !== activeSessionId) {
+      switchSession(sessionId);
+    }
+  }, [sessionId, activeSessionId]);
+
+  const handleNewChatClick = () => {
+    setNewChatTitle('');
+    setShowNewChatModal(true);
+  };
+
+  const handleNewChat = async () => {
+    const title = newChatTitle.trim() || 'New Chat';
+    const newId = await createNewChatSession(title);
+    setShowNewChatModal(false);
+    setNewChatTitle('');
+    if (newId) {
+      router.push(`/chat?sessionId=${newId}`);
+    }
+  };
 
   const handleSend = async () => {
     const text = input.trim();
@@ -109,17 +145,21 @@ export default function ChatPage() {
     setIsThinking(true);
 
     const localParsed = parseTransaction(text);
-    
+
     let content = '';
     let apiParsedData = null;
 
     try {
       if (localParsed.isQuery) {
-        const response = await apiClient('/ai/chat', { data: { message: text } });
+        const response = await apiClient('/ai/chat', {
+          data: { message: text, session_id: activeSessionId }
+        });
         content = response.data?.reply || "I'm sorry, I couldn't process that query.";
       } else {
-        const response = await apiClient('/ai/parse', { data: { text, save: false } });
-        
+        const response = await apiClient('/ai/parse', {
+          data: { text, save: false, session_id: activeSessionId }
+        });
+
         if (response.data && response.data.amount) {
           apiParsedData = response.data;
           content = `Misa has analysed your input. Here's what I extracted — please confirm if it looks right:`;
@@ -132,7 +172,7 @@ export default function ChatPage() {
       content = "I'm having trouble connecting to my brain right now. Please try again later.";
     }
 
-    const assistantMsgId = Date.now().toString(); // Use timestamp as simple ID if needed
+    const assistantMsgId = Date.now().toString();
     const assistantMsg: ChatMessage = {
       id: assistantMsgId,
       role: 'assistant',
@@ -142,7 +182,7 @@ export default function ChatPage() {
     };
     addChatMessage(assistantMsg);
     setIsThinking(false);
-    
+
     if (apiParsedData) {
       setPendingParsed({ msgId: assistantMsgId, parsed: apiParsedData });
     }
@@ -150,23 +190,21 @@ export default function ChatPage() {
 
   const handleConfirm = () => {
     if (!pendingParsed) return;
-    
+
     const parsed = pendingParsed.parsed;
-    
-    // Add transaction
+
     addTransaction({
       ...parsed,
       date: getTodayDate(),
       rawInput: chatHistory.find(m => m.id !== pendingParsed.msgId && m.role === 'user')?.content || '',
     });
 
-    // Inventory Deduction Logic
     if (parsed.type === 'income' && user?.inventoryEnabled) {
-      const match = items.find(i => 
-        i.name.toLowerCase().includes(parsed.item.toLowerCase()) || 
+      const match = items.find(i =>
+        i.name.toLowerCase().includes(parsed.item.toLowerCase()) ||
         parsed.item.toLowerCase().includes(i.name.toLowerCase())
       );
-      
+
       if (match) {
         const qty = parsed.quantity || 1;
         updateStock(match.id, -qty);
@@ -183,11 +221,13 @@ export default function ChatPage() {
     setPendingParsed(null);
   };
 
-  const handleDiscard = () => {
+  const handleDiscard = async () => {
+    await undoLastTransaction();
+
     const discardMsg: ChatMessage = {
       id: generateId(),
       role: 'assistant',
-      content: `No problem! The transaction was discarded. Try describing it differently.`,
+      content: `No problem! I've discarded those details and ensured nothing was recorded.`,
       timestamp: new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }),
     };
     addChatMessage(discardMsg);
@@ -203,90 +243,139 @@ export default function ChatPage() {
 
   return (
     <div className="page-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', paddingBottom: '1rem' }}>
-      <div className="page-header" style={{ marginBottom: '1rem' }}>
-        <h1>Ask Misa</h1>
-        <p>Describe your transaction or ask for history in plain English</p>
+      {/* Header */}
+      <div className="page-header" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1>Ask Misa</h1>
+          <p>Describe your transaction or ask for history in plain English</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-primary btn-sm" onClick={handleNewChatClick}>
+            <Plus size={14} /> New Chat
+          </button>
+        </div>
       </div>
 
-      {/* Examples */}
-      {chatHistory.length === 0 && (
-        <div className={styles.examplesBox}>
-          <p className={styles.examplesTitle}><Sparkles size={14} /> Try an example:</p>
-          <div className={styles.exampleChips}>
-            {EXAMPLES.map(ex => (
-              <button key={ex} className={styles.exampleChip} onClick={() => setInput(ex)}>
-                {ex}
-              </button>
+      {/* Chat Container */}
+      <div className={styles.chatContainer}>
+        <div className={styles.mainChatArea}>
+          {/* Examples */}
+          {chatHistory.length === 0 && (
+            <div className={styles.examplesBox}>
+              <p className={styles.examplesTitle}><Sparkles size={14} /> Try an example:</p>
+              <div className={styles.exampleChips}>
+                {EXAMPLES.map(ex => (
+                  <button key={ex} className={styles.exampleChip} onClick={() => setInput(ex)}>
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Chat Messages */}
+          <div className={styles.chatWindow}>
+            {chatHistory.length === 0 && (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}><Sparkles size={40} /></div>
+                <h2>Chat with Misa</h2>
+              </div>
+            )}
+            {chatHistory.map(msg => (
+              <div key={msg.id} className={`${styles.messageRow} ${msg.role === 'user' ? styles.userRow : styles.aiRow}`}>
+                <div className={styles.msgAvatar}>
+                  {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                </div>
+                <div className={`${styles.bubble} ${msg.role === 'user' ? styles.userBubble : styles.aiBubble}`}>
+                  <p className={styles.bubbleText} style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+                  {msg.parsed && pendingParsed?.msgId === msg.id && (
+                    <ParsedCard
+                      parsed={msg.parsed}
+                      onConfirm={handleConfirm}
+                      onDiscard={handleDiscard}
+                    />
+                  )}
+                  {msg.parsed && pendingParsed?.msgId !== msg.id && (
+                    <div className={styles.parsedMini}>
+                      <span className={`badge ${msg.parsed.type === 'income' ? 'badge-income' : 'badge-expense'}`}>{msg.parsed.type}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{formatAmount(msg.parsed.amount)} · {msg.parsed.item}</span>
+                    </div>
+                  )}
+                  <span className={styles.msgTime}>{msg.timestamp}</span>
+                </div>
+              </div>
             ))}
+            {isThinking && <TypingIndicator />}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className={styles.inputArea}>
+            <div className={styles.inputWrapper}>
+              <textarea
+                ref={inputRef}
+                className={styles.chatInput}
+                placeholder='e.g. "Sold 2 bags of flour for 12000 to Mrs Adaeze via transfer"'
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={2}
+                disabled={isThinking}
+              />
+              <div className={styles.inputActions}>
+                <button className="btn btn-ghost btn-sm" onClick={() => { clearChat(); setPendingParsed(null); }} title="Clear chat">
+                  <RotateCcw size={14} />
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSend}
+                  disabled={!input.trim() || isThinking}
+                  id="send-btn"
+                >
+                  <Send size={15} /> Send
+                </button>
+              </div>
+            </div>
+            <p className={styles.inputHint}>Press Enter to send · Shift+Enter for new line</p>
+          </div>
+        </div>
+      </div>
+
+      {/* New Chat Title Modal */}
+      {showNewChatModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>New Conversation</h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.2rem' }}>
+              Give this chat session a title to keep your workspace organized.
+            </p>
+            <input
+              type="text"
+              placeholder="e.g., Weekly Sales, Auditing May..."
+              value={newChatTitle}
+              onChange={(e) => setNewChatTitle(e.target.value)}
+              className={styles.modalInput}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleNewChat();
+                if (e.key === 'Escape') setShowNewChatModal(false);
+              }}
+            />
+            <div className={styles.modalActions}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowNewChatModal(false)}>Cancel</button>
+              <button className="btn btn-primary btn-sm" onClick={handleNewChat}>Start Chat</button>
+            </div>
           </div>
         </div>
       )}
-
-      {/* Chat Messages */}
-      <div className={styles.chatWindow}>
-        {chatHistory.length === 0 && (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}><Sparkles size={40} /></div>
-            <h2>Chat with Misa</h2>
-          </div>
-        )}
-        {chatHistory.map(msg => (
-          <div key={msg.id} className={`${styles.messageRow} ${msg.role === 'user' ? styles.userRow : styles.aiRow}`}>
-            <div className={styles.msgAvatar}>
-              {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
-            </div>
-            <div className={`${styles.bubble} ${msg.role === 'user' ? styles.userBubble : styles.aiBubble}`}>
-              <p className={styles.bubbleText}>{msg.content}</p>
-              {msg.parsed && pendingParsed?.msgId === msg.id && (
-                <ParsedCard
-                  parsed={msg.parsed}
-                  onConfirm={handleConfirm}
-                  onDiscard={handleDiscard}
-                />
-              )}
-              {msg.parsed && pendingParsed?.msgId !== msg.id && (
-                <div className={styles.parsedMini}>
-                  <span className={`badge ${msg.parsed.type === 'income' ? 'badge-income' : 'badge-expense'}`}>{msg.parsed.type}</span>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{formatAmount(msg.parsed.amount)} · {msg.parsed.item}</span>
-                </div>
-              )}
-              <span className={styles.msgTime}>{msg.timestamp}</span>
-            </div>
-          </div>
-        ))}
-        {isThinking && <TypingIndicator />}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className={styles.inputArea}>
-        <div className={styles.inputWrapper}>
-          <textarea
-            ref={inputRef}
-            className={styles.chatInput}
-            placeholder='e.g. "Sold 2 bags of flour for 12000 to Mrs Adaeze via transfer"'
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={2}
-            disabled={isThinking}
-          />
-          <div className={styles.inputActions}>
-            <button className="btn btn-ghost btn-sm" onClick={() => { clearChat(); setPendingParsed(null); }} title="Clear chat">
-              <RotateCcw size={14} />
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleSend}
-              disabled={!input.trim() || isThinking}
-              id="send-btn"
-            >
-              <Send size={15} /> Send
-            </button>
-          </div>
-        </div>
-        <p className={styles.inputHint}>Press Enter to send · Shift+Enter for new line</p>
-      </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="page-container"><h1>Loading Chat...</h1></div>}>
+      <ChatContent />
+    </Suspense>
   );
 }

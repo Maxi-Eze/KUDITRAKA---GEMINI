@@ -1,4 +1,13 @@
-const BASE_URL = 'https://kudi-v2.onrender.com/api';
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'https://kudi-v2-xah5.onrender.com/api';
+    }
+  }
+  return 'https://kudi-v2-xah5.onrender.com/api';
+};
+
+const BASE_URL = getBaseUrl();
 
 interface RequestOptions extends RequestInit {
   data?: any;

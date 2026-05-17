@@ -59,7 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: {
           name: userData.ownerName || userData.businessName || 'User',
           email: userData.email,
-          password: userData.password
+          password: userData.password,
+          business_name: userData.businessName
         }
       });
       
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Signup error:", error);
       alert(error.message || "Failed to register");
       return false;
@@ -115,15 +116,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const completeOnboarding = (sector: BusinessSector, inventoryEnabled: boolean) => {
-    if (user) {
-      const updatedUser = { ...user, businessSector: sector, inventoryEnabled };
-      setUser(updatedUser);
-      localStorage.setItem('ai-bk-user', JSON.stringify(updatedUser));
+  const completeOnboarding = async (sector: BusinessSector, inventoryEnabled: boolean) => {
+    try {
+      await apiClient('/auth/onboarding', {
+        method: 'PUT',
+        data: {
+          business_sector: sector,
+          inventory_enabled: inventoryEnabled
+        }
+      });
+
+      if (user) {
+        const updatedUser = { ...user, businessSector: sector, inventoryEnabled, onboarded: true };
+        setUser(updatedUser);
+        localStorage.setItem('ai-bk-user', JSON.stringify(updatedUser));
+      }
+      setOnboarded(true);
+      localStorage.setItem('ai-bk-onboarded', 'true');
+      router.push('/');
+    } catch (error) {
+      console.error("Onboarding error:", error);
+      alert("Failed to save onboarding data. Please try again.");
     }
-    setOnboarded(true);
-    localStorage.setItem('ai-bk-onboarded', 'true');
-    router.push('/');
   };
 
   const logout = () => {

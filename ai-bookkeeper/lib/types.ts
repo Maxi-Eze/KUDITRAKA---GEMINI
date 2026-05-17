@@ -31,10 +31,17 @@ export type BusinessSector = 'Retail & Trade' | 'Professional Services' | 'Food 
 export interface User {
   id: string;
   businessName: string;
+  ownerName: string;
   businessSector?: BusinessSector;
   inventoryEnabled: boolean;
   onboarded: boolean;
   email: string;
+  phone?: string;
+  address?: string;
+  cacNumber?: string;
+  businessType?: string;
+  businessSize?: string;
+  salesChannel?: string;
 }
 
 export interface Customer {

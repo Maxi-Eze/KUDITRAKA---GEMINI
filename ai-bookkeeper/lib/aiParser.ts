@@ -3,6 +3,7 @@ import { ParsedTransaction, PaymentMethod } from './types';
 const incomeKeywords = ['sold', 'received', 'earned', 'sale', 'income', 'got', 'collected', 'revenue'];
 const expenseKeywords = ['bought', 'paid', 'purchased', 'spent', 'expense', 'cost', 'payment', 'fee', 'bill'];
 const queryKeywords = ['how much', 'total', 'summary', 'show me', 'list', 'what is', 'what was'];
+const greetingKeywords = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'];
 
 const paymentMethods: Record<string, PaymentMethod> = {
   transfer: 'transfer',
@@ -96,7 +97,8 @@ function extractQuantity(text: string): number {
 
 export function parseTransaction(input: string): ParsedTransaction {
   const lower = input.toLowerCase();
-  const isQuery = queryKeywords.some(kw => lower.includes(kw));
+  const isQuery = queryKeywords.some(kw => lower.includes(kw)) || 
+                   greetingKeywords.some(kw => lower.trim() === kw || lower.startsWith(kw + ' '));
 
   if (isQuery) {
     let queryType: 'spend' | 'income' | 'stock' | 'balance' = 'income';
