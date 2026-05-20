@@ -176,6 +176,24 @@
   flex-wrap: wrap;
 }
 
+.parsedInput {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+.parsedInput:focus {
+  border-color: var(--accent-purple);
+  background: rgba(174, 255, 0, 0.04);
+}
+
 .parsedMini {
   display: flex;
   align-items: center;

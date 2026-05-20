@@ -5,12 +5,14 @@ import { useRouter, usePathname } from 'next/navigation';
 import { User, BusinessSector } from '@/lib/types';
 import { apiClient } from '@/lib/apiClient';
 
+export type SignupData = Omit<User, 'id' | 'inventoryEnabled' | 'onboarded'> & { password?: string };
+
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   onboarded: boolean;
   isInitializing: boolean;
-  signup: (userData: User & { password?: string }) => Promise<boolean>;
+  signup: (userData: SignupData) => Promise<boolean>;
   login: (email: string, pass: string) => Promise<boolean>;
   completeOnboarding: (sector: BusinessSector, inventoryEnabled: boolean) => void;
   logout: () => void;
@@ -53,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer);
   }, [pathname, router]);
 
-  const signup = async (userData: User & { password?: string }) => {
+  const signup = async (userData: SignupData) => {
     try {
       const response = await apiClient('/auth/register', {
         data: {
@@ -66,7 +68,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (response.userId) {
         // Save the extra business data locally since backend doesn't support it yet
-        const localUser = { ...userData, id: response.userId };
+        const localUser: User = { 
+          ...userData, 
+          id: response.userId,
+          inventoryEnabled: false,
+          onboarded: false
+        };
         setUser(localUser);
         localStorage.setItem('ai-bk-user', JSON.stringify(localUser));
         router.push('/login');

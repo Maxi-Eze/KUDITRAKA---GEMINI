@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Inter, Chakra_Petch } from 'next/font/google';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';

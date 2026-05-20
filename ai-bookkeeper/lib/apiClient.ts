@@ -46,8 +46,20 @@ export async function apiClient(endpoint: string, options: RequestOptions = {}) 
 
   try {
     const response = await fetch(url, config);
-    const result = await response.json();
-    
+
+    // Only parse JSON when the server actually sends JSON.
+    // Endpoints that return 204 No Content, or that don't exist yet (HTML 404),
+    // would throw a SyntaxError if we called response.json() unconditionally.
+    let result: any = {};
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+    }
+
     if (!response.ok) {
       if (response.status === 401 && typeof window !== 'undefined') {
         // Handle unauthorized (token expired or invalid)
@@ -62,10 +74,9 @@ export async function apiClient(endpoint: string, options: RequestOptions = {}) 
       }
       throw new Error(errorMessage);
     }
-    
+
     return result;
   } catch (error) {
-    console.error('API Client Error:', error);
     throw error;
   }
 }

@@ -287,10 +287,10 @@ export default function OnboardingPage() {
                         <span>{DEMO_STEPS[movieStep].isBalanced ? 'Balanced & Sorted' : 'Parsed Successfully'}</span>
                       </div>
                       <div className={styles.extractedGrid}>
-                        <div className={styles.extractItem}><span className={styles.exLabel}>Amount</span><span className={styles.exValue}>{formatAmount(DEMO_STEPS[movieStep].result.amount)}</span></div>
-                        <div className={styles.extractItem}><span className={styles.exLabel}>Item</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result.item}</span></div>
-                        <div className={styles.extractItem}><span className={styles.exLabel}>Qty</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result.quantity || 1}</span></div>
-                        <div className={styles.extractItem}><span className={styles.exLabel}>Channel</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result.payment_method}</span></div>
+                        <div className={styles.extractItem}><span className={styles.exLabel}>Amount</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result ? formatAmount(DEMO_STEPS[movieStep].result.amount) : ''}</span></div>
+                        <div className={styles.extractItem}><span className={styles.exLabel}>Item</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result?.item}</span></div>
+                        <div className={styles.extractItem}><span className={styles.exLabel}>Qty</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result?.quantity || 1}</span></div>
+                        <div className={styles.extractItem}><span className={styles.exLabel}>Channel</span><span className={styles.exValue}>{DEMO_STEPS[movieStep].result?.payment_method}</span></div>
                         {DEMO_STEPS[movieStep].isBalanced && (
                           <div className={styles.extractItem}><span className={styles.exLabel}>Status</span><span className="badge badge-income">Verified</span></div>
                         )}
@@ -301,8 +301,8 @@ export default function OnboardingPage() {
                   {showResult && DEMO_STEPS[movieStep].isQuery && (
                     <div className={styles.queryCard}>
                       <div className={styles.resultTitle}><Bot size={18} /> <span>Misa Answered</span></div>
-                      <p className={styles.queryAnswer}>{DEMO_STEPS[movieStep].queryResult.answer}</p>
-                      <p className={styles.queryDetails}>{DEMO_STEPS[movieStep].queryResult.details}</p>
+                      <p className={styles.queryAnswer}>{DEMO_STEPS[movieStep].queryResult?.answer}</p>
+                      <p className={styles.queryDetails}>{DEMO_STEPS[movieStep].queryResult?.details}</p>
                     </div>
                   )}
                 </div>
