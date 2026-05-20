@@ -7,7 +7,7 @@ import { useInventory } from '@/context/InventoryContext';
 import { apiClient } from '@/lib/apiClient';
 import { parseTransaction, formatAmount, generateId, getTodayDate } from '@/lib/aiParser';
 import { ChatMessage, ParsedTransaction } from '@/lib/types';
-import { Send, Bot, User, CheckCircle, XCircle, Sparkles, RotateCcw, MessageSquare, History, Plus, Edit2 } from 'lucide-react';
+import { Send, Bot, User, CheckCircle, XCircle, Sparkles, RotateCcw, Plus, Edit2 } from 'lucide-react';
 import styles from './page.module.css';
 
 const EXAMPLES = [
@@ -31,9 +31,94 @@ function TypingIndicator() {
 
 function ParsedCard({ parsed, onConfirm, onDiscard }: {
   parsed: ParsedTransaction;
-  onConfirm: () => void;
+  onConfirm: (edited: ParsedTransaction) => void;
   onDiscard: () => void;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<ParsedTransaction>({ ...parsed });
+
+  const qty = isEditing ? (draft.quantity || 1) : (parsed.quantity || 1);
+  const unitPrice = !isEditing && qty > 1 ? parsed.amount / qty : null;
+
+  const set = (field: keyof ParsedTransaction, value: any) =>
+    setDraft(prev => ({ ...prev, [field]: value }));
+
+  if (isEditing) {
+    return (
+      <div className={styles.parsedCard}>
+        <div className={styles.parsedHeader}>
+          <Edit2 size={14} />
+          <span>Edit Details</span>
+        </div>
+        <div className={styles.parsedGrid}>
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Type</span>
+            <select
+              className={styles.parsedInput}
+              value={draft.type}
+              onChange={e => set('type', e.target.value)}
+            >
+              <option value="income">income</option>
+              <option value="expense">expense</option>
+            </select>
+          </div>
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Item</span>
+            <input
+              className={styles.parsedInput}
+              value={draft.item}
+              onChange={e => set('item', e.target.value)}
+            />
+          </div>
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Quantity</span>
+            <input
+              type="number"
+              min={1}
+              className={styles.parsedInput}
+              value={draft.quantity || 1}
+              onChange={e => set('quantity', parseInt(e.target.value) || 1)}
+            />
+          </div>
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Total Amount (₦)</span>
+            <input
+              type="number"
+              min={0}
+              className={styles.parsedInput}
+              value={draft.amount}
+              onChange={e => set('amount', parseFloat(e.target.value) || 0)}
+            />
+          </div>
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Payment</span>
+            <input
+              className={styles.parsedInput}
+              value={draft.payment_method}
+              onChange={e => set('payment_method', e.target.value)}
+            />
+          </div>
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Customer</span>
+            <input
+              className={styles.parsedInput}
+              value={draft.customer || ''}
+              onChange={e => set('customer', e.target.value)}
+            />
+          </div>
+        </div>
+        <div className={styles.parsedActions}>
+          <button className="btn btn-primary btn-sm" onClick={() => { setIsEditing(false); onConfirm(draft); }}>
+            <CheckCircle size={14} /> Save & Confirm
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={() => { setDraft({ ...parsed }); setIsEditing(false); }}>
+            <XCircle size={14} /> Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.parsedCard}>
       <div className={styles.parsedHeader}>
@@ -48,12 +133,22 @@ function ParsedCard({ parsed, onConfirm, onDiscard }: {
           </span>
         </div>
         <div className={styles.parsedField}>
-          <span className={styles.parsedLabel}>Amount</span>
-          <span className={styles.parsedValue}>{formatAmount(parsed.amount)}</span>
-        </div>
-        <div className={styles.parsedField}>
           <span className={styles.parsedLabel}>Item</span>
           <span className={styles.parsedValue}>{parsed.item}</span>
+        </div>
+        <div className={styles.parsedField}>
+          <span className={styles.parsedLabel}>Quantity</span>
+          <span className={styles.parsedValue}>{qty}</span>
+        </div>
+        {unitPrice !== null && (
+          <div className={styles.parsedField}>
+            <span className={styles.parsedLabel}>Unit Price</span>
+            <span className={styles.parsedValue}>{formatAmount(unitPrice)}</span>
+          </div>
+        )}
+        <div className={styles.parsedField}>
+          <span className={styles.parsedLabel}>Total Amount</span>
+          <span className={styles.parsedValue}>{formatAmount(parsed.amount)}</span>
         </div>
         <div className={styles.parsedField}>
           <span className={styles.parsedLabel}>Payment</span>
@@ -67,8 +162,11 @@ function ParsedCard({ parsed, onConfirm, onDiscard }: {
         )}
       </div>
       <div className={styles.parsedActions}>
-        <button className="btn btn-primary btn-sm" onClick={onConfirm}>
+        <button className="btn btn-primary btn-sm" onClick={() => onConfirm(parsed)}>
           <CheckCircle size={14} /> Confirm & Save
+        </button>
+        <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
+          <Edit2 size={14} /> Edit
         </button>
         <button className="btn btn-ghost btn-sm" onClick={onDiscard}>
           <XCircle size={14} /> Discard
@@ -105,15 +203,43 @@ function ChatContent() {
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [newChatTitle, setNewChatTitle] = useState('');
 
+  const getTodayTitle = () => {
+    const d = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  };
+
+  // Returns the session ID to use for today — creates one if needed
+  const ensureTodaySession = async (): Promise<string | null> => {
+    const todayTitle = getTodayTitle();
+    const activeSession = chatSessions.find(s => s.id === activeSessionId);
+    if (activeSession?.title === todayTitle && activeSessionId) return activeSessionId;
+
+    const todaySession = chatSessions.find(s => s.title === todayTitle);
+    if (todaySession) {
+      await switchSession(todaySession.id);
+      return todaySession.id;
+    }
+
+    const newId = await createNewChatSession(todayTitle);
+    return newId || null;
+  };
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, isThinking]);
 
+  // Load history whenever this component mounts with a sessionId in the URL,
+  // or when the sessionId URL param changes. We intentionally do NOT guard on
+  // activeSessionId: that value lives in context and persists across page
+  // navigations, so the guard would prevent the reload when the user returns
+  // to the same session URL after navigating away and back.
   useEffect(() => {
-    if (sessionId && sessionId !== activeSessionId) {
+    if (sessionId) {
       switchSession(sessionId);
     }
-  }, [sessionId, activeSessionId]);
+  }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleNewChatClick = () => {
     setNewChatTitle('');
@@ -134,6 +260,10 @@ function ChatContent() {
     const text = input.trim();
     if (!text || isThinking) return;
     setInput('');
+    setIsThinking(true);
+
+    // Auto-route to today's session if the user hasn't picked one manually
+    const currentSessionId = sessionId ? activeSessionId : await ensureTodaySession();
 
     const userMsg: ChatMessage = {
       id: generateId(),
@@ -142,7 +272,6 @@ function ChatContent() {
       timestamp: new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }),
     };
     addChatMessage(userMsg);
-    setIsThinking(true);
 
     const localParsed = parseTransaction(text);
 
@@ -152,12 +281,12 @@ function ChatContent() {
     try {
       if (localParsed.isQuery) {
         const response = await apiClient('/ai/chat', {
-          data: { message: text, session_id: activeSessionId }
+          data: { message: text, session_id: currentSessionId }
         });
         content = response.data?.reply || "I'm sorry, I couldn't process that query.";
       } else {
         const response = await apiClient('/ai/parse', {
-          data: { text, save: false, session_id: activeSessionId }
+          data: { text, save: false, session_id: currentSessionId }
         });
 
         if (response.data && response.data.amount) {
@@ -188,10 +317,10 @@ function ChatContent() {
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (edited: ParsedTransaction) => {
     if (!pendingParsed) return;
 
-    const parsed = pendingParsed.parsed;
+    const parsed = edited;
 
     addTransaction({
       ...parsed,
@@ -291,7 +420,7 @@ function ChatContent() {
                   {msg.parsed && pendingParsed?.msgId === msg.id && (
                     <ParsedCard
                       parsed={msg.parsed}
-                      onConfirm={handleConfirm}
+                      onConfirm={(edited) => handleConfirm(edited)}
                       onDiscard={handleDiscard}
                     />
                   )}

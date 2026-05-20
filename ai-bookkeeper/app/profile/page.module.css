@@ -1,122 +1,196 @@
-.header {
+/* ── Hero ── */
+.hero {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2.5rem;
+  gap: 1.75rem;
+  padding: 2rem 0 2.75rem;
 }
 
-.titleArea h1 {
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px; /* squircle — iOS app-icon geometry */
+  background: var(--accent-green);
+  color: #000;
   font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.04em;
+  box-shadow: 0 8px 32px rgba(174, 255, 0, 0.22);
 }
 
-.titleArea p {
-  color: var(--text-secondary);
+.heroText {
+  flex: 1;
+  min-width: 0;
+}
+
+.businessName {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.3rem;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heroSub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 .statusBadge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(174, 255, 0, 0.1);
-  color: #aeff00;
-  padding: 8px 16px;
+  gap: 6px;
+  background: rgba(174, 255, 0, 0.07);
+  color: var(--accent-green);
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  border: 1px solid rgba(174, 255, 0, 0.2);
+  border: 1px solid rgba(174, 255, 0, 0.15);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.profileGrid {
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 0;
+}
+
+/* ── Info Columns ── */
+.infoColumns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr auto 1fr;
+  padding: 2.5rem 0;
 }
 
-.profileCard {
-  padding: 2rem;
+.vertDivider {
+  width: 1px;
+  background: var(--border-subtle);
+  margin: 0 3rem;
+  align-self: stretch;
 }
 
-.wideCard {
-  grid-column: span 2;
+.infoSection {
+  display: flex;
+  flex-direction: column;
 }
 
-.cardHeader {
+/* ── Section title ── */
+.sectionTitle {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 2rem;
-  color: var(--text-primary);
-}
-
-.headerIcon {
-  color: #aeff00;
-}
-
-.cardHeader h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.infoList {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.infoItem {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  font-size: 0.75rem;
+  gap: 7px;
+  font-size: 0.68rem;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.12em;
   color: var(--text-muted);
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  margin: 0 0 1.25rem;
 }
 
-.value {
-  font-size: 1rem;
+/* ── Info rows ── */
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.rowLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.rowValue {
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.cacText {
-  color: #aeff00;
-  display: flex;
-  align-items: center;
   gap: 6px;
 }
 
-.placeholderBox {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 2.5rem;
-  text-align: center;
+.rowIcon {
+  color: var(--text-muted);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
 }
 
+.notProvided {
+  color: var(--text-muted) !important;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* ── Compliance ── */
+.compliance {
+  padding: 2.5rem 0 1rem;
+}
+
+.emptyDocs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.75rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Responsive ── */
 @media (max-width: 900px) {
-  .profileGrid {
+  .infoColumns {
     grid-template-columns: 1fr;
   }
-  .wideCard {
-    grid-column: span 1;
+  .vertDivider {
+    display: none;
+  }
+  .infoSection + .infoSection {
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .hero {
+    gap: 1.25rem;
+  }
+  .businessName {
+    font-size: 1.5rem;
+  }
+  .emptyDocs {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    flex-wrap: wrap;
+  }
+  .statusBadge {
+    margin-left: calc(72px + 1.25rem);
   }
 }

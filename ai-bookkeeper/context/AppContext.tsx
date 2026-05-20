@@ -78,6 +78,8 @@ interface AppContextType {
   undoLastTransaction: () => Promise<void>;
   clearChat: () => void;
   refreshSessions: () => Promise<void>;
+  deleteSession: (id: string) => Promise<void>;
+  deleteSessions: (ids: string[]) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -95,27 +97,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(console.error);
 
-      apiClient('/ai/chat/history')
-        .then(res => {
-          if (res.data) {
-            const mappedHistory = res.data.map((msg: any) => ({
-              id: msg.id || Math.random().toString(36),
-              role: msg.role === 'model' ? 'assistant' : msg.role,
-              content: msg.content,
-              timestamp: new Date(msg.created_at).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })
-            }));
-            dispatch({ type: 'SET_CHAT_HISTORY', payload: mappedHistory });
-          }
-        })
-        .catch(console.error);
+      // Load the sessions list only — do NOT auto-load any chat history here.
+      // Doing so causes a race: the no-session-id fetch resolves after the
+      // session-specific fetch (triggered by navigation) and overwrites it.
+      // History is loaded on-demand by switchSession() when the user navigates
+      // to a specific session.
       apiClient('/ai/chat/sessions')
         .then(res => {
           if (res.data) {
             dispatch({ type: 'SET_SESSIONS', payload: res.data });
-            if (res.data.length > 0) {
-              const firstSession = res.data[0].id;
-              dispatch({ type: 'SET_ACTIVE_SESSION', payload: firstSession });
-            }
+            // Do NOT set activeSessionId here — navigation drives which
+            // session is active, so auto-setting the first session would
+            // race with and overwrite the user's navigated-to session.
           }
         })
         .catch(console.error);
@@ -213,6 +206,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteSession = async (id: string) => {
+    try {
+      await apiClient(`/ai/chat/sessions/${id}`, { method: 'DELETE' });
+    } catch {
+      // Backend may not support this endpoint yet — proceed with local removal
+    }
+    const updatedSessions = state.chatSessions.filter(s => s.id !== id);
+    dispatch({ type: 'SET_SESSIONS', payload: updatedSessions });
+    if (state.activeSessionId === id) {
+      dispatch({ type: 'SET_ACTIVE_SESSION', payload: updatedSessions.length > 0 ? updatedSessions[0].id : null });
+      dispatch({ type: 'CLEAR_CHAT' });
+    }
+  };
+
+  const deleteSessions = async (ids: string[]) => {
+    await Promise.allSettled(ids.map(id => apiClient(`/ai/chat/sessions/${id}`, { method: 'DELETE' })));
+    const updatedSessions = state.chatSessions.filter(s => !ids.includes(s.id));
+    dispatch({ type: 'SET_SESSIONS', payload: updatedSessions });
+    if (state.activeSessionId && ids.includes(state.activeSessionId)) {
+      dispatch({ type: 'SET_ACTIVE_SESSION', payload: updatedSessions.length > 0 ? updatedSessions[0].id : null });
+      dispatch({ type: 'CLEAR_CHAT' });
+    }
+  };
+
   const refreshSessions = async () => {
     try {
       const res = await apiClient('/ai/chat/sessions');
@@ -225,17 +242,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ 
-      state, 
-      addTransaction, 
-      deleteTransaction, 
-      addChatMessage, 
+    <AppContext.Provider value={{
+      state,
+      addTransaction,
+      deleteTransaction,
+      addChatMessage,
       createNewChatSession,
       renameChatSession,
       switchSession,
       undoLastTransaction,
       clearChat,
-      refreshSessions
+      refreshSessions,
+      deleteSession,
+      deleteSessions
     }}>
       {children}
     </AppContext.Provider>
