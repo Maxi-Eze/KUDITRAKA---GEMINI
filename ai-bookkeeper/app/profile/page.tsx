@@ -1,7 +1,10 @@
 'use client';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Building2, User, Mail, Phone, MapPin, FileText, BadgeCheck, ShieldCheck } from 'lucide-react';
+import { Building2, User, Mail, Phone, MapPin, FileText, BadgeCheck, ShieldCheck, Camera } from 'lucide-react';
 import styles from './page.module.css';
+
+const LOGO_KEY = 'ai-bk-business-logo';
 
 function InfoRow({ label, value, icon }: { label: string; value?: string | null; icon?: React.ReactNode }) {
   const display = value?.trim() || null;
@@ -18,6 +21,29 @@ function InfoRow({ label, value, icon }: { label: string; value?: string | null;
 
 export default function ProfilePage() {
   const { user } = useAuth();
+  const [logo, setLogo] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(LOGO_KEY);
+    if (saved) setLogo(saved);
+  }, []);
+
+  const handleLogoClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setLogo(dataUrl);
+      localStorage.setItem(LOGO_KEY, dataUrl);
+    };
+    reader.readAsDataURL(file);
+    // Reset input so the same file can be re-selected if needed
+    e.target.value = '';
+  };
 
   if (!user) return null;
 
@@ -28,11 +54,32 @@ export default function ProfilePage() {
 
       {/* ── Identity Hero ── */}
       <div className={styles.hero}>
-        <div className={styles.avatar}>{initial}</div>
+
+        {/* Logo / avatar uploader */}
+        <div className={styles.avatarWrapper} onClick={handleLogoClick} title="Upload business logo">
+          {logo ? (
+            <img src={logo} alt="Business logo" className={styles.logoImg} />
+          ) : (
+            <div className={styles.avatar}>{initial}</div>
+          )}
+          <div className={styles.avatarOverlay}>
+            <Camera size={18} />
+            <span>{logo ? 'Change' : 'Upload'}</span>
+          </div>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleFileChange}
+        />
+
         <div className={styles.heroText}>
           <h1 className={styles.businessName}>{user.businessName || 'Your Business'}</h1>
           <p className={styles.heroSub}>{user.businessSector || user.businessType || 'Business Account'}</p>
         </div>
+
         <div className={styles.statusBadge}>
           <ShieldCheck size={14} />
           <span>Active</span>
