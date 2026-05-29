@@ -201,6 +201,36 @@
   margin-top: 0.5rem;
 }
 
+.confirmedCard {
+  margin-top: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+.confirmedGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.confirmedField {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.confirmedLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.confirmedValue {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 .inputArea {
   flex-shrink: 0;
 }

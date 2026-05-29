@@ -189,7 +189,8 @@ function ChatContent() {
     renameChatSession,
     switchSession,
     undoLastTransaction,
-    clearChat
+    clearChat,
+    confirmParsed
   } = useApp();
   const { user } = useAuth();
   const { items, updateStock } = useInventory();
@@ -340,13 +341,7 @@ function ChatContent() {
       }
     }
 
-    const confirmMsg: ChatMessage = {
-      id: generateId(),
-      role: 'assistant',
-      content: `✅ Transaction saved successfully! ${formatAmount(parsed.amount)} ${parsed.type} has been recorded.`,
-      timestamp: new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }),
-    };
-    addChatMessage(confirmMsg);
+    confirmParsed(pendingParsed.msgId);
     setPendingParsed(null);
   };
 
@@ -417,19 +412,44 @@ function ChatContent() {
                 </div>
                 <div className={`${styles.bubble} ${msg.role === 'user' ? styles.userBubble : styles.aiBubble}`}>
                   <p className={styles.bubbleText} style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p>
-                  {msg.parsed && pendingParsed?.msgId === msg.id && (
+                  {msg.parsed && pendingParsed?.msgId === msg.id ? (
                     <ParsedCard
                       parsed={msg.parsed}
                       onConfirm={(edited) => handleConfirm(edited)}
                       onDiscard={handleDiscard}
                     />
-                  )}
-                  {msg.parsed && pendingParsed?.msgId !== msg.id && (
-                    <div className={styles.parsedMini}>
-                      <span className={`badge ${msg.parsed.type === 'income' ? 'badge-income' : 'badge-expense'}`}>{msg.parsed.type}</span>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{formatAmount(msg.parsed.amount)} · {msg.parsed.item}</span>
+                  ) : msg.parsed ? (
+                    <div className={styles.confirmedCard}>
+                      <div className={styles.confirmedGrid}>
+                        <div className={styles.confirmedField}>
+                          <span className={styles.confirmedLabel}>Type</span>
+                          <span className={`badge ${msg.parsed.type === 'income' ? 'badge-income' : 'badge-expense'}`}>
+                            {msg.parsed.type.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className={styles.confirmedField}>
+                          <span className={styles.confirmedLabel}>Item</span>
+                          <span className={styles.confirmedValue}>{msg.parsed.item}</span>
+                        </div>
+                        <div className={styles.confirmedField}>
+                          <span className={styles.confirmedLabel}>Quantity</span>
+                          <span className={styles.confirmedValue}>{msg.parsed.quantity || 1}</span>
+                        </div>
+                        <div className={styles.confirmedField}>
+                          <span className={styles.confirmedLabel}>Total Amount</span>
+                          <span className={styles.confirmedValue}>{formatAmount(msg.parsed.amount || 0)}</span>
+                        </div>
+                        <div className={styles.confirmedField}>
+                          <span className={styles.confirmedLabel}>Payment</span>
+                          <span className={styles.confirmedValue}>{msg.parsed.payment_method || '—'}</span>
+                        </div>
+                        <div className={styles.confirmedField}>
+                          <span className={styles.confirmedLabel}>Customer</span>
+                          <span className={styles.confirmedValue}>{msg.parsed.customer || '—'}</span>
+                        </div>
+                      </div>
                     </div>
-                  )}
+                  ) : null}
                   <span className={styles.msgTime}>{msg.timestamp}</span>
                 </div>
               </div>

@@ -57,6 +57,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   parsed?: ParsedTransaction;
+  confirmed?: boolean;
   timestamp: string;
 }
 

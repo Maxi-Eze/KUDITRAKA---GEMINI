@@ -23,7 +23,8 @@ type AppAction =
   | { type: 'SET_SESSIONS'; payload: any[] }
   | { type: 'SET_ACTIVE_SESSION'; payload: string | null }
   | { type: 'SET_LAST_TRANSACTION_ID'; payload: string | null }
-  | { type: 'CLEAR_CHAT' };
+  | { type: 'CLEAR_CHAT' }
+  | { type: 'CONFIRM_PARSED'; payload: string };
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -53,6 +54,13 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, lastTransactionId: action.payload };
     case 'CLEAR_CHAT':
       return { ...state, chatHistory: [] };
+    case 'CONFIRM_PARSED':
+      return {
+        ...state,
+        chatHistory: state.chatHistory.map(m =>
+          m.id === action.payload ? { ...m, confirmed: true } : m
+        ),
+      };
     default:
       return state;
   }
@@ -77,6 +85,7 @@ interface AppContextType {
   switchSession: (sessionId: string) => void;
   undoLastTransaction: () => Promise<void>;
   clearChat: () => void;
+  confirmParsed: (msgId: string) => void;
   refreshSessions: () => Promise<void>;
   deleteSession: (id: string) => Promise<void>;
   deleteSessions: (ids: string[]) => Promise<void>;
@@ -157,12 +166,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     apiClient(`/ai/chat/history?session_id=${sessionId}`)
       .then(res => {
         if (res.data) {
-          const mappedHistory = res.data.map((msg: any) => ({
-            id: msg.id || Math.random().toString(36),
-            role: msg.role === 'model' ? 'assistant' : msg.role,
-            content: msg.content,
-            timestamp: new Date(msg.created_at).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })
-          }));
+          const mappedHistory = res.data.map((msg: any) => {
+            let parsed = undefined;
+            let content = msg.content;
+            try {
+              parsed = JSON.parse(msg.content);
+              content = '';
+            } catch {}
+            return {
+              id: msg.id || Math.random().toString(36),
+              role: msg.role === 'model' ? 'assistant' : msg.role,
+              content,
+              parsed,
+              timestamp: new Date(msg.created_at).toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' })
+            };
+          });
           dispatch({ type: 'SET_CHAT_HISTORY', payload: mappedHistory });
         }
       })
@@ -204,6 +222,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const confirmParsed = (msgId: string) => {
+    dispatch({ type: 'CONFIRM_PARSED', payload: msgId });
   };
 
   const deleteSession = async (id: string) => {
@@ -252,6 +274,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       switchSession,
       undoLastTransaction,
       clearChat,
+      confirmParsed,
       refreshSessions,
       deleteSession,
       deleteSessions
