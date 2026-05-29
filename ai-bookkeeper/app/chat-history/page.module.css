@@ -8,7 +8,7 @@
 
 .sessionCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle); 
   border-radius: var(--radius-lg);
   padding: 1.25rem;
   display: flex;
