@@ -342,6 +342,14 @@ function ChatContent() {
     }
 
     confirmParsed(pendingParsed.msgId);
+
+    const confirmMsg: ChatMessage = {
+      id: generateId(),
+      role: 'assistant',
+      content: `✅ Transaction saved! ${formatAmount(parsed.amount)} ${parsed.type} has been recorded.`,
+      timestamp: new Date().toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' }),
+    };
+    addChatMessage(confirmMsg);
     setPendingParsed(null);
   };
 
