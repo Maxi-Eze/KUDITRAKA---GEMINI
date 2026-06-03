@@ -91,6 +91,20 @@ interface AppContextType {
   deleteSessions: (ids: string[]) => Promise<void>;
 }
 
+function mapTransaction(raw: any): Transaction {
+  return {
+    id: raw.id,
+    type: raw.type,
+    amount: parseFloat(raw.amount) || 0,
+    item: raw.item || '',
+    customer: raw.customer || raw.customer_id || '',
+    payment_method: raw.payment_method || 'cash',
+    date: raw.date,
+    rawInput: raw.raw_input || '',
+    quantity: raw.quantity ?? 1,
+  };
+}
+
 const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -102,7 +116,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (isLoggedIn) {
       apiClient('/transactions')
         .then(res => {
-          if (res.data) dispatch({ type: 'SET_TRANSACTIONS', payload: res.data });
+          if (Array.isArray(res)) dispatch({ type: 'SET_TRANSACTIONS', payload: res.map(mapTransaction) });
         })
         .catch(console.error);
 
@@ -139,12 +153,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         payment_method: t.payment_method || 'cash'
       };
 
-      const res = await apiClient('/transactions', { data: cleanData });
-      if (res.data) {
-        dispatch({ type: 'SET_LAST_TRANSACTION_ID', payload: res.data.id });
-        const all = await apiClient('/transactions');
-        if (all.data) dispatch({ type: 'SET_TRANSACTIONS', payload: all.data });
-      }
+      const created = await apiClient('/transactions', { data: cleanData });
+      if (created?.id) dispatch({ type: 'SET_LAST_TRANSACTION_ID', payload: created.id });
+      const all = await apiClient('/transactions');
+      if (Array.isArray(all)) dispatch({ type: 'SET_TRANSACTIONS', payload: all.map(mapTransaction) });
     } catch (e) {
       console.error(e);
     }

@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { InventoryItem, ReconciliationLog } from '@/lib/types';
 import { apiClient } from '@/lib/apiClient';
+import { useAuth } from '@/context/AuthContext';
 
 interface InventoryContextType {
   items: InventoryItem[];
@@ -41,6 +42,7 @@ function mapLog(raw: any): ReconciliationLog {
 }
 
 export function InventoryProvider({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [reconciliationLogs, setReconciliationLogs] = useState<ReconciliationLog[]>([]);
 
@@ -63,9 +65,11 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    loadItems();
-    loadLogs();
-  }, []);
+    if (isLoggedIn) {
+      loadItems();
+      loadLogs();
+    }
+  }, [isLoggedIn]);
 
   const addItem = async (item: Omit<InventoryItem, 'id'>) => {
     try {
