@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<boolean>;
   completeOnboarding: (sector: BusinessSector, inventoryEnabled: boolean) => void;
   logout: () => void;
+  setUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -147,6 +148,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = (newUser: User) => {
+    setUser(newUser);
+  };
+  
   const logout = () => {
     setUser(null);
     setOnboarded(false);
@@ -166,7 +171,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signup, 
       login, 
       completeOnboarding, 
-      logout 
+      logout,
+      setUser: updateUser 
     }}>
       {children}
     </AuthContext.Provider>

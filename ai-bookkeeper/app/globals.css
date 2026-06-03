@@ -1,5 +1,11 @@
+/* ===== FONTS (runtime loaded — Google Fonts not reachable at build time) ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&display=swap');
+
 /* ===== DESIGN TOKENS ===== */
 :root {
+  --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-chakra: 'Chakra Petch', sans-serif;
   --bg-base: #0a0a0a;
   --bg-surface: #121214;
   --bg-card: rgba(26, 26, 28, 0.8);

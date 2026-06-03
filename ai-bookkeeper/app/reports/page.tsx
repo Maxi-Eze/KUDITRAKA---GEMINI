@@ -1,23 +1,25 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { formatAmount } from '@/lib/aiParser';
+import { apiClient } from '@/lib/apiClient';
 import { BarChart3, FileText, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import styles from './page.module.css';
 import MonthlyChart from '@/components/Charts/MonthlyChart';
 import CategoryPieChart from '@/components/Charts/CategoryPieChart';
 
-function generateAISummary(income: number, expense: number, txCount: number, topItem: string): string {
-  const net = income - expense;
-  const margin = income > 0 ? ((net / income) * 100).toFixed(1) : '0';
-  const status = net > 0 ? 'profitable' : 'at a loss';
-  return `Your business is currently ${status} with a net ${net >= 0 ? 'profit' : 'loss'} of ₦${Math.abs(net).toLocaleString()} across ${txCount} transactions. Income stands at ₦${income.toLocaleString()} and total expenses at ₦${expense.toLocaleString()}, giving a profit margin of ${margin}%. Your best-selling item this period is "${topItem}". ${net > 0 ? 'Keep up the great momentum!' : 'Consider reviewing your expense categories to improve margins.'}`;
-}
-
 export default function ReportsPage() {
   const { state } = useApp();
   const { user } = useAuth();
   const { transactions } = state;
+  const [dailySummary, setDailySummary] = useState<{ date: string; income: number; expense: number; balance: number } | null>(null);
+
+  useEffect(() => {
+    apiClient('/reports/daily-summary')
+      .then(res => setDailySummary(res))
+      .catch(() => {});
+  }, []);
 
   const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
   const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
@@ -29,12 +31,9 @@ export default function ReportsPage() {
   });
   const topItem = Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
-  const paymentBreakdown: Record<string, number> = {};
-  transactions.forEach(t => {
-    paymentBreakdown[t.payment_method] = (paymentBreakdown[t.payment_method] || 0) + t.amount;
-  });
-
-  const aiSummary = generateAISummary(income, expense, transactions.length, topItem);
+  const aiSummary = dailySummary
+    ? `Today's Summary — Income: ₦${dailySummary.income.toLocaleString()}, Expenses: ₦${dailySummary.expense.toLocaleString()}, Net: ${dailySummary.balance >= 0 ? '+' : ''}₦${dailySummary.balance.toLocaleString()}`
+    : `Your business across ${transactions.length} transactions. Income: ₦${income.toLocaleString()}, Expenses: ₦${expense.toLocaleString()}, Net: ${net >= 0 ? '+' : ''}₦${Math.abs(net).toLocaleString()}. Top item: "${topItem}".`;
 
   const stats = [
     { label: 'Gross Income', value: formatAmount(income), icon: TrendingUp, color: 'var(--accent-green)' },
