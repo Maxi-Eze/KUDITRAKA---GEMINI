@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
-import { AppShell } from '@/components/layout/AppShell';
 import './globals.css';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -18,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <QueryProvider>
           <ThemeProvider>
-            <AppShell>{children}</AppShell>
+            {children}
           </ThemeProvider>
         </QueryProvider>
       </body>
