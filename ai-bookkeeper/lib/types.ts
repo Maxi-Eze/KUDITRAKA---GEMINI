@@ -82,3 +82,32 @@ export interface ReconciliationLog {
   reason: string;
   timestamp: string;
 }
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count?: number;
+  last_message?: string;
+}
+
+export interface ChatHistoryMessage {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  parsed?: ParsedTransaction;
+  confirmed?: boolean;
+  created_at: string;
+}
+
+export interface ParsedTransactionResponse {
+  data: ParsedTransaction;
+}
+
+export interface ChatReplyResponse {
+  data: {
+    reply: string;
+  };
+}

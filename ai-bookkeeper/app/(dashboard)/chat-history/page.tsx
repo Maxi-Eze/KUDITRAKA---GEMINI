@@ -1,15 +1,15 @@
 'use client';
 
-import { PageHeader } from '@/components/ui/page-header';
+import { useChatSessions } from '@/hooks/useChat';
+import { SessionGrid } from '@/components/features/chat-history/SessionGrid';
 
 export default function ChatHistoryPage() {
+  const { data: sessions, isLoading } = useChatSessions();
+  const sessionList = Array.isArray(sessions) ? sessions : [];
+
   return (
-    <div className="p-6">
-      <PageHeader
-        title="Chat History"
-        description="Browse your past conversations with Misa"
-      />
-      <div className="text-muted-foreground">Chat history coming in Phase 2.</div>
+    <div className="space-y-4">
+      <SessionGrid sessions={sessionList} isLoading={isLoading} />
     </div>
   );
 }
