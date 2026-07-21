@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
+import { QueryProvider } from '@/providers/QueryProvider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { AppShell } from '@/components/layout/AppShell';
 import './globals.css';
-import { AppProvider } from '@/context/AppContext';
-import { AuthProvider } from '@/context/AuthContext';
-import { InventoryProvider } from '@/context/InventoryContext';
-import LayoutWrapper from '@/components/LayoutWrapper';
-import MobileNav from '@/components/MobileNav';
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: 'Kuditraka.Ai — Smart Business Finance',
@@ -13,15 +14,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`font-sans ${geist.variable}`} suppressHydrationWarning>
       <body>
-        <AuthProvider>
-          <InventoryProvider>
-            <AppProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </AppProvider>
-          </InventoryProvider>
-        </AuthProvider>
+        <QueryProvider>
+          <ThemeProvider>
+            <AppShell>{children}</AppShell>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
