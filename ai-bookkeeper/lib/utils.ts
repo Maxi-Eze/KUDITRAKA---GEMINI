@@ -14,3 +14,8 @@ export function formatCurrency(amount: number | string): string {
     minimumFractionDigits: 0,
   }).format(num);
 }
+
+export function formatTxDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
+}

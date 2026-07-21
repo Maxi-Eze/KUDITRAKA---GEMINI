@@ -19,6 +19,15 @@ export function useCreateTransaction() {
   });
 }
 
+export function useUpdateTransaction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof transactionsApi.update>[1] }) =>
+      transactionsApi.update(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+  });
+}
+
 export function useDeleteTransaction() {
   const qc = useQueryClient();
   return useMutation({

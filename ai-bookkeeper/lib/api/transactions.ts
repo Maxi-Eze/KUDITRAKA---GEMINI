@@ -1,7 +1,7 @@
 import { client } from './client';
 import type { Transaction } from '../types';
 
-interface TransactionQueryParams {
+export interface TransactionQueryParams {
   type?: string;
   startDate?: string;
   endDate?: string;
