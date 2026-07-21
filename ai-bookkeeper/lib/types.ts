@@ -52,6 +52,15 @@ export interface Customer {
   transactions: Transaction[];
 }
 
+export interface CustomerData {
+  name: string;
+  count: number;
+  total: number;
+  income: number;
+  expense: number;
+  transactions: Transaction[];
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
