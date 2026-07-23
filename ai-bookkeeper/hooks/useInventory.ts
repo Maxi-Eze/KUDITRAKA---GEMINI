@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryApi } from '@/lib/api';
 import { queryKeys } from './keys';
+import type { InventoryItem } from '@/lib/types';
 
 export function useInventoryItems() {
   return useQuery({
@@ -14,7 +15,7 @@ export function useInventoryItems() {
 export function useCreateItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: inventoryApi.create,
+    mutationFn: (data: Partial<InventoryItem>) => inventoryApi.create(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.inventory.all }),
   });
 }
@@ -22,7 +23,7 @@ export function useCreateItem() {
 export function useUpdateItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) => inventoryApi.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<InventoryItem> }) => inventoryApi.update(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.inventory.all }),
   });
 }
