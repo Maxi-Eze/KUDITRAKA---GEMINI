@@ -25,4 +25,8 @@ export const queryKeys = {
     all: ['inventory'] as const,
     list: () => [...queryKeys.inventory.all, 'list'] as const,
   },
+  whatsapp: {
+    all: ['whatsapp'] as const,
+    status: () => [...queryKeys.whatsapp.all, 'status'] as const,
+  },
 } as const;

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { queryKeys } from './keys';
+import type { User } from '@/lib/types';
 
 export function useUser() {
   return useQuery({
@@ -50,6 +51,17 @@ export function useCompleteOnboarding() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.auth.user() });
       router.push('/');
+    },
+  });
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Partial<User>) => authApi.updateProfile(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.auth.user() });
     },
   });
 }

@@ -1,11 +1,6 @@
-const BASE_URL = 'https://kudi-v2-xah5.onrender.com/api';
+import axios from 'axios';
 
-function getToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('ai-bk-token');
-  }
-  return null;
-}
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://kudi-v2-xah5.onrender.com/api';
 
 export class ApiError extends Error {
   status: number;
@@ -16,36 +11,44 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+const instance = axios.create({
+  baseURL: BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+instance.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('ai-bk-token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
-  if (!res.ok) {
-    if (res.status === 401 && typeof window !== 'undefined') {
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('ai-bk-token');
       localStorage.removeItem('ai-bk-user');
       localStorage.removeItem('ai-bk-is-logged');
       window.location.href = '/login';
     }
-    const body = await res.json().catch(() => ({}));
-    throw new ApiError(body.error || body.message || 'Request failed', res.status);
-  }
-
-  if (res.status === 204) return undefined as T;
-  const ct = res.headers.get('content-type') || '';
-  if (ct.includes('application/json')) return res.json();
-  return undefined as T;
-}
+    const message =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message ||
+      'Request failed';
+    const status = error.response?.status || 500;
+    throw new ApiError(message, status);
+  },
+);
 
 export const client = {
-  get: <T>(url: string) => request<T>(url),
-  post: <T>(url: string, data: unknown) => request<T>(url, { method: 'POST', body: JSON.stringify(data) }),
-  put: <T>(url: string, data: unknown) => request<T>(url, { method: 'PUT', body: JSON.stringify(data) }),
-  patch: <T>(url: string, data: unknown) => request<T>(url, { method: 'PATCH', body: JSON.stringify(data) }),
-  delete: <T>(url: string) => request<T>(url, { method: 'DELETE' }),
+  get: <T>(url: string) => instance.get<T>(url).then((r) => r.data),
+  post: <T>(url: string, data: unknown) => instance.post<T>(url, data).then((r) => r.data),
+  put: <T>(url: string, data: unknown) => instance.put<T>(url, data).then((r) => r.data),
+  patch: <T>(url: string, data: unknown) => instance.patch<T>(url, data).then((r) => r.data),
+  delete: <T>(url: string) => instance.delete<T>(url).then((r) => r.data),
 };

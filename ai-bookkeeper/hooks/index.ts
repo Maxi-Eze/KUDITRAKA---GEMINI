@@ -1,7 +1,8 @@
-export { useUser, useLogin, useSignup, useCompleteOnboarding, useLogout } from './useAuth';
+export { useUser, useLogin, useSignup, useCompleteOnboarding, useUpdateProfile, useLogout } from './useAuth';
 export { useTransactions, useCreateTransaction, useDeleteTransaction } from './useTransactions';
 export { useCustomers } from './useCustomers';
 export { useChatSessions, useChatHistory, useSendMessage, useCreateSession, useRenameSession, useDeleteSession, useClearHistory } from './useChat';
 export { useInventoryItems, useCreateItem, useUpdateItem, useDeleteItem } from './useInventory';
 export { useDailySummary, useAnalytics } from './useReports';
+export { useWhatsAppStatus, useLinkWhatsApp } from './useWhatsApp';
 export { queryKeys } from './keys';

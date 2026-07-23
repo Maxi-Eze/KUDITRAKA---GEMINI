@@ -10,6 +10,7 @@ import {
   Package,
   BarChart3,
   Clock,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/inventory', label: 'Inventory', icon: Package },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/chat-history', label: 'Chat History', icon: Clock },
+  { href: '/profile', label: 'Profile', icon: User },
 ];
 
 interface SidebarProps {

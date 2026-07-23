@@ -13,4 +13,7 @@ export const authApi = {
 
   completeOnboarding: (data: { business_sector: string; inventory_enabled: boolean }) =>
     client.put('/auth/onboarding', data),
+
+  updateProfile: (data: Partial<User>) =>
+    client.put<User>('/auth/profile', data),
 };
