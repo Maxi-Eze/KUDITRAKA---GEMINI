@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Check, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { useSignup } from '@/hooks/useAuth';
+import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 
 interface StepProps {
   currentStep: number;
@@ -69,20 +74,40 @@ interface SignupWizardProps {
 
 export function SignupWizard({ className }: SignupWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    businessName: '',
-    sector: '',
-    inventoryEnabled: false,
+  const [inventoryEnabled, setInventoryEnabled] = useState(false);
+  const signup = useSignup();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      businessName: '',
+    },
   });
 
-  const passwordsMatch =
-    formData.password.length > 0 &&
-    formData.confirmPassword.length > 0 &&
-    formData.password === formData.confirmPassword;
+  const handleNext = async () => {
+    setCurrentStep(2);
+  };
+
+  const handleBack = () => {
+    setCurrentStep(1);
+  };
+
+  const onSubmit = (data: SignupFormData) => {
+    signup.mutate({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      business_name: data.businessName || undefined,
+    });
+  };
 
   return (
     <Card className={cn('w-full max-w-md shadow-lg shadow-black/20', className)}>
@@ -105,153 +130,157 @@ export function SignupWizard({ className }: SignupWizardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="pt-4">
-        {currentStep === 1 ? (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Your name"
-                className="h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="you@example.com"
-                className="h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="Create a password"
-                className="h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                placeholder="Confirm your password"
-                className={cn(
-                  'h-11',
-                  formData.confirmPassword.length > 0 &&
-                    !passwordsMatch &&
-                    'border-destructive focus-visible:ring-destructive/20'
-                )}
-              />
-              {formData.confirmPassword.length > 0 && (
-                <p
-                  className={cn(
-                    'text-xs',
-                    passwordsMatch ? 'text-primary' : 'text-destructive'
-                  )}
-                >
-                  {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
-                </p>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="business-name">Business Name</Label>
-              <Input
-                id="business-name"
-                value={formData.businessName}
-                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                placeholder="e.g. Mama Ngozi Stores"
-                className="h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Business Sector</Label>
-              <Select
-                value={formData.sector}
-                onValueChange={(value) => setFormData({ ...formData, sector: value ?? '' })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your sector" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Retail & Trade">Retail & Trade</SelectItem>
-                  <SelectItem value="Professional Services">Professional Services</SelectItem>
-                  <SelectItem value="Food & Catering">Food & Catering</SelectItem>
-                  <SelectItem value="Manufacturing">Manufacturing</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="rounded-lg border border-border p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="inventory" className="text-sm font-medium">
-                    Inventory Tracking
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Track stock levels and get low-stock alerts
-                  </p>
-                </div>
-                <Switch
-                  id="inventory"
-                  checked={formData.inventoryEnabled}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, inventoryEnabled: checked })
-                  }
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <CardContent className="pt-4">
+          {currentStep === 1 ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Your name"
+                  className={cn('h-11', errors.name && 'border-destructive')}
+                  {...register('name')}
                 />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className={cn('h-11', errors.email && 'border-destructive')}
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Create a password"
+                  className={cn('h-11', errors.password && 'border-destructive')}
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm your password"
+                  className={cn('h-11', errors.confirmPassword && 'border-destructive')}
+                  {...register('confirmPassword')}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                )}
               </div>
             </div>
-          </div>
-        )}
-      </CardContent>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="business-name">Business Name</Label>
+                <Input
+                  id="business-name"
+                  placeholder="e.g. Mama Ngozi Stores"
+                  className="h-11"
+                  {...register('businessName')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Business Sector</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your sector" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Retail & Trade">Retail & Trade</SelectItem>
+                    <SelectItem value="Professional Services">Professional Services</SelectItem>
+                    <SelectItem value="Food & Catering">Food & Catering</SelectItem>
+                    <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="rounded-lg border border-border p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="inventory" className="text-sm font-medium">
+                      Inventory Tracking
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Track stock levels and get low-stock alerts
+                    </p>
+                  </div>
+                  <Switch
+                    id="inventory"
+                    checked={inventoryEnabled}
+                    onCheckedChange={setInventoryEnabled}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
 
-      <CardFooter className="flex flex-col gap-4 pt-2">
-        <Button
-          className="w-full transition-transform hover:scale-[1.02]"
-          size="lg"
-          onClick={() => {
-            if (currentStep === 1) {
-              setCurrentStep(2);
-            }
-          }}
-        >
-          {currentStep === 1 ? 'Next →' : 'Create Account'}
-        </Button>
+        <CardFooter className="flex flex-col gap-4 pt-2">
+          {currentStep === 1 ? (
+            <Button
+              type="button"
+              className="w-full transition-transform hover:scale-[1.02]"
+              size="lg"
+              onClick={handleNext}
+            >
+              Next →
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="submit"
+                className="w-full transition-transform hover:scale-[1.02]"
+                size="lg"
+                disabled={signup.isPending}
+              >
+                {signup.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={handleBack}
+              >
+                ← Back
+              </Button>
+            </>
+          )}
 
-        {currentStep === 2 && (
-          <Button
-            variant="ghost"
-            className="w-full"
-            onClick={() => setCurrentStep(1)}
-          >
-            ← Back
-          </Button>
-        )}
+          <Separator />
 
-        <Separator />
-
-        <p className="text-sm text-muted-foreground text-center">
-          Already have an account?{' '}
-          <a href="/login" className="text-primary hover:underline font-medium">
-            Sign in
-          </a>
-        </p>
-      </CardFooter>
+          <p className="text-sm text-muted-foreground text-center">
+            Already have an account?{' '}
+            <Link href="/login" className="text-primary hover:underline font-medium">
+              Sign in
+            </Link>
+          </p>
+        </CardFooter>
+      </form>
     </Card>
   );
 }
