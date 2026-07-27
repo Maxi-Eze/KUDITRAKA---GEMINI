@@ -1,57 +1,60 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
+import { profileUpdateSchema, type ProfileUpdateFormData } from '@/lib/validations/auth';
+import { cn } from '@/lib/utils';
 
 export function ProfileForm() {
   const { data: user } = useUser();
   const updateMutation = useUpdateProfile();
   const [editing, setEditing] = useState(false);
 
-  const [ownerName, setOwnerName] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [cacNumber, setCacNumber] = useState('');
-  const [businessType, setBusinessType] = useState('');
-  const [businessSize, setBusinessSize] = useState('');
-  const [salesChannel, setSalesChannel] = useState('');
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<ProfileUpdateFormData>({
+    resolver: zodResolver(profileUpdateSchema),
+  });
 
   useEffect(() => {
     if (user) {
-      setOwnerName(user.ownerName || '');
-      setBusinessName(user.businessName || '');
-      setEmail(user.email || '');
-      setPhone(user.phone || '');
-      setAddress(user.address || '');
-      setCacNumber(user.cacNumber || '');
-      setBusinessType(user.businessType || '');
-      setBusinessSize(user.businessSize || '');
-      setSalesChannel(user.salesChannel || '');
+      reset({
+        name: user.ownerName || '',
+        businessName: user.businessName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        cacNumber: user.cacNumber || '',
+        businessType: user.businessType || '',
+        businessSize: user.businessSize || '',
+        salesChannel: user.salesChannel || '',
+      });
     }
-  }, [user]);
+  }, [user, reset]);
 
   if (!user) return null;
 
-  const handleSave = () => {
-    if (!ownerName || !businessName || !email) return;
-
+  const onSubmit = (data: ProfileUpdateFormData) => {
     updateMutation.mutate(
       {
-        ownerName,
-        businessName,
-        email,
-        phone: phone || undefined,
-        address: address || undefined,
-        cacNumber: cacNumber || undefined,
-        businessType: businessType || undefined,
-        businessSize: businessSize || undefined,
-        salesChannel: salesChannel || undefined,
+        ownerName: data.name,
+        businessName: data.businessName,
+        email: data.email,
+        phone: data.phone || undefined,
+        address: data.address || undefined,
+        cacNumber: data.cacNumber || undefined,
+        businessType: data.businessType || undefined,
+        businessSize: data.businessSize || undefined,
+        salesChannel: data.salesChannel || undefined,
       },
       {
         onSuccess: () => {
@@ -62,15 +65,7 @@ export function ProfileForm() {
   };
 
   const handleCancel = () => {
-    setOwnerName(user.ownerName || '');
-    setBusinessName(user.businessName || '');
-    setEmail(user.email || '');
-    setPhone(user.phone || '');
-    setAddress(user.address || '');
-    setCacNumber(user.cacNumber || '');
-    setBusinessType(user.businessType || '');
-    setBusinessSize(user.businessSize || '');
-    setSalesChannel(user.salesChannel || '');
+    reset();
     setEditing(false);
   };
 
@@ -78,94 +73,79 @@ export function ProfileForm() {
     <Card>
       <CardContent className="p-4">
         {editing ? (
-          <div className="space-y-3">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="ownerName">Name</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
-                  id="ownerName"
-                  value={ownerName}
-                  onChange={(e) => setOwnerName(e.target.value)}
+                  id="name"
+                  className={cn(errors.name && 'border-destructive')}
+                  {...register('name')}
                 />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name.message}</p>
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="businessName">Business Name</Label>
                 <Input
                   id="businessName"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
+                  className={cn(errors.businessName && 'border-destructive')}
+                  {...register('businessName')}
                 />
+                {errors.businessName && (
+                  <p className="text-sm text-destructive">{errors.businessName.message}</p>
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  className={cn(errors.email && 'border-destructive')}
+                  {...register('email')}
                 />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
+                <Input id="phone" {...register('phone')} />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
+                <Input id="address" {...register('address')} />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="cacNumber">CAC Number</Label>
-                <Input
-                  id="cacNumber"
-                  value={cacNumber}
-                  onChange={(e) => setCacNumber(e.target.value)}
-                />
+                <Input id="cacNumber" {...register('cacNumber')} />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="businessType">Business Type</Label>
-                <Input
-                  id="businessType"
-                  value={businessType}
-                  onChange={(e) => setBusinessType(e.target.value)}
-                />
+                <Input id="businessType" {...register('businessType')} />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="businessSize">Business Size</Label>
-                <Input
-                  id="businessSize"
-                  value={businessSize}
-                  onChange={(e) => setBusinessSize(e.target.value)}
-                />
+                <Input id="businessSize" {...register('businessSize')} />
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="salesChannel">Sales Channel</Label>
-                <Input
-                  id="salesChannel"
-                  value={salesChannel}
-                  onChange={(e) => setSalesChannel(e.target.value)}
-                />
+                <Input id="salesChannel" {...register('salesChannel')} />
               </div>
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={handleCancel}>
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button
-                onClick={handleSave}
-                disabled={!ownerName || !businessName || !email || updateMutation.isPending}
+                type="submit"
+                disabled={!isDirty || updateMutation.isPending}
               >
                 {updateMutation.isPending ? 'Saving...' : 'Save'}
               </Button>
             </div>
-          </div>
+          </form>
         ) : (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
