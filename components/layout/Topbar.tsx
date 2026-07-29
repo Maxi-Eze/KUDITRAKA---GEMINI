@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/useAuth';
 
 const routeLabels: Record<string, string> = {
-  '/': 'Dashboard',
+  '/dashboard': 'Dashboard',
   '/chat': 'Chat',
   '/transactions': 'Transactions',
   '/customers': 'Customers',

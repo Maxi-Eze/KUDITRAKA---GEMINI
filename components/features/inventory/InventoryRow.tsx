@@ -31,10 +31,10 @@ export function InventoryRow({ item, onClick }: InventoryRowProps) {
         <span className="text-muted-foreground">{item.category}</span>
       </TableCell>
       <TableCell>
-        <StockBadge stock={item.stock} minStock={item.minStock} />
+        <StockBadge stock={item.stock} minStock={item.min_stock} />
       </TableCell>
       <TableCell>
-        <span className="font-medium">{formatCurrency(item.sellingPrice)}</span>
+        <span className="font-medium">{formatCurrency(item.selling_price)}</span>
       </TableCell>
       <TableCell>
         <span className="text-muted-foreground">{item.stock}</span>

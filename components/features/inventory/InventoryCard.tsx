@@ -27,11 +27,11 @@ export function InventoryCard({ item, onClick }: InventoryCardProps) {
       <CardContent className="p-3">
         <div className="flex items-start justify-between mb-2">
           <span className="text-xs text-muted-foreground">{item.category}</span>
-          <StockBadge stock={item.stock} minStock={item.minStock} />
+          <StockBadge stock={item.stock} minStock={item.min_stock} />
         </div>
         <p className="text-sm font-medium truncate">{item.name}</p>
         <div className="flex items-center justify-between mt-2">
-          <span className="text-sm font-medium">{formatCurrency(item.sellingPrice)}</span>
+          <span className="text-sm font-medium">{formatCurrency(item.selling_price)}</span>
           <span className="text-xs text-muted-foreground">Stock: {item.stock}</span>
         </div>
       </CardContent>

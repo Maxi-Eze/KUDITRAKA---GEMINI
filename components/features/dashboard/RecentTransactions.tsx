@@ -74,8 +74,8 @@ export function RecentTransactions({ transactions, isLoading }: RecentTransactio
                     </Badge>
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{tx.item}</p>
-                      {tx.customer && (
-                        <p className="text-xs text-muted-foreground truncate">{tx.customer}</p>
+                      {tx.customer_id && (
+                        <p className="text-xs text-muted-foreground truncate">{tx.customer_id}</p>
                       )}
                     </div>
                   </div>

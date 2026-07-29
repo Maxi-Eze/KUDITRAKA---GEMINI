@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { whatsappApi } from '@/lib/api';
 import { queryKeys } from './keys';
 
@@ -18,5 +19,6 @@ export function useLinkWhatsApp() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.whatsapp.all });
     },
+    onError: (error: Error) => toast.error(error.message || 'Failed to link WhatsApp'),
   });
 }

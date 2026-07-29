@@ -1,14 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { MobileNav } from './MobileNav';
+import { useUser } from '@/hooks/useAuth';
+import { LoadingPage } from '@/components/ui/loading-page';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const { data: user, isLoading } = useUser();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/');
+    }
+  }, [isLoading, user, router]);
 
   useEffect(() => {
     const stored = localStorage.getItem('sidebar-collapsed');
@@ -20,6 +31,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem('sidebar-collapsed', String(collapsed));
   }, [collapsed]);
+
+  if (isLoading) return <LoadingPage />;
+  if (!user) return null;
 
   const toggle = () => setCollapsed((prev) => !prev);
 

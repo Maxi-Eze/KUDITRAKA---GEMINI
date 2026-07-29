@@ -15,6 +15,7 @@ export const queryKeys = {
   customers: {
     all: ['customers'] as const,
     list: () => [...queryKeys.customers.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.customers.all, 'detail', id] as const,
   },
   chat: {
     all: ['chat'] as const,
@@ -24,6 +25,7 @@ export const queryKeys = {
   inventory: {
     all: ['inventory'] as const,
     list: () => [...queryKeys.inventory.all, 'list'] as const,
+    logs: () => [...queryKeys.inventory.all, 'logs'] as const,
   },
   whatsapp: {
     all: ['whatsapp'] as const,

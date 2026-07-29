@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { transactionsApi } from '@/lib/api';
 import { queryKeys } from './keys';
 
@@ -16,6 +17,7 @@ export function useCreateTransaction() {
   return useMutation({
     mutationFn: transactionsApi.create,
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    onError: (error: Error) => toast.error(error.message || 'Failed to create transaction'),
   });
 }
 
@@ -25,6 +27,7 @@ export function useUpdateTransaction() {
     mutationFn: ({ id, data }: { id: string; data: Parameters<typeof transactionsApi.update>[1] }) =>
       transactionsApi.update(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    onError: (error: Error) => toast.error(error.message || 'Failed to update transaction'),
   });
 }
 
@@ -33,5 +36,6 @@ export function useDeleteTransaction() {
   return useMutation({
     mutationFn: transactionsApi.remove,
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    onError: (error: Error) => toast.error(error.message || 'Failed to delete transaction'),
   });
 }

@@ -5,7 +5,6 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetFooter,
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { useCreateTransaction } from '@/hooks/useTransactions';
+import { customersApi } from '@/lib/api';
 import type { TransactionType, PaymentMethod } from '@/lib/types';
 
 interface NewTransactionSheetProps {
@@ -53,19 +53,29 @@ export function NewTransactionSheet({ open, onOpenChange }: NewTransactionSheetP
     setDate(new Date().toISOString().split('T')[0]);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !item) return;
+
+    let customerId: string | null = null;
+    if (customer) {
+      try {
+        const resolved = await customersApi.findOrCreate(customer);
+        customerId = resolved.id;
+      } catch {
+        // proceed without customer ID on error
+      }
+    }
 
     createMutation.mutate(
       {
         type,
         amount: parseFloat(amount),
         item,
-        customer,
+        customer_id: customerId,
         payment_method: paymentMethod,
         date,
-        rawInput: '',
+        raw_input: '',
       },
       {
         onSuccess: () => {
@@ -168,15 +178,14 @@ export function NewTransactionSheet({ open, onOpenChange }: NewTransactionSheetP
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
-        </form>
-        <SheetFooter>
           <Button
             type="submit"
+            className="w-full"
             disabled={!amount || !item || createMutation.isPending}
           >
             {createMutation.isPending ? 'Saving...' : 'Save Transaction'}
           </Button>
-        </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   );

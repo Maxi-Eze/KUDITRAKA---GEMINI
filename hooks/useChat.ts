@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { chatApi } from '@/lib/api';
 import { queryKeys } from './keys';
 import type { ChatSendResponse } from '@/lib/api/chat';
@@ -38,6 +39,7 @@ export function useCreateSession() {
   return useMutation({
     mutationFn: chatApi.createSession,
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.chat.sessions() }),
+    onError: (error: Error) => toast.error(error.message || 'Failed to create session'),
   });
 }
 
@@ -46,6 +48,7 @@ export function useRenameSession() {
   return useMutation({
     mutationFn: ({ id, title }: { id: string; title: string }) => chatApi.renameSession(id, title),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.chat.sessions() }),
+    onError: (error: Error) => toast.error(error.message || 'Failed to rename session'),
   });
 }
 
@@ -54,6 +57,7 @@ export function useDeleteSession() {
   return useMutation({
     mutationFn: chatApi.deleteSession,
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.chat.sessions() }),
+    onError: (error: Error) => toast.error(error.message || 'Failed to delete session'),
   });
 }
 

@@ -26,13 +26,6 @@ export const onboardingSchema = z.object({
 export const profileUpdateSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   businessName: z.string().min(1, 'Business name is required'),
-  email: z.string().email('Enter a valid email address'),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  cacNumber: z.string().optional(),
-  businessType: z.string().optional(),
-  businessSize: z.string().optional(),
-  salesChannel: z.string().optional(),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
