@@ -51,11 +51,7 @@ export function useLogin() {
       const mapped = mapUser(res.user as unknown as Record<string, unknown>);
       qc.setQueryData(queryKeys.auth.user(), mapped);
       toast.success('Logged in successfully');
-      if (!mapped.onboarded) {
-        router.push('/onboarding');
-      } else {
-        router.push('/');
-      }
+      router.push('/');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Login failed');

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const publicRoutes = ['/login', '/signup'];
-const onboardingRoute = '/onboarding';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -19,10 +18,6 @@ export function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  if (pathname === onboardingRoute) {
-    return NextResponse.next();
   }
 
   return NextResponse.next();
