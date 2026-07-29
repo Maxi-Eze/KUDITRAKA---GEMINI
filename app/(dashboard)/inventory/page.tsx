@@ -12,7 +12,7 @@ import { useInventoryItems, useDeleteItem } from '@/hooks/useInventory';
 import { Plus } from 'lucide-react';
 import type { InventoryItem } from '@/lib/types';
 
-type SortField = 'name' | 'stock' | 'sellingPrice' | 'category';
+type SortField = 'name' | 'stock' | 'selling_price' | 'category';
 
 const PAGE_SIZE = 20;
 
@@ -57,8 +57,8 @@ export default function InventoryPage() {
       case 'stock':
         result = [...result].sort((a, b) => b.stock - a.stock);
         break;
-      case 'sellingPrice':
-        result = [...result].sort((a, b) => b.sellingPrice - a.sellingPrice);
+      case 'selling_price':
+        result = [...result].sort((a, b) => Number(b.selling_price) - Number(a.selling_price));
         break;
       case 'category':
         result = [...result].sort((a, b) => a.category.localeCompare(b.category));

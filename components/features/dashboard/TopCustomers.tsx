@@ -24,15 +24,15 @@ export function TopCustomers({ transactions, isLoading }: TopCustomersProps) {
 
     const map = new Map<string, CustomerData>();
     for (const tx of transactions) {
-      if (tx.type !== 'income' || !tx.customer || tx.customer.trim() === '') continue;
-      const key = tx.customer.trim().toLowerCase();
+      if (tx.type !== 'income' || !tx.customer_id || tx.customer_id.trim() === '') continue;
+      const key = tx.customer_id.trim().toLowerCase();
       const amount = typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
       const existing = map.get(key);
       if (existing) {
         existing.count += 1;
         existing.total += amount;
       } else {
-        map.set(key, { name: tx.customer.trim(), count: 1, total: amount });
+        map.set(key, { name: tx.customer_id.trim(), count: 1, total: amount });
       }
     }
 

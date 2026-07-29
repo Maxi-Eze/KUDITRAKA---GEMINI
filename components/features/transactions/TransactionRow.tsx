@@ -2,15 +2,17 @@ import { TableRow, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatTxDate, cn } from '@/lib/utils';
-import { Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
 
 interface TransactionRowProps {
   transaction: Transaction;
+  onView: (transaction: Transaction) => void;
+  onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
 }
 
-export function TransactionRow({ transaction, onDelete }: TransactionRowProps) {
+export function TransactionRow({ transaction, onView, onEdit, onDelete }: TransactionRowProps) {
   const amount = typeof transaction.amount === 'string' ? parseFloat(transaction.amount) : transaction.amount;
 
   return (
@@ -25,7 +27,7 @@ export function TransactionRow({ transaction, onDelete }: TransactionRowProps) {
       </TableCell>
       <TableCell>
         <span className="text-muted-foreground">
-          {transaction.customer || '—'}
+          {transaction.customer_id || '—'}
         </span>
       </TableCell>
       <TableCell>
@@ -40,14 +42,35 @@ export function TransactionRow({ transaction, onDelete }: TransactionRowProps) {
         <span className="text-muted-foreground">{formatTxDate(transaction.date)}</span>
       </TableCell>
       <TableCell className="text-right">
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={() => onDelete(transaction.id)}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => onView(transaction)}
+            className="text-muted-foreground hover:text-foreground"
+            title="View details"
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => onEdit(transaction)}
+            className="text-muted-foreground hover:text-foreground"
+            title="Edit"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => onDelete(transaction.id)}
+            className="text-muted-foreground hover:text-destructive"
+            title="Delete"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );

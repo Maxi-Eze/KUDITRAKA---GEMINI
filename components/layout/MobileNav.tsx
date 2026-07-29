@@ -6,7 +6,7 @@ import { LayoutDashboard, MessageSquare, ArrowLeftRight, Users, MoreHorizontal }
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: '/', label: 'Home', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/transactions', label: 'Activity', icon: ArrowLeftRight },
   { href: '/customers', label: 'People', icon: Users },

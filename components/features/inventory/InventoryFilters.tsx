@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/select';
 import { Search } from 'lucide-react';
 
-type SortField = 'name' | 'stock' | 'sellingPrice' | 'category';
+type SortField = 'name' | 'stock' | 'selling_price' | 'category';
 
 interface InventoryFiltersProps {
   search: string;
@@ -41,7 +41,7 @@ export function InventoryFilters({
         <SelectContent>
           <SelectItem value="name">Name A-Z</SelectItem>
           <SelectItem value="stock">Stock Level</SelectItem>
-          <SelectItem value="sellingPrice">Price</SelectItem>
+          <SelectItem value="selling_price">Price</SelectItem>
           <SelectItem value="category">Category</SelectItem>
         </SelectContent>
       </Select>

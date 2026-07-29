@@ -15,6 +15,7 @@ import { ChatWindow } from '@/components/features/chat/ChatWindow';
 import { Button } from '@/components/ui/button';
 import { Menu, Plus } from 'lucide-react';
 import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
+import { customersApi } from '@/lib/api';
 import type { ChatParseResponse } from '@/lib/api/chat';
 
 const TRANSACTION_KEYWORDS = ['sold', 'bought', 'spent', 'earned', 'paid', 'received', 'purchased', 'cost', 'expense', 'income'];
@@ -43,7 +44,29 @@ export default function ChatPage() {
 
   const sessionList = Array.isArray(sessions) ? sessions : [];
   const historyList: ChatHistoryMessage[] = Array.isArray(historyMessages)
-    ? historyMessages
+    ? historyMessages.map((m, i) => {
+        const role = m.role === 'model' ? ('assistant' as const) : m.role;
+        const id = m.id || `hist-${i}-${m.created_at}`;
+        let content = m.content;
+        let parsed = m.parsed;
+
+        if (m.role === 'model') {
+          try {
+            const json = JSON.parse(m.content);
+            if (json && typeof json === 'object' && !Array.isArray(json) && 'type' in json) {
+              parsed = json as ParsedTransaction;
+              const amount = typeof json.amount === 'number' && json.amount > 0 ? ` (₦${json.amount.toLocaleString()})` : '';
+              content = `Transaction recorded: ${json.type} — ${json.item || 'Item'}${amount}`;
+            } else if (Array.isArray(json)) {
+              content = '';
+            }
+          } catch {
+            // not JSON, use as-is
+          }
+        }
+
+        return { ...m, id, role, content, parsed };
+      })
     : [];
 
   const allMessages = historyList.length > 0 ? historyList : localMessages;
@@ -152,15 +175,24 @@ export default function ChatPage() {
   );
 
   const handleConfirmParsed = useCallback(
-    (parsed: ParsedTransaction) => {
+    async (parsed: ParsedTransaction) => {
+      let customerId: string | null = null;
+      if (parsed.customer) {
+        try {
+          const customer = await customersApi.findOrCreate(parsed.customer);
+          customerId = customer.id;
+        } catch {
+          // proceed without customer ID on error
+        }
+      }
       createTransaction.mutate({
         type: parsed.type,
         amount: parsed.amount,
         item: parsed.item,
-        customer: parsed.customer,
+        customer_id: customerId,
         payment_method: parsed.payment_method,
         date: new Date().toISOString().split('T')[0],
-        rawInput: '',
+        raw_input: '',
         quantity: parsed.quantity,
       });
     },

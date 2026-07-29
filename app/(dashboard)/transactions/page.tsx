@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useTransactions, useDeleteTransaction } from '@/hooks/useTransactions';
 import { TransactionFilters } from '@/components/features/transactions/TransactionFilters';
 import { TransactionList } from '@/components/features/transactions/TransactionList';
+import { TransactionDetailSheet } from '@/components/features/transactions/TransactionDetailSheet';
 import { DeleteTransactionDialog } from '@/components/features/transactions/DeleteTransactionDialog';
 import { NewTransactionSheet } from '@/components/features/transactions/NewTransactionSheet';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,8 @@ export default function TransactionsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [detailTarget, setDetailTarget] = useState<Transaction | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -46,7 +49,7 @@ export default function TransactionsPage() {
       result = result.filter(
         (tx) =>
           tx.item.toLowerCase().includes(q) ||
-          (tx.customer && tx.customer.toLowerCase().includes(q))
+          (tx.customer_id && tx.customer_id.toLowerCase().includes(q))
       );
     }
 
@@ -67,12 +70,27 @@ export default function TransactionsPage() {
 
   const hasActiveFilters = search !== '' || typeFilter !== 'all' || startDate !== '' || endDate !== '';
 
+  const handleView = (tx: Transaction) => {
+    setDetailTarget(tx);
+    setDetailOpen(true);
+  };
+
+  const handleEdit = (tx: Transaction) => {
+    setDetailTarget(tx);
+    setDetailOpen(true);
+  };
+
   const handleDelete = (id: string) => {
     const tx = transactions.find((t) => t.id === id);
     if (tx) {
       setDeleteTarget(tx);
       setDeleteOpen(true);
     }
+  };
+
+  const handleDeleteFromDetail = (tx: Transaction) => {
+    setDeleteTarget(tx);
+    setDeleteOpen(true);
   };
 
   const confirmDelete = () => {
@@ -109,6 +127,8 @@ export default function TransactionsPage() {
       <TransactionList
         transactions={paginatedTransactions}
         isLoading={isLoading}
+        onView={handleView}
+        onEdit={handleEdit}
         onDelete={handleDelete}
         currentPage={currentPage}
         totalItems={totalItems}
@@ -118,6 +138,13 @@ export default function TransactionsPage() {
       />
 
       <NewTransactionSheet open={addOpen} onOpenChange={setAddOpen} />
+
+      <TransactionDetailSheet
+        transaction={detailTarget}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onDelete={handleDeleteFromDetail}
+      />
 
       <DeleteTransactionDialog
         transaction={deleteTarget}

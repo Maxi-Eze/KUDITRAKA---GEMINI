@@ -275,7 +275,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
 
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline font-medium">
+            <Link href="/" className="text-primary hover:underline font-medium">
               Sign in
             </Link>
           </p>

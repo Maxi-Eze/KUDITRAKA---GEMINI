@@ -7,6 +7,11 @@ export interface ChatParseResponse {
 
 export type ChatSendResponse = ChatParseResponse | ChatReplyResponse;
 
+export interface ChatEnvelope<T> {
+  message: string;
+  data: T;
+}
+
 export const chatApi = {
   parse: (text: string, sessionId?: string) =>
     client.post<ChatParseResponse>('/ai/parse', { text, save: false, session_id: sessionId }),
@@ -14,20 +19,26 @@ export const chatApi = {
   chat: (message: string, sessionId?: string) =>
     client.post<ChatReplyResponse>('/ai/chat', { message, session_id: sessionId }),
 
-  getSessions: () =>
-    client.get<ChatSession[]>('/ai/chat/sessions'),
+  getSessions: async () => {
+    const res = await client.get<ChatEnvelope<ChatSession[]>>('/ai/chat/sessions');
+    return res.data;
+  },
 
-  createSession: (title: string) =>
-    client.post<ChatSession>('/ai/chat/sessions', { title }),
+  createSession: async (title: string) => {
+    const res = await client.post<ChatEnvelope<ChatSession>>('/ai/chat/sessions', { title });
+    return res.data;
+  },
 
-  renameSession: ( id: string, title: string) =>
+  renameSession: (id: string, title: string) =>
     client.patch<void>(`/ai/chat/sessions/${id}`, { title }),
 
   deleteSession: (id: string) =>
     client.delete(`/ai/chat/sessions/${id}`),
 
-  getHistory: (sessionId: string) =>
-    client.get<ChatHistoryMessage[]>(`/ai/chat/history?session_id=${sessionId}`),
+  getHistory: async (sessionId: string) => {
+    const res = await client.get<ChatEnvelope<ChatHistoryMessage[]>>(`/ai/chat/history?session_id=${sessionId}`);
+    return res.data;
+  },
 
   clearHistory: (sessionId: string) =>
     client.delete(`/ai/chat/history?session_id=${sessionId}`),

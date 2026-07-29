@@ -5,7 +5,6 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetFooter,
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -45,9 +44,9 @@ export function NewInventorySheet({ open, onOpenChange }: NewInventorySheetProps
         name,
         category,
         stock: parseInt(stock, 10) || 0,
-        minStock: parseInt(minStock, 10) || 0,
-        costPrice: parseFloat(costPrice) || 0,
-        sellingPrice: parseFloat(sellingPrice) || 0,
+        min_stock: parseInt(minStock, 10) || 0,
+        cost_price: parseFloat(costPrice) || 0,
+        selling_price: parseFloat(sellingPrice) || 0,
       },
       {
         onSuccess: () => {
@@ -136,15 +135,14 @@ export function NewInventorySheet({ open, onOpenChange }: NewInventorySheetProps
               onChange={(e) => setSellingPrice(e.target.value)}
             />
           </div>
-        </form>
-        <SheetFooter>
           <Button
             type="submit"
+            className="w-full"
             disabled={!name || !category || createMutation.isPending}
           >
             {createMutation.isPending ? 'Saving...' : 'Save Item'}
           </Button>
-        </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   );

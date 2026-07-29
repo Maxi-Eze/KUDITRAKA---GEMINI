@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { authApi } from '@/lib/api';
-import { setCookie, removeCookie } from '@/lib/utils';
+import type { ProfileUpdateData } from '@/lib/api/auth';
+
 import { queryKeys } from './keys';
 import type { User } from '@/lib/types';
 
@@ -47,11 +48,10 @@ export function useLogin() {
     mutationFn: authApi.login,
     onSuccess: (res) => {
       localStorage.setItem('ai-bk-token', res.token);
-      setCookie('ai-bk-token', res.token);
       const mapped = mapUser(res.user as unknown as Record<string, unknown>);
       qc.setQueryData(queryKeys.auth.user(), mapped);
       toast.success('Logged in successfully');
-      router.push('/');
+      router.push('/dashboard');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Login failed');
@@ -66,7 +66,7 @@ export function useSignup() {
     mutationFn: authApi.register,
     onSuccess: () => {
       toast.success('Account created! Please log in.');
-      router.push('/login');
+      router.push('/');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Signup failed');
@@ -83,7 +83,7 @@ export function useCompleteOnboarding() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.auth.user() });
       toast.success('Business profile completed!');
-      router.push('/');
+      router.push('/dashboard');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Onboarding failed');
@@ -95,7 +95,7 @@ export function useUpdateProfile() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<User>) => authApi.updateProfile(data),
+    mutationFn: (data: ProfileUpdateData) => authApi.updateProfile(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.auth.user() });
       toast.success('Profile updated');
@@ -112,8 +112,7 @@ export function useLogout() {
 
   return () => {
     localStorage.removeItem('ai-bk-token');
-    removeCookie('ai-bk-token');
     qc.clear();
-    router.push('/login');
+    router.push('/');
   };
 }

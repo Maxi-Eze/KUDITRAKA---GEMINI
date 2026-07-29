@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/customers', label: 'Customers', icon: Users },

@@ -10,6 +10,8 @@ import type { Transaction } from '@/lib/types';
 interface TransactionListProps {
   transactions: Transaction[];
   isLoading: boolean;
+  onView: (transaction: Transaction) => void;
+  onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
   currentPage: number;
   totalItems: number;
@@ -70,6 +72,8 @@ function SkeletonCards() {
 export function TransactionList({
   transactions,
   isLoading,
+  onView,
+  onEdit,
   onDelete,
   currentPage,
   totalItems,
@@ -116,14 +120,14 @@ export function TransactionList({
           </TableHeader>
           <TableBody>
             {transactions.map((tx) => (
-              <TransactionRow key={tx.id} transaction={tx} onDelete={onDelete} />
+              <TransactionRow key={tx.id} transaction={tx} onView={onView} onEdit={onEdit} onDelete={onDelete} />
             ))}
           </TableBody>
         </Table>
       </div>
       <div className="lg:hidden space-y-3">
         {transactions.map((tx) => (
-          <TransactionCard key={tx.id} transaction={tx} onDelete={onDelete} />
+          <TransactionCard key={tx.id} transaction={tx} onView={onView} onEdit={onEdit} onDelete={onDelete} />
         ))}
       </div>
       <Pagination

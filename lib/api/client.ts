@@ -31,7 +31,7 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('ai-bk-token');
-      window.location.href = '/login';
+      window.location.href = '/';
     }
     const message =
       error.response?.data?.error ||

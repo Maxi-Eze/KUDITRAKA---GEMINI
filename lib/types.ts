@@ -4,13 +4,15 @@ export type PaymentMethod = 'cash' | 'transfer' | 'pos' | 'card' | 'cheque' | 'o
 export interface Transaction {
   id: string;
   type: TransactionType;
-  amount: number;
+  amount: number | string;
   item: string;
-  customer: string;
+  customer_id: string | null;
   payment_method: PaymentMethod | string;
   date: string;
-  rawInput: string;
+  raw_input: string | null;
   quantity?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ParsedTransaction {
@@ -47,9 +49,10 @@ export interface User {
 export interface Customer {
   id: string;
   name: string;
-  totalTransactions: number;
-  totalAmount: number;
-  transactions: Transaction[];
+  phone?: string;
+  email?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CustomerData {
@@ -74,22 +77,22 @@ export interface InventoryItem {
   id: string;
   name: string;
   stock: number;
-  minStock: number;
-  costPrice: number;
-  sellingPrice: number;
+  min_stock: number;
+  cost_price: number | string;
+  selling_price: number | string;
   category: string;
-  lastRestocked?: string;
+  last_restocked?: string;
 }
 
 export interface ReconciliationLog {
   id: string;
-  itemId: string;
-  itemName: string;
-  systemStock: number;
-  actualStock: number;
+  item_id: string;
+  item_name: string;
+  system_stock: number;
+  actual_stock: number;
   difference: number;
   reason: string;
-  timestamp: string;
+  created_at: string;
 }
 
 export interface ChatSession {
@@ -102,9 +105,9 @@ export interface ChatSession {
 }
 
 export interface ChatHistoryMessage {
-  id: string;
-  session_id: string;
-  role: 'user' | 'assistant';
+  id?: string;
+  session_id?: string;
+  role: 'user' | 'assistant' | 'model';
   content: string;
   parsed?: ParsedTransaction;
   confirmed?: boolean;
@@ -115,8 +118,20 @@ export interface ParsedTransactionResponse {
   data: ParsedTransaction;
 }
 
+export interface FinancialSnapshot {
+  today_income: number;
+  today_expenses: number;
+  today_net: number;
+  this_month_income: number;
+  this_month_expenses: number;
+  this_month_net: number;
+  recent_transactions: Transaction[];
+}
+
 export interface ChatReplyResponse {
   data: {
     reply: string;
+    financial_snapshot?: FinancialSnapshot;
+    session_id?: string;
   };
 }
