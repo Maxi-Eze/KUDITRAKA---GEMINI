@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -50,9 +51,7 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
           collapsed ? 'justify-center px-2 py-4' : 'gap-2.5 px-5 py-4',
         )}
       >
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <span className="text-primary-foreground font-bold text-sm">K</span>
-        </div>
+        <BrandLogo variant="icon" className="h-8 w-8 shrink-0" />
         {!collapsed && (
           <span className="font-semibold text-sidebar-foreground text-sm truncate">
             Kuditraka.Ai

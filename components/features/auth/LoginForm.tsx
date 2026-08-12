@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useLogin } from '@/hooks/useAuth';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
@@ -36,9 +37,7 @@ export function LoginForm({ className }: LoginFormProps) {
     <Card className={cn('w-full max-w-md shadow-lg shadow-black/20', className)}>
       <CardHeader className="text-center pb-2">
         <div className="flex justify-center mb-2 lg:hidden">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xl">K</span>
-          </div>
+          <BrandLogo variant="icon" className="h-12 w-12" />
         </div>
         <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
         <p className="text-muted-foreground">Sign in to your account</p>

@@ -1,5 +1,6 @@
 import { Mic, Globe, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 
 interface AuthBrandingProps {
   className?: string;
@@ -27,9 +28,7 @@ export function AuthBranding({ className }: AuthBrandingProps) {
   return (
     <div className={cn('relative z-10 flex flex-col items-center gap-8 text-center max-w-sm', className)}>
       <div className="flex flex-col items-center gap-3">
-        <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center">
-          <span className="text-primary-foreground font-bold text-3xl">K</span>
-        </div>
+        <BrandLogo variant="icon" className="h-16 w-16" />
         <h1 className="text-4xl font-bold text-foreground tracking-tight">Kuditraka.Ai</h1>
       </div>
 

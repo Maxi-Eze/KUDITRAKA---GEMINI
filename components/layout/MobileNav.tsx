@@ -2,15 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MessageSquare, ArrowLeftRight, Users, MoreHorizontal } from 'lucide-react';
+import { Home, MessageSquare, ArrowLeftRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/transactions', label: 'Activity', icon: ArrowLeftRight },
-  { href: '/customers', label: 'People', icon: Users },
-  { href: '/reports', label: 'More', icon: MoreHorizontal },
 ];
 
 export function MobileNav() {

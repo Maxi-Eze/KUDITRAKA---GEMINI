@@ -60,7 +60,7 @@ export function MonthlyChart({ analytics, isLoading }: MonthlyChartProps) {
         {
           label: 'Income',
           data: last6Months.map((m) => incomeByMonth[m.key]),
-          backgroundColor: 'oklch(0.85 0.18 130)',
+          backgroundColor: 'oklch(0.894 0.231 127)',
           borderRadius: 4,
         },
         {
