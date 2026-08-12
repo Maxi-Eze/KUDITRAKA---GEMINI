@@ -59,13 +59,13 @@ export function RevenueChart({ transactions, isLoading }: RevenueChartProps) {
       datasets: [
         {
           data: last7Days.map((d) => incomeByDate[d]),
-          borderColor: 'oklch(0.85 0.18 130)',
-          backgroundColor: 'oklch(0.85 0.18 130 / 0.1)',
+          borderColor: 'oklch(0.894 0.231 127)',
+          backgroundColor: 'oklch(0.894 0.231 127 / 0.1)',
           fill: true,
           tension: 0.4,
           pointRadius: 3,
           pointHoverRadius: 5,
-          pointBackgroundColor: 'oklch(0.85 0.18 130)',
+          pointBackgroundColor: 'oklch(0.894 0.231 127)',
           borderWidth: 2,
         },
       ],

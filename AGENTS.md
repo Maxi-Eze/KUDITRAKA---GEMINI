@@ -194,10 +194,10 @@ Tailwind reads from CSS custom properties defined in `globals.css`, enabling dar
 ### 6. Design Direction
 
 - **Style:** Dark Minimalist Finance with brand accent
-- **Colors:** Dark base (#0a0a0a) + neon green accent (#aeff00)
+- **Colors:** Dark base (#0a0a0a) + neon green accent (#B2F600)
 - **Cards:** Solid card backgrounds with subtle borders (reduced glassmorphism)
 - **Layout:** Bento Grid for dashboard (modular cards, strong visual grouping)
-- **Typography:** Inter font, clear hierarchy (page title → section title → card title → body → muted)
+- **Typography:** Satoshi Variable font, clear hierarchy (page title → section title → card title → body → muted)
 - **Spacing:** 4px base scale
 - **Theme:** Dark/light via `next-themes` (light theme uses same green on light bg)
 - **Mobile:** Bottom nav, stacked cards, 44px touch targets

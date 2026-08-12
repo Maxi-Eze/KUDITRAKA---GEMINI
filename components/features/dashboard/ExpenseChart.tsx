@@ -68,7 +68,7 @@ export function ExpenseChart({ analytics, isLoading }: ExpenseChartProps) {
                   datasets: [
                     {
                       data: [chartData.income, chartData.expense],
-                      backgroundColor: ['oklch(0.85 0.18 130)', 'oklch(0.65 0.2 25)'],
+                      backgroundColor: ['oklch(0.894 0.231 127)', 'oklch(0.65 0.2 25)'],
                       borderWidth: 0,
                       hoverOffset: 4,
                     },

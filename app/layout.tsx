@@ -1,11 +1,14 @@
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
+import localFont from 'next/font/local';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+const satoshi = localFont({
+  src: './fonts/Satoshi-Variable.ttf',
+  variable: '--font-satoshi',
+});
 
 export const metadata: Metadata = {
   title: 'Kuditraka.Ai — Smart Business Finance',
@@ -14,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`font-sans ${geist.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`font-sans ${satoshi.variable}`} suppressHydrationWarning>
       <body>
         <QueryProvider>
           <ThemeProvider>

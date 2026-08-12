@@ -10,8 +10,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             className="absolute inset-0"
             style={{
               background: [
-                'radial-gradient(circle at 25% 15%, oklch(0.85 0.18 130 / 0.2), transparent 55%)',
-                'radial-gradient(circle at 75% 85%, oklch(0.85 0.18 130 / 0.1), transparent 55%)',
+                'radial-gradient(circle at 25% 15%, oklch(0.894 0.231 127 / 0.2), transparent 55%)',
+                'radial-gradient(circle at 75% 85%, oklch(0.894 0.231 127 / 0.1), transparent 55%)',
                 'radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.3) 100%)',
               ].join(', '),
             }}

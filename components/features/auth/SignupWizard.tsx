@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useSignup } from '@/hooks/useAuth';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
@@ -113,9 +114,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
     <Card className={cn('w-full max-w-md shadow-lg shadow-black/20', className)}>
       <CardHeader className="pb-2">
         <div className="flex justify-center mb-2 lg:hidden">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xl">K</span>
-          </div>
+          <BrandLogo variant="icon" className="h-12 w-12" />
         </div>
         <StepIndicator currentStep={currentStep} />
         <div className="text-center pt-2">
