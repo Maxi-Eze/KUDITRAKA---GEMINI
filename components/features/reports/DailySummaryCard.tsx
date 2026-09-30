@@ -1,16 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { formatCurrency } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Wallet, Calendar } from 'lucide-react';
-import type { DailySummary } from '@/lib/api/reports';
+import type { ReportPeriod, ReportSummary } from '@/lib/api/reports';
 
 interface DailySummaryCardProps {
-  date: string;
-  onDateChange: (date: string) => void;
-  summary?: DailySummary;
+  period: ReportPeriod;
+  onPeriodChange: (period: ReportPeriod) => void;
+  summary?: ReportSummary;
   isLoading: boolean;
 }
+
+const PERIODS: { value: ReportPeriod; label: string }[] = [
+  { value: 'daily', label: 'Today' },
+  { value: 'weekly', label: 'This Week' },
+  { value: 'monthly', label: 'This Month' },
+  { value: 'yearly', label: 'This Year' },
+];
 
 function SkeletonCard() {
   return (
@@ -25,7 +39,7 @@ function SkeletonCard() {
   );
 }
 
-export function DailySummaryCard({ date, onDateChange, summary, isLoading }: DailySummaryCardProps) {
+export function DailySummaryCard({ period, onPeriodChange, summary, isLoading }: DailySummaryCardProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -41,18 +55,24 @@ export function DailySummaryCard({ date, onDateChange, summary, isLoading }: Dai
     );
   }
 
-  const hasData = summary && (summary.income > 0 || summary.expense > 0);
+  const hasData = !!summary && (summary.total_income > 0 || summary.total_expenses > 0);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Calendar className="h-4 w-4 text-muted-foreground" />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => onDateChange(e.target.value)}
-          className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 md:text-sm dark:bg-input/30 sm:w-40"
-        />
+        <Select value={period} onValueChange={(value) => onPeriodChange(value as ReportPeriod)}>
+          <SelectTrigger className="h-8 w-full sm:w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PERIODS.map((p) => (
+              <SelectItem key={p.value} value={p.value}>
+                {p.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       {hasData ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -62,7 +82,7 @@ export function DailySummaryCard({ date, onDateChange, summary, isLoading }: Dai
               <TrendingUp className="h-4 w-4 text-emerald-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-emerald-500">{formatCurrency(summary.income)}</div>
+              <div className="text-2xl font-bold text-emerald-500">{formatCurrency(summary.total_income)}</div>
             </CardContent>
           </Card>
           <Card>
@@ -71,24 +91,24 @@ export function DailySummaryCard({ date, onDateChange, summary, isLoading }: Dai
               <TrendingDown className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-500">{formatCurrency(summary.expense)}</div>
+              <div className="text-2xl font-bold text-red-500">{formatCurrency(summary.total_expenses)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Balance</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Net Balance</CardTitle>
               <Wallet className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(summary.balance)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(summary.net_balance)}</div>
             </CardContent>
           </Card>
         </div>
       ) : (
         <EmptyState
           icon={Calendar}
-          title="No data for this date"
-          description="Try selecting a different date"
+          title="No data for this period"
+          description="Try selecting a different period"
         />
       )}
     </div>

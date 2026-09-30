@@ -20,6 +20,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useUpdateTransaction } from '@/hooks/useTransactions';
+import { customersApi } from '@/lib/api';
 import { formatCurrency, formatTxDate, cn } from '@/lib/utils';
 import { Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
 import type { Transaction, TransactionType, PaymentMethod } from '@/lib/types';
@@ -63,7 +64,7 @@ export function TransactionDetailSheet({
     setType(transaction.type);
     setAmount(amt);
     setItem(transaction.item);
-    setCustomer(transaction.customer_id || '');
+    setCustomer(transaction.customer_name || '');
     setPaymentMethod(transaction.payment_method as PaymentMethod);
     setQuantity(transaction.quantity?.toString() || '');
     setDate(transaction.date.split('T')[0]);
@@ -85,9 +86,20 @@ export function TransactionDetailSheet({
     setMode('view');
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!transaction || !amount || !item) return;
+
+    let customerId: string | null = null;
+    const trimmedCustomer = customer.trim();
+    if (trimmedCustomer) {
+      try {
+        const resolved = await customersApi.findOrCreate(trimmedCustomer);
+        customerId = resolved.id;
+      } catch {
+        customerId = transaction.customer_id;
+      }
+    }
 
     updateMutation.mutate(
       {
@@ -96,7 +108,7 @@ export function TransactionDetailSheet({
           type,
           amount: parseFloat(amount),
           item,
-          customer_id: customer || null,
+          customer_id: customerId,
           payment_method: paymentMethod,
           quantity: quantity ? parseInt(quantity) : undefined,
           date: new Date(date).toISOString(),
@@ -153,10 +165,12 @@ export function TransactionDetailSheet({
                 <span className="text-sm font-medium">{transaction.item}</span>
               </div>
 
-              {transaction.customer_id && (
+              {(transaction.customer_name || transaction.customer_id) && (
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Customer</span>
-                  <span className="text-sm font-medium">{transaction.customer_id}</span>
+                  <span className="text-sm font-medium">
+                    {transaction.customer_name || transaction.customer_id}
+                  </span>
                 </div>
               )}
 

@@ -53,8 +53,10 @@ export function TransactionCard({ transaction, onView, onEdit, onDelete }: Trans
           </div>
         </div>
         <p className="text-sm font-medium">{transaction.item}</p>
-{transaction.customer_id && (
-              <p className="text-xs text-muted-foreground">{transaction.customer_id}</p>
+        {(transaction.customer_name || transaction.customer_id) && (
+          <p className="text-xs text-muted-foreground">
+            {transaction.customer_name || transaction.customer_id}
+          </p>
         )}
         <div className="flex items-center justify-between mt-2">
           <span className={cn(

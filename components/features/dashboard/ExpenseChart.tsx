@@ -6,12 +6,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
 import { formatCurrency } from '@/lib/utils';
-import type { AnalyticsRow } from '@/lib/api/reports';
+import type { Analytics } from '@/lib/api/reports';
 
 ChartJS.register(ArcElement, Tooltip);
 
 interface ExpenseChartProps {
-  analytics?: AnalyticsRow[];
+  analytics?: Analytics;
   isLoading?: boolean;
 }
 
@@ -21,15 +21,9 @@ export function ExpenseChart({ analytics, isLoading }: ExpenseChartProps) {
 
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const monthRows = analytics.filter((r) => r.month === currentMonth);
-
-    let income = 0;
-    let expense = 0;
-    for (const row of monthRows) {
-      const total = parseFloat(row.total);
-      if (row.type === 'income') income += total;
-      if (row.type === 'expense') expense += total;
-    }
+    const point = analytics.timeline.find((p) => p.period.slice(0, 7) === currentMonth);
+    const income = point?.income ?? 0;
+    const expense = point?.expense ?? 0;
 
     return { income, expense, net: income - expense };
   }, [analytics]);

@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Wallet, Calendar } from 'lucide-react';
-import type { AnalyticsRow } from '@/lib/api/reports';
+import type { Analytics } from '@/lib/api/reports';
 
 interface ReportOverviewProps {
-  analytics?: AnalyticsRow[];
+  analytics?: Analytics;
   isLoading: boolean;
 }
 
@@ -29,21 +29,15 @@ export function ReportOverview({ analytics, isLoading }: ReportOverviewProps) {
   const stats = useMemo(() => {
     if (!analytics) return null;
 
-    let totalIncome = 0;
-    let totalExpense = 0;
-    const months = new Set<string>();
+    const { total_income, total_expenses, net_balance } = analytics.overall_summary;
+    const months = analytics.timeline.length;
 
-    for (const row of analytics) {
-      const total = parseFloat(row.total);
-      months.add(row.month);
-      if (row.type === 'income') totalIncome += total;
-      if (row.type === 'expense') totalExpense += total;
-    }
-
-    const netProfit = totalIncome - totalExpense;
-    const avgMonthly = months.size > 0 ? netProfit / months.size : 0;
-
-    return { totalIncome, totalExpense, netProfit, avgMonthly };
+    return {
+      totalIncome: total_income,
+      totalExpense: total_expenses,
+      netProfit: net_balance,
+      avgMonthly: months > 0 ? net_balance / months : 0,
+    };
   }, [analytics]);
 
   if (isLoading) {

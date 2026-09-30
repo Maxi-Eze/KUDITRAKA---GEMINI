@@ -1,33 +1,24 @@
 import { client } from './client';
-import type { ChatSession, ChatHistoryMessage, ParsedTransaction, ChatReplyResponse } from '../types';
+import type { ChatSession, ChatHistoryMessage, ParsedTransaction, FinancialSnapshot } from '../types';
 
-export interface ChatParseResponse {
-  data: ParsedTransaction;
+export interface ChatReply {
+  reply: string;
+  financial_snapshot?: FinancialSnapshot;
+  session_id?: string;
 }
 
-export type ChatSendResponse = ChatParseResponse | ChatReplyResponse;
-
-export interface ChatEnvelope<T> {
-  message: string;
-  data: T;
-}
+export type ChatSendResponse = ParsedTransaction | ChatReply;
 
 export const chatApi = {
   parse: (text: string, sessionId?: string) =>
-    client.post<ChatParseResponse>('/ai/parse', { text, save: false, session_id: sessionId }),
+    client.post<ParsedTransaction>('/ai/parse', { text, save: false, session_id: sessionId }),
 
   chat: (message: string, sessionId?: string) =>
-    client.post<ChatReplyResponse>('/ai/chat', { message, session_id: sessionId }),
+    client.post<ChatReply>('/ai/chat', { message, sessionId }),
 
-  getSessions: async () => {
-    const res = await client.get<ChatEnvelope<ChatSession[]>>('/ai/chat/sessions');
-    return res.data;
-  },
+  getSessions: () => client.get<ChatSession[]>('/ai/chat/sessions'),
 
-  createSession: async (title: string) => {
-    const res = await client.post<ChatEnvelope<ChatSession>>('/ai/chat/sessions', { title });
-    return res.data;
-  },
+  createSession: (title: string) => client.post<ChatSession>('/ai/chat/sessions', { title }),
 
   renameSession: (id: string, title: string) =>
     client.patch<void>(`/ai/chat/sessions/${id}`, { title }),
@@ -35,10 +26,8 @@ export const chatApi = {
   deleteSession: (id: string) =>
     client.delete(`/ai/chat/sessions/${id}`),
 
-  getHistory: async (sessionId: string) => {
-    const res = await client.get<ChatEnvelope<ChatHistoryMessage[]>>(`/ai/chat/history?session_id=${sessionId}`);
-    return res.data;
-  },
+  getHistory: (sessionId: string) =>
+    client.get<ChatHistoryMessage[]>(`/ai/chat/history?session_id=${sessionId}`),
 
   clearHistory: (sessionId: string) =>
     client.delete(`/ai/chat/history?session_id=${sessionId}`),

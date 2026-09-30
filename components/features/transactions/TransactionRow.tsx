@@ -27,7 +27,7 @@ export function TransactionRow({ transaction, onView, onEdit, onDelete }: Transa
       </TableCell>
       <TableCell>
         <span className="text-muted-foreground">
-          {transaction.customer_id || '—'}
+          {transaction.customer_name || transaction.customer_id || '—'}
         </span>
       </TableCell>
       <TableCell>
