@@ -2,27 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
-import type { DailySummary, AnalyticsRow } from '@/lib/api/reports';
+import type { ReportSummary, Analytics } from '@/lib/api/reports';
 
 interface KpiCardsProps {
-  dailySummary?: DailySummary;
-  analytics?: AnalyticsRow[];
+  summary?: ReportSummary;
+  analytics?: Analytics;
   transactionCount?: number;
   isLoading?: boolean;
 }
 
-function getMonthNet(analytics: AnalyticsRow[]): number {
+function getMonthNet(analytics: Analytics): number {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const monthRows = analytics.filter((r) => r.month === currentMonth);
-  let income = 0;
-  let expense = 0;
-  for (const row of monthRows) {
-    const total = parseFloat(row.total);
-    if (row.type === 'income') income += total;
-    if (row.type === 'expense') expense += total;
-  }
-  return income - expense;
+  const point = analytics.timeline.find((p) => p.period.slice(0, 7) === currentMonth);
+  return point?.net_profit ?? 0;
 }
 
 function SkeletonCard() {
@@ -38,7 +31,7 @@ function SkeletonCard() {
   );
 }
 
-export function KpiCards({ dailySummary, analytics, transactionCount, isLoading }: KpiCardsProps) {
+export function KpiCards({ summary, analytics, transactionCount, isLoading }: KpiCardsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -54,13 +47,13 @@ export function KpiCards({ dailySummary, analytics, transactionCount, isLoading 
   const cards = [
     {
       label: "Today's Income",
-      value: formatCurrency(dailySummary?.income ?? 0),
+      value: formatCurrency(summary?.total_income ?? 0),
       icon: TrendingUp,
       color: 'text-emerald-500',
     },
     {
       label: "Today's Expenses",
-      value: formatCurrency(dailySummary?.expense ?? 0),
+      value: formatCurrency(summary?.total_expenses ?? 0),
       icon: TrendingDown,
       color: 'text-red-500',
     },

@@ -7,12 +7,23 @@ export interface Transaction {
   amount: number | string;
   item: string;
   customer_id: string | null;
+  customer_name?: string | null;
+  category?: string | null;
   payment_method: PaymentMethod | string;
   date: string;
   raw_input: string | null;
   quantity?: number;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
 
 export interface ParsedTransaction {
@@ -114,10 +125,6 @@ export interface ChatHistoryMessage {
   created_at: string;
 }
 
-export interface ParsedTransactionResponse {
-  data: ParsedTransaction;
-}
-
 export interface FinancialSnapshot {
   today_income: number;
   today_expenses: number;
@@ -126,12 +133,4 @@ export interface FinancialSnapshot {
   this_month_expenses: number;
   this_month_net: number;
   recent_transactions: Transaction[];
-}
-
-export interface ChatReplyResponse {
-  data: {
-    reply: string;
-    financial_snapshot?: FinancialSnapshot;
-    session_id?: string;
-  };
 }

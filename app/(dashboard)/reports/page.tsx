@@ -5,16 +5,13 @@ import { PageHeader } from '@/components/ui/page-header';
 import { DailySummaryCard } from '@/components/features/reports/DailySummaryCard';
 import { MonthlyChart } from '@/components/features/reports/MonthlyChart';
 import { ReportOverview } from '@/components/features/reports/ReportOverview';
-import { useDailySummary, useAnalytics } from '@/hooks/useReports';
-
-function getToday(): string {
-  return new Date().toISOString().split('T')[0];
-}
+import { useSummary, useAnalytics } from '@/hooks/useReports';
+import type { ReportPeriod } from '@/lib/api/reports';
 
 export default function ReportsPage() {
-  const [selectedDate, setSelectedDate] = useState(getToday);
+  const [period, setPeriod] = useState<ReportPeriod>('daily');
 
-  const { data: dailySummary, isLoading: dailyLoading } = useDailySummary(selectedDate);
+  const { data: summary, isLoading: summaryLoading } = useSummary(period);
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
 
   return (
@@ -25,10 +22,10 @@ export default function ReportsPage() {
       />
       <div className="space-y-6">
         <DailySummaryCard
-          date={selectedDate}
-          onDateChange={setSelectedDate}
-          summary={dailySummary}
-          isLoading={dailyLoading}
+          period={period}
+          onPeriodChange={setPeriod}
+          summary={summary}
+          isLoading={summaryLoading}
         />
         <ReportOverview
           analytics={analytics}

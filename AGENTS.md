@@ -24,7 +24,7 @@
 | Theme | next-themes | latest |
 | Package Manager | npm | — |
 
-**Backend:** External REST API at `https://kudi-v2-xah5.onrender.com/api` (not part of this repo).
+**Backend:** External REST API at `https://misa.kuditraka.name.ng/api` (not part of this repo).
 
 ---
 

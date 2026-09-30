@@ -8,7 +8,7 @@ import { queryKeys } from './keys';
 export function useTransactions() {
   return useQuery({
     queryKey: queryKeys.transactions.list(),
-    queryFn: () => transactionsApi.list(),
+    queryFn: () => transactionsApi.listAll(),
   });
 }
 

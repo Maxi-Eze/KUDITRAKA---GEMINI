@@ -1,13 +1,20 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { reportsApi } from '@/lib/api';
+import { reportsApi, type ReportPeriod } from '@/lib/api/reports';
 import { queryKeys } from './keys';
 
-export function useDailySummary(date: string) {
+export function useSummary(period: ReportPeriod = 'daily') {
   return useQuery({
-    queryKey: queryKeys.reports.dailySummary(date),
-    queryFn: () => reportsApi.getDailySummary(date),
+    queryKey: queryKeys.reports.summary(period),
+    queryFn: () => reportsApi.getSummary(period),
+  });
+}
+
+export function useDailyReport() {
+  return useQuery({
+    queryKey: queryKeys.reports.daily(),
+    queryFn: reportsApi.getDaily,
   });
 }
 

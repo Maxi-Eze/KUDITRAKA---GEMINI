@@ -9,7 +9,8 @@ export const queryKeys = {
   },
   reports: {
     all: ['reports'] as const,
-    dailySummary: (date: string) => [...queryKeys.reports.all, 'dailySummary', date] as const,
+    summary: (period: string) => [...queryKeys.reports.all, 'summary', period] as const,
+    daily: () => [...queryKeys.reports.all, 'daily'] as const,
     analytics: () => [...queryKeys.reports.all, 'analytics'] as const,
   },
   customers: {

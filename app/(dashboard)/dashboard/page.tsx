@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransactions } from '@/hooks/useTransactions';
-import { useDailySummary, useAnalytics } from '@/hooks/useReports';
+import { useSummary, useAnalytics } from '@/hooks/useReports';
 import { KpiCards } from '@/components/features/dashboard/KpiCards';
 import { RevenueChart } from '@/components/features/dashboard/RevenueChart';
 import { ExpenseChart } from '@/components/features/dashboard/ExpenseChart';
@@ -9,17 +9,16 @@ import { RecentTransactions } from '@/components/features/dashboard/RecentTransa
 import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
 
 export default function DashboardPage() {
-  const today = new Date().toISOString().split('T')[0];
-  const { data: dailySummary, isLoading: dailyLoading } = useDailySummary(today);
+  const { data: summary, isLoading: summaryLoading } = useSummary('daily');
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
   const { data: transactions, isLoading: txLoading } = useTransactions();
 
-  const isAnyLoading = dailyLoading || analyticsLoading || txLoading;
+  const isAnyLoading = summaryLoading || analyticsLoading || txLoading;
 
   return (
     <div className="space-y-6">
       <KpiCards
-        dailySummary={dailySummary}
+        summary={summary}
         analytics={analytics}
         transactionCount={Array.isArray(transactions) ? transactions.length : 0}
         isLoading={isAnyLoading}

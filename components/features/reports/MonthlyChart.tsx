@@ -13,12 +13,12 @@ import {
   Tooltip,
 } from 'chart.js';
 import { BarChart3 } from 'lucide-react';
-import type { AnalyticsRow } from '@/lib/api/reports';
+import type { Analytics } from '@/lib/api/reports';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
 
 interface MonthlyChartProps {
-  analytics?: AnalyticsRow[];
+  analytics?: Analytics;
   isLoading: boolean;
 }
 
@@ -47,11 +47,11 @@ export function MonthlyChart({ analytics, isLoading }: MonthlyChartProps) {
       expenseByMonth[m.key] = 0;
     }
 
-    for (const row of analytics) {
-      if (!(row.month in incomeByMonth)) continue;
-      const total = parseFloat(row.total);
-      if (row.type === 'income') incomeByMonth[row.month] += total;
-      if (row.type === 'expense') expenseByMonth[row.month] += total;
+    for (const point of analytics.timeline) {
+      const key = point.period.slice(0, 7);
+      if (!(key in incomeByMonth)) continue;
+      incomeByMonth[key] += point.income;
+      expenseByMonth[key] += point.expense;
     }
 
     return {

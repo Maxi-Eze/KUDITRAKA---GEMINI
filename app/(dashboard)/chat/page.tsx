@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Menu, Plus } from 'lucide-react';
 import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
 import { customersApi } from '@/lib/api';
-import type { ChatParseResponse } from '@/lib/api/chat';
 
 const TRANSACTION_KEYWORDS = ['sold', 'bought', 'spent', 'earned', 'paid', 'received', 'purchased', 'cost', 'expense', 'income'];
 const QUESTION_KEYWORDS = ['how much', 'what', 'when', 'where', 'why', 'how many', 'total', 'balance', 'summary'];
@@ -138,12 +137,11 @@ export default function ChatPage() {
             let parsed: ParsedTransaction | undefined;
 
             if (isQuery) {
-              const chatData = data as { data?: { reply?: string } };
-              content = chatData?.data?.reply || content;
+              const reply = data as { reply?: string };
+              content = reply?.reply || content;
             } else {
-              const parseData = data as { data?: ParsedTransaction };
-              parsed = parseData?.data;
-              if (parsed) {
+              parsed = data as ParsedTransaction;
+              if (parsed && parsed.type) {
                 content = `Transaction parsed: ${parsed.type} - ${parsed.item}`;
               }
             }

@@ -7,7 +7,7 @@ export interface WhatsAppLinkStatus {
 
 export const whatsappApi = {
   getStatus: () =>
-    client.get<WhatsAppLinkStatus>('/whatsapp/link'),
+    client.get<WhatsAppLinkStatus>('/whatsapp/status'),
 
   link: (phone: string) =>
     client.post<{ phone: string }>('/whatsapp/link', { phone }),

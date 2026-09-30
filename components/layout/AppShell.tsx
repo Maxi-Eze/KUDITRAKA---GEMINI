@@ -12,14 +12,19 @@ import { LoadingPage } from '@/components/ui/loading-page';
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useUser();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoading && !user) {
       router.push('/');
     }
-  }, [isLoading, user, router]);
+  }, [mounted, isLoading, user, router]);
 
   useEffect(() => {
     const stored = localStorage.getItem('sidebar-collapsed');
@@ -32,7 +37,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     localStorage.setItem('sidebar-collapsed', String(collapsed));
   }, [collapsed]);
 
-  if (isLoading) return <LoadingPage />;
+  if (!mounted || isLoading) return <LoadingPage />;
   if (!user) return null;
 
   const toggle = () => setCollapsed((prev) => !prev);
