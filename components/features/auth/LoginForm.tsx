@@ -46,13 +46,15 @@ export function LoginForm({ className }: LoginFormProps) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="pt-4 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" required>Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
+                aria-required="true"
+                aria-invalid={!!errors.email}
                 className={cn('pl-9 h-11', errors.email && 'border-destructive')}
                 {...register('email')}
               />
@@ -63,7 +65,7 @@ export function LoginForm({ className }: LoginFormProps) {
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" required>Password</Label>
               <a href="#" className="text-xs text-primary hover:underline">
                 Forgot password?
               </a>
@@ -74,6 +76,8 @@ export function LoginForm({ className }: LoginFormProps) {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
+                aria-required="true"
+                aria-invalid={!!errors.password}
                 className={cn('pl-9 h-11', errors.password && 'border-destructive')}
                 {...register('password')}
               />

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
+import { getFieldErrors } from '@/lib/api/errors';
 import type { BusinessSector } from '@/lib/types';
 
 const sectors: { value: BusinessSector; label: string }[] = [
@@ -29,6 +30,7 @@ export function BusinessSettings() {
 
   const [sector, setSector] = useState<BusinessSector | ''>('');
   const [inventoryEnabled, setInventoryEnabled] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -41,11 +43,21 @@ export function BusinessSettings() {
 
   const handleSave = () => {
     if (!sector) return;
+    setError(null);
 
-    updateMutation.mutate({
-      business_sector: sector,
-      inventory_enabled: inventoryEnabled,
-    });
+    updateMutation.mutate(
+      {
+        business_sector: sector,
+        inventory_enabled: inventoryEnabled,
+      },
+      {
+        onError: (err) => {
+          const fieldErrors = getFieldErrors(err);
+          const first = Object.values(fieldErrors)[0];
+          setError(first || (err as Error).message || 'Failed to save settings');
+        },
+      }
+    );
   };
 
   return (
@@ -56,7 +68,7 @@ export function BusinessSettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-2">
-          <Label>Business Sector</Label>
+          <Label required>Business Sector</Label>
           <Select value={sector} onValueChange={(val) => setSector(val as BusinessSector)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select your sector" />
@@ -92,6 +104,7 @@ export function BusinessSettings() {
             {updateMutation.isPending ? 'Saving...' : 'Save settings'}
           </Button>
         </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
       </CardContent>
     </Card>
   );

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@/lib/validations/auth';
+import { getFieldErrors } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
 export function ProfileForm() {
@@ -19,6 +20,7 @@ export function ProfileForm() {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isDirty },
   } = useForm<ProfileUpdateFormData>({
     resolver: zodResolver(profileUpdateSchema),
@@ -51,6 +53,15 @@ export function ProfileForm() {
             phone: data.phone,
           });
         },
+        onError: (error) => {
+          const fieldErrors = getFieldErrors(error);
+          for (const [field, message] of Object.entries(fieldErrors)) {
+            if (field === 'name' || field === 'businessName' || field === 'business_name' || field === 'phone') {
+              const target = field === 'business_name' ? 'businessName' : field;
+              setError(target as 'name' | 'businessName' | 'phone', { message });
+            }
+          }
+        },
       }
     );
   };
@@ -65,9 +76,11 @@ export function ProfileForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" required>Full Name</Label>
               <Input
                 id="name"
+                aria-required="true"
+                aria-invalid={!!errors.name}
                 className={cn(errors.name && 'border-destructive')}
                 {...register('name')}
               />
@@ -76,9 +89,12 @@ export function ProfileForm() {
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="businessName">Business Name</Label>
+              <Label htmlFor="businessName">
+                Business Name <span className="text-muted-foreground">(optional)</span>
+              </Label>
               <Input
                 id="businessName"
+                aria-invalid={!!errors.businessName}
                 className={cn(errors.businessName && 'border-destructive')}
                 {...register('businessName')}
               />
@@ -87,10 +103,13 @@ export function ProfileForm() {
               )}
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">
+                Phone Number <span className="text-muted-foreground">(optional)</span>
+              </Label>
               <Input
                 id="phone"
                 placeholder="+2348012345678"
+                aria-invalid={!!errors.phone}
                 className={cn(errors.phone && 'border-destructive')}
                 {...register('phone')}
               />

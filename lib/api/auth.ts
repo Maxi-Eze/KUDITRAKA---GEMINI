@@ -6,6 +6,7 @@ export interface RegisterData {
   email: string;
   password: string;
   business_name?: string;
+  phone?: string;
 }
 
 export interface LoginData {

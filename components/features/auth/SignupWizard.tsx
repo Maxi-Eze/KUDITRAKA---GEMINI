@@ -10,8 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useSignup } from '@/hooks/useAuth';
@@ -75,12 +73,12 @@ interface SignupWizardProps {
 
 export function SignupWizard({ className }: SignupWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [inventoryEnabled, setInventoryEnabled] = useState(false);
   const signup = useSignup();
 
   const {
     register,
     handleSubmit,
+    trigger,
     formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -90,11 +88,13 @@ export function SignupWizard({ className }: SignupWizardProps) {
       password: '',
       confirmPassword: '',
       businessName: '',
+      phone: '',
     },
   });
 
   const handleNext = async () => {
-    setCurrentStep(2);
+    const valid = await trigger(['name', 'email', 'password', 'confirmPassword']);
+    if (valid) setCurrentStep(2);
   };
 
   const handleBack = () => {
@@ -107,6 +107,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
       email: data.email,
       password: data.password,
       business_name: data.businessName || undefined,
+      phone: data.phone || undefined,
     });
   };
 
@@ -134,10 +135,12 @@ export function SignupWizard({ className }: SignupWizardProps) {
           {currentStep === 1 ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name" required>Full Name</Label>
                 <Input
                   id="name"
                   placeholder="Your name"
+                  aria-required="true"
+                  aria-invalid={!!errors.name}
                   className={cn('h-11', errors.name && 'border-destructive')}
                   {...register('name')}
                 />
@@ -146,11 +149,13 @@ export function SignupWizard({ className }: SignupWizardProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" required>Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
+                  aria-required="true"
+                  aria-invalid={!!errors.email}
                   className={cn('h-11', errors.email && 'border-destructive')}
                   {...register('email')}
                 />
@@ -159,11 +164,13 @@ export function SignupWizard({ className }: SignupWizardProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" required>Password</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="Create a password"
+                  aria-required="true"
+                  aria-invalid={!!errors.password}
                   className={cn('h-11', errors.password && 'border-destructive')}
                   {...register('password')}
                 />
@@ -172,11 +179,13 @@ export function SignupWizard({ className }: SignupWizardProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Label htmlFor="confirm-password" required>Confirm Password</Label>
                 <Input
                   id="confirm-password"
                   type="password"
                   placeholder="Confirm your password"
+                  aria-required="true"
+                  aria-invalid={!!errors.confirmPassword}
                   className={cn('h-11', errors.confirmPassword && 'border-destructive')}
                   {...register('confirmPassword')}
                 />
@@ -188,45 +197,35 @@ export function SignupWizard({ className }: SignupWizardProps) {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="business-name">Business Name</Label>
+                <Label htmlFor="business-name">
+                  Business Name <span className="text-muted-foreground">(optional)</span>
+                </Label>
                 <Input
                   id="business-name"
                   placeholder="e.g. Mama Ngozi Stores"
-                  className="h-11"
+                  className={cn('h-11', errors.businessName && 'border-destructive')}
                   {...register('businessName')}
                 />
+                {errors.businessName && (
+                  <p className="text-sm text-destructive">{errors.businessName.message}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label>Business Sector</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your sector" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Retail & Trade">Retail & Trade</SelectItem>
-                    <SelectItem value="Professional Services">Professional Services</SelectItem>
-                    <SelectItem value="Food & Catering">Food & Catering</SelectItem>
-                    <SelectItem value="Manufacturing">Manufacturing</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="rounded-lg border border-border p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="inventory" className="text-sm font-medium">
-                      Inventory Tracking
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Track stock levels and get low-stock alerts
-                    </p>
-                  </div>
-                  <Switch
-                    id="inventory"
-                    checked={inventoryEnabled}
-                    onCheckedChange={setInventoryEnabled}
-                  />
-                </div>
+                <Label htmlFor="phone">
+                  Phone Number <span className="text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id="phone"
+                  placeholder="+2348012345678"
+                  className={cn('h-11', errors.phone && 'border-destructive')}
+                  {...register('phone')}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Adding your phone lets you record transactions via WhatsApp.
+                </p>
+                {errors.phone && (
+                  <p className="text-sm text-destructive">{errors.phone.message}</p>
+                )}
               </div>
             </div>
           )}
