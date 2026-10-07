@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
+import { getFieldErrors } from '@/lib/api/errors';
 import {
   useUpdateItem,
   useAdjustStock,
@@ -20,6 +23,15 @@ import {
   useReconciliationLogs,
 } from '@/hooks/useInventory';
 import { Loader2 } from 'lucide-react';
+import {
+  inventoryItemSchema,
+  stockAdjustSchema,
+  reconcileSchema,
+  type InventoryItemFormInput,
+  type InventoryItemFormData,
+  type StockAdjustFormInput,
+  type ReconcileFormInput,
+} from '@/lib/validations/inventory';
 import type { InventoryItem } from '@/lib/types';
 
 interface InventoryDetailProps {
@@ -29,6 +41,15 @@ interface InventoryDetailProps {
 }
 
 const PRESETS = [-10, -5, -1, 1, 5, 10];
+
+const INVENTORY_FIELDS = [
+  'name',
+  'category',
+  'stock',
+  'min_stock',
+  'cost_price',
+  'selling_price',
+] as const;
 
 function StockBadge({ stock, minStock }: { stock: number; minStock: number }) {
   if (stock <= 0) {
@@ -40,6 +61,17 @@ function StockBadge({ stock, minStock }: { stock: number; minStock: number }) {
   return <Badge variant="secondary" className="bg-green-500/10 text-green-500">In Stock</Badge>;
 }
 
+function toEditValues(item: InventoryItem): InventoryItemFormInput {
+  return {
+    name: item.name,
+    category: item.category,
+    stock: String(item.stock),
+    min_stock: String(item.min_stock),
+    cost_price: String(item.cost_price),
+    selling_price: String(item.selling_price),
+  };
+}
+
 export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailProps) {
   const updateMutation = useUpdateItem();
   const adjustStock = useAdjustStock();
@@ -47,29 +79,37 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
   const { data: logsData } = useReconciliationLogs();
 
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [stock, setStock] = useState('0');
-  const [minStock, setMinStock] = useState('0');
-  const [costPrice, setCostPrice] = useState('0');
-  const [sellingPrice, setSellingPrice] = useState('0');
-  const [customQty, setCustomQty] = useState('');
-  const [reconcileStockVal, setReconcileStockVal] = useState('');
-  const [reconcileReason, setReconcileReason] = useState('');
+
+  const editForm = useForm<InventoryItemFormInput, unknown, InventoryItemFormData>({
+    resolver: zodResolver(inventoryItemSchema),
+    defaultValues: {
+      name: '',
+      category: '',
+      stock: '0',
+      min_stock: '0',
+      cost_price: '0',
+      selling_price: '0',
+    },
+  });
+
+  const adjustForm = useForm<StockAdjustFormInput, unknown, { quantity: number }>({
+    resolver: zodResolver(stockAdjustSchema),
+    defaultValues: { quantity: '' },
+  });
+
+  const reconcileForm = useForm<ReconcileFormInput, unknown, { actual_stock: number; reason: string }>({
+    resolver: zodResolver(reconcileSchema),
+    defaultValues: { actual_stock: '', reason: '' },
+  });
 
   useEffect(() => {
     if (item) {
-      setName(item.name);
-      setCategory(item.category);
-      setStock(String(item.stock));
-      setMinStock(String(item.min_stock));
-      setCostPrice(String(item.cost_price));
-      setSellingPrice(String(item.selling_price));
-      setReconcileStockVal(String(item.stock));
-      setReconcileReason('');
+      editForm.reset(toEditValues(item));
+      reconcileForm.reset({ actual_stock: String(item.stock), reason: '' });
     }
     setEditing(false);
-    setCustomQty('');
+    adjustForm.reset({ quantity: '' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item]);
 
   const itemLogs = useMemo(() => {
@@ -82,21 +122,20 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
 
   if (!item) return null;
 
-  const handleSave = () => {
-    if (!name || !category) return;
+  const handleSave = (data: InventoryItemFormData) => {
     updateMutation.mutate(
+      { id: item.id, data },
       {
-        id: item.id,
-        data: {
-          name,
-          category,
-          stock: parseInt(stock, 10) || 0,
-          min_stock: parseInt(minStock, 10) || 0,
-          cost_price: parseFloat(costPrice) || 0,
-          selling_price: parseFloat(sellingPrice) || 0,
+        onSuccess: () => setEditing(false),
+        onError: (error) => {
+          const fieldErrors = getFieldErrors(error);
+          for (const [field, message] of Object.entries(fieldErrors)) {
+            if ((INVENTORY_FIELDS as readonly string[]).includes(field)) {
+              editForm.setError(field as (typeof INVENTORY_FIELDS)[number], { message });
+            }
+          }
         },
-      },
-      { onSuccess: () => setEditing(false) }
+      }
     );
   };
 
@@ -104,23 +143,23 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
     adjustStock.mutate({ id: item.id, quantity: qty });
   };
 
-  const handleCustomAdjust = () => {
-    const qty = parseInt(customQty, 10);
-    if (isNaN(qty) || qty === 0) return;
+  const handleCustomAdjust = (data: { quantity: number }) => {
     adjustStock.mutate(
-      { id: item.id, quantity: qty },
-      { onSuccess: () => setCustomQty('') }
+      { id: item.id, quantity: data.quantity },
+      { onSuccess: () => adjustForm.reset({ quantity: '' }) }
     );
   };
 
-  const handleReconcile = () => {
-    const val = parseInt(reconcileStockVal, 10);
-    if (isNaN(val) || val < 0 || !reconcileReason.trim()) return;
-    reconcileStock.mutate({
-      id: item.id,
-      data: { actual_stock: val, reason: reconcileReason.trim() },
-    });
+  const handleReconcile = (data: { actual_stock: number; reason: string }) => {
+    reconcileStock.mutate(
+      { id: item.id, data: { actual_stock: data.actual_stock, reason: data.reason } },
+      { onSuccess: () => reconcileForm.reset({ actual_stock: String(item.stock), reason: '' }) }
+    );
   };
+
+  const editErrors = editForm.formState.errors;
+  const adjustErrors = adjustForm.formState.errors;
+  const reconcileErrors = reconcileForm.formState.errors;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,42 +169,90 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
         </DialogHeader>
         <div className="space-y-4">
           {editing ? (
-            <div className="space-y-3">
+            <form onSubmit={editForm.handleSubmit(handleSave)} className="space-y-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-name">Name</Label>
-                <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
+                <Label htmlFor="edit-name" required>Name</Label>
+                <Input
+                  id="edit-name"
+                  aria-required="true"
+                  aria-invalid={!!editErrors.name}
+                  className={cn(editErrors.name && 'border-destructive')}
+                  {...editForm.register('name')}
+                />
+                {editErrors.name && <p className="text-sm text-destructive">{editErrors.name.message}</p>}
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-category">Category</Label>
-                <Input id="edit-category" value={category} onChange={(e) => setCategory(e.target.value)} />
+                <Label htmlFor="edit-category" required>Category</Label>
+                <Input
+                  id="edit-category"
+                  aria-required="true"
+                  aria-invalid={!!editErrors.category}
+                  className={cn(editErrors.category && 'border-destructive')}
+                  {...editForm.register('category')}
+                />
+                {editErrors.category && <p className="text-sm text-destructive">{editErrors.category.message}</p>}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="edit-stock">Stock</Label>
-                  <Input id="edit-stock" type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} />
+                  <Input
+                    id="edit-stock"
+                    type="number"
+                    min="0"
+                    aria-invalid={!!editErrors.stock}
+                    className={cn(editErrors.stock && 'border-destructive')}
+                    {...editForm.register('stock')}
+                  />
+                  {editErrors.stock && <p className="text-sm text-destructive">{editErrors.stock.message}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="edit-minStock">Min Stock</Label>
-                  <Input id="edit-minStock" type="number" min="0" value={minStock} onChange={(e) => setMinStock(e.target.value)} />
+                  <Input
+                    id="edit-minStock"
+                    type="number"
+                    min="0"
+                    aria-invalid={!!editErrors.min_stock}
+                    className={cn(editErrors.min_stock && 'border-destructive')}
+                    {...editForm.register('min_stock')}
+                  />
+                  {editErrors.min_stock && <p className="text-sm text-destructive">{editErrors.min_stock.message}</p>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="edit-costPrice">Cost Price</Label>
-                  <Input id="edit-costPrice" type="number" min="0" step="0.01" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} />
+                  <Input
+                    id="edit-costPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    aria-invalid={!!editErrors.cost_price}
+                    className={cn(editErrors.cost_price && 'border-destructive')}
+                    {...editForm.register('cost_price')}
+                  />
+                  {editErrors.cost_price && <p className="text-sm text-destructive">{editErrors.cost_price.message}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="edit-sellingPrice">Selling Price</Label>
-                  <Input id="edit-sellingPrice" type="number" min="0" step="0.01" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} />
+                  <Input
+                    id="edit-sellingPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    aria-invalid={!!editErrors.selling_price}
+                    className={cn(editErrors.selling_price && 'border-destructive')}
+                    {...editForm.register('selling_price')}
+                  />
+                  {editErrors.selling_price && <p className="text-sm text-destructive">{editErrors.selling_price.message}</p>}
                 </div>
               </div>
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
-                <Button onClick={handleSave} disabled={!name || !category || updateMutation.isPending}>
+                <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+                <Button type="submit" disabled={updateMutation.isPending}>
                   {updateMutation.isPending ? 'Saving...' : 'Save'}
                 </Button>
               </div>
-            </div>
+            </form>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-3">
@@ -220,20 +307,24 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                     </Button>
                   ))}
                 </div>
-                <div className="flex gap-2 items-center">
-                  <Input
-                    type="number"
-                    placeholder="Custom"
-                    value={customQty}
-                    onChange={(e) => setCustomQty(e.target.value)}
-                    className="h-9 w-28"
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleCustomAdjust(); }}
-                  />
+                <div className="flex gap-2 items-start">
+                  <div className="flex flex-col gap-1">
+                    <Input
+                      type="number"
+                      placeholder="Custom"
+                      aria-invalid={!!adjustErrors.quantity}
+                      className={cn('h-9 w-28', adjustErrors.quantity && 'border-destructive')}
+                      {...adjustForm.register('quantity')}
+                    />
+                    {adjustErrors.quantity && (
+                      <p className="text-xs text-destructive">{adjustErrors.quantity.message}</p>
+                    )}
+                  </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={handleCustomAdjust}
-                    disabled={!customQty || adjustStock.isPending}
+                    onClick={adjustForm.handleSubmit(handleCustomAdjust)}
+                    disabled={adjustStock.isPending}
                   >
                     {adjustStock.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Adjust'}
                   </Button>
@@ -251,25 +342,31 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                       type="number"
                       min="0"
                       placeholder={String(item.stock)}
-                      value={reconcileStockVal}
-                      onChange={(e) => setReconcileStockVal(e.target.value)}
+                      aria-invalid={!!reconcileErrors.actual_stock}
+                      className={cn(reconcileErrors.actual_stock && 'border-destructive')}
+                      {...reconcileForm.register('actual_stock')}
                     />
+                    {reconcileErrors.actual_stock && (
+                      <p className="text-xs text-destructive">{reconcileErrors.actual_stock.message}</p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">Reason</Label>
                     <Input
                       placeholder="e.g. Damaged units"
-                      value={reconcileReason}
-                      onChange={(e) => setReconcileReason(e.target.value)}
+                      aria-invalid={!!reconcileErrors.reason}
+                      className={cn(reconcileErrors.reason && 'border-destructive')}
+                      {...reconcileForm.register('reason')}
                     />
+                    {reconcileErrors.reason && (
+                      <p className="text-xs text-destructive">{reconcileErrors.reason.message}</p>
+                    )}
                   </div>
                 </div>
                 <Button
                   size="sm"
-                  onClick={handleReconcile}
-                  disabled={
-                    !reconcileStockVal || parseInt(reconcileStockVal) < 0 || !reconcileReason.trim() || reconcileStock.isPending
-                  }
+                  onClick={reconcileForm.handleSubmit(handleReconcile)}
+                  disabled={reconcileStock.isPending}
                 >
                   {reconcileStock.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
                   Reconcile Stock

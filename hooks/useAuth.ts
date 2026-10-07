@@ -74,23 +74,6 @@ export function useSignup() {
   });
 }
 
-export function useCompleteOnboarding() {
-  const qc = useQueryClient();
-  const router = useRouter();
-
-  return useMutation({
-    mutationFn: authApi.completeOnboarding,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.auth.user() });
-      toast.success('Business profile completed!');
-      router.push('/dashboard');
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Onboarding failed');
-    },
-  });
-}
-
 export function useUpdateProfile() {
   const qc = useQueryClient();
 

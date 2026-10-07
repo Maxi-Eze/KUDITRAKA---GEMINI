@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Sheet,
   SheetContent,
@@ -11,50 +12,66 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateItem } from '@/hooks/useInventory';
+import { getFieldErrors } from '@/lib/api/errors';
+import { cn } from '@/lib/utils';
+import {
+  inventoryItemSchema,
+  type InventoryItemFormInput,
+  type InventoryItemFormData,
+} from '@/lib/validations/inventory';
 
 interface NewInventorySheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+const INVENTORY_FIELDS = [
+  'name',
+  'category',
+  'stock',
+  'min_stock',
+  'cost_price',
+  'selling_price',
+] as const;
+
+const defaults: InventoryItemFormInput = {
+  name: '',
+  category: '',
+  stock: '0',
+  min_stock: '0',
+  cost_price: '0',
+  selling_price: '0',
+};
+
 export function NewInventorySheet({ open, onOpenChange }: NewInventorySheetProps) {
   const createMutation = useCreateItem();
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [stock, setStock] = useState('0');
-  const [minStock, setMinStock] = useState('0');
-  const [costPrice, setCostPrice] = useState('0');
-  const [sellingPrice, setSellingPrice] = useState('0');
 
-  const resetForm = () => {
-    setName('');
-    setCategory('');
-    setStock('0');
-    setMinStock('0');
-    setCostPrice('0');
-    setSellingPrice('0');
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm<InventoryItemFormInput, unknown, InventoryItemFormData>({
+    resolver: zodResolver(inventoryItemSchema),
+    defaultValues: defaults,
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !category) return;
-
-    createMutation.mutate(
-      {
-        name,
-        category,
-        stock: parseInt(stock, 10) || 0,
-        min_stock: parseInt(minStock, 10) || 0,
-        cost_price: parseFloat(costPrice) || 0,
-        selling_price: parseFloat(sellingPrice) || 0,
+  const onSubmit = (data: InventoryItemFormData) => {
+    createMutation.mutate(data, {
+      onSuccess: () => {
+        reset(defaults);
+        onOpenChange(false);
       },
-      {
-        onSuccess: () => {
-          resetForm();
-          onOpenChange(false);
-        },
-      }
-    );
+      onError: (error) => {
+        const fieldErrors = getFieldErrors(error);
+        for (const [field, message] of Object.entries(fieldErrors)) {
+          if ((INVENTORY_FIELDS as readonly string[]).includes(field)) {
+            setError(field as (typeof INVENTORY_FIELDS)[number], { message });
+          }
+        }
+      },
+    });
   };
 
   return (
@@ -63,82 +80,95 @@ export function NewInventorySheet({ open, onOpenChange }: NewInventorySheetProps
         <SheetHeader>
           <SheetTitle>Add Inventory Item</SheetTitle>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 px-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name" required>Name</Label>
             <Input
               id="name"
               placeholder="e.g. Rice"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              aria-required="true"
+              aria-invalid={!!errors.name}
+              className={cn(errors.name && 'border-destructive')}
+              {...register('name')}
             />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category" required>Category</Label>
             <Input
               id="category"
               placeholder="e.g. Food"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
+              aria-required="true"
+              aria-invalid={!!errors.category}
+              className={cn(errors.category && 'border-destructive')}
+              {...register('category')}
             />
+            {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="stock">Stock</Label>
-            <Input
-              id="stock"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="stock">Stock</Label>
+              <Input
+                id="stock"
+                type="number"
+                min="0"
+                aria-invalid={!!errors.stock}
+                className={cn(errors.stock && 'border-destructive')}
+                {...register('stock')}
+              />
+              {errors.stock && <p className="text-sm text-destructive">{errors.stock.message}</p>}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="minStock">Min Stock</Label>
+              <Input
+                id="minStock"
+                type="number"
+                min="0"
+                aria-invalid={!!errors.min_stock}
+                className={cn(errors.min_stock && 'border-destructive')}
+                {...register('min_stock')}
+              />
+              {errors.min_stock && <p className="text-sm text-destructive">{errors.min_stock.message}</p>}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="minStock">Min Stock</Label>
-            <Input
-              id="minStock"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={minStock}
-              onChange={(e) => setMinStock(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="costPrice">Cost Price</Label>
+              <Input
+                id="costPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                aria-invalid={!!errors.cost_price}
+                className={cn(errors.cost_price && 'border-destructive')}
+                {...register('cost_price')}
+              />
+              {errors.cost_price && <p className="text-sm text-destructive">{errors.cost_price.message}</p>}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="sellingPrice">Selling Price</Label>
+              <Input
+                id="sellingPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                aria-invalid={!!errors.selling_price}
+                className={cn(errors.selling_price && 'border-destructive')}
+                {...register('selling_price')}
+              />
+              {errors.selling_price && <p className="text-sm text-destructive">{errors.selling_price.message}</p>}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="costPrice">Cost Price</Label>
-            <Input
-              id="costPrice"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0"
-              value={costPrice}
-              onChange={(e) => setCostPrice(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="sellingPrice">Selling Price</Label>
-            <Input
-              id="sellingPrice"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0"
-              value={sellingPrice}
-              onChange={(e) => setSellingPrice(e.target.value)}
-            />
-          </div>
           <Button
             type="submit"
             className="w-full"
-            disabled={!name || !category || createMutation.isPending}
+            disabled={createMutation.isPending}
           >
             {createMutation.isPending ? 'Saving...' : 'Save Item'}
           </Button>

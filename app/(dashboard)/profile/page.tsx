@@ -2,24 +2,25 @@
 
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ProfileInfo } from '@/components/features/profile/ProfileInfo';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { ProfileHeader } from '@/components/features/profile/ProfileHeader';
 import { ProfileForm } from '@/components/features/profile/ProfileForm';
+import { ProfileInfo } from '@/components/features/profile/ProfileInfo';
 import { BusinessSettings } from '@/components/features/profile/BusinessSettings';
 import { WhatsAppLink } from '@/components/features/profile/WhatsAppLink';
 import { useUser } from '@/hooks/useAuth';
-
-type ActiveSection = 'info' | 'business' | 'whatsapp';
+import { User, Building2, MessageCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const { data: user, isLoading } = useUser();
-  const [activeSection, setActiveSection] = useState<ActiveSection>('info');
+  const [tab, setTab] = useState('profile');
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full" />
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-48 w-full" />
       </div>
@@ -35,40 +36,37 @@ export default function ProfilePage() {
         description="Manage your account and business settings"
       />
 
-      <div className="flex gap-2">
-        <Button
-          variant={activeSection === 'info' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setActiveSection('info')}
-        >
-          Profile
-        </Button>
-        <Button
-          variant={activeSection === 'business' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setActiveSection('business')}
-        >
-          Business Settings
-        </Button>
-        <Button
-          variant={activeSection === 'whatsapp' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setActiveSection('whatsapp')}
-        >
-          WhatsApp
-        </Button>
-      </div>
+      <ProfileHeader user={user} />
 
-      {activeSection === 'info' && (
-        <div className="space-y-4">
-          <ProfileInfo user={user} />
+      <Tabs value={tab} onValueChange={(value) => setTab(value as string)}>
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="profile">
+            <User />
+            Profile
+          </TabsTrigger>
+          <TabsTrigger value="business">
+            <Building2 />
+            Business
+          </TabsTrigger>
+          <TabsTrigger value="whatsapp">
+            <MessageCircle />
+            WhatsApp
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-4">
           <ProfileForm />
-        </div>
-      )}
+          <ProfileInfo user={user} />
+        </TabsContent>
 
-      {activeSection === 'business' && <BusinessSettings />}
+        <TabsContent value="business">
+          <BusinessSettings />
+        </TabsContent>
 
-      {activeSection === 'whatsapp' && <WhatsAppLink />}
+        <TabsContent value="whatsapp">
+          <WhatsAppLink />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
