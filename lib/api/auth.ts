@@ -18,14 +18,12 @@ export interface LoginResponse {
   user: User;
 }
 
-export interface OnboardingData {
-  business_sector: string;
-  inventory_enabled: boolean;
-}
-
 export interface ProfileUpdateData {
   name?: string;
   business_name?: string;
+  business_sector?: string;
+  phone?: string;
+  inventory_enabled?: boolean;
 }
 
 export const authApi = {
@@ -37,9 +35,6 @@ export const authApi = {
 
   getProfile: () =>
     client.get<User>('/auth/profile'),
-
-  completeOnboarding: (data: OnboardingData) =>
-    client.put('/auth/onboarding', data),
 
   updateProfile: (data: ProfileUpdateData) =>
     client.put<User>('/auth/profile', data),

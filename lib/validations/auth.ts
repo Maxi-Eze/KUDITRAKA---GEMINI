@@ -18,17 +18,15 @@ export const signupSchema = z
     path: ['confirmPassword'],
   });
 
-export const onboardingSchema = z.object({
-  business_sector: z.string().min(1, 'Select a business sector'),
-  inventory_enabled: z.boolean(),
-});
-
 export const profileUpdateSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  businessName: z.string().min(1, 'Business name is required'),
+  businessName: z.string().optional(),
+  phone: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\+?[0-9]{10,15}$/.test(v), 'Enter a valid phone number'),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type SignupFormData = z.infer<typeof signupSchema>;
-export type OnboardingFormData = z.infer<typeof onboardingSchema>;
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;

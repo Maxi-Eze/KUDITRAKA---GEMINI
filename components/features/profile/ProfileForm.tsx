@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ export function ProfileForm() {
       reset({
         name: user.ownerName || '',
         businessName: user.businessName || '',
+        phone: user.phone || '',
       });
     }
   }, [user, reset]);
@@ -40,12 +41,14 @@ export function ProfileForm() {
       {
         name: data.name,
         business_name: data.businessName,
+        phone: data.phone,
       },
       {
         onSuccess: () => {
           reset({
             name: data.name,
             businessName: data.businessName,
+            phone: data.phone,
           });
         },
       }
@@ -54,11 +57,15 @@ export function ProfileForm() {
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <CardHeader>
+        <CardTitle>Personal details</CardTitle>
+        <CardDescription>Update your name, business name and phone number.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
                 className={cn(errors.name && 'border-destructive')}
@@ -79,13 +86,22 @@ export function ProfileForm() {
                 <p className="text-sm text-destructive">{errors.businessName.message}</p>
               )}
             </div>
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                placeholder="+2348012345678"
+                className={cn(errors.phone && 'border-destructive')}
+                {...register('phone')}
+              />
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone.message}</p>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2 justify-end">
-            <Button
-              type="submit"
-              disabled={!isDirty || updateMutation.isPending}
-            >
-              {updateMutation.isPending ? 'Saving...' : 'Save'}
+          <div className="flex justify-end">
+            <Button type="submit" disabled={!isDirty || updateMutation.isPending}>
+              {updateMutation.isPending ? 'Saving...' : 'Save changes'}
             </Button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,7 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { useCompleteOnboarding, useUser } from '@/hooks/useAuth';
+import { useUpdateProfile, useUser } from '@/hooks/useAuth';
 import type { BusinessSector } from '@/lib/types';
 
 const sectors: { value: BusinessSector; label: string }[] = [
@@ -25,7 +25,7 @@ const sectors: { value: BusinessSector; label: string }[] = [
 
 export function BusinessSettings() {
   const { data: user } = useUser();
-  const onboardingMutation = useCompleteOnboarding();
+  const updateMutation = useUpdateProfile();
 
   const [sector, setSector] = useState<BusinessSector | ''>('');
   const [inventoryEnabled, setInventoryEnabled] = useState(false);
@@ -42,7 +42,7 @@ export function BusinessSettings() {
   const handleSave = () => {
     if (!sector) return;
 
-    onboardingMutation.mutate({
+    updateMutation.mutate({
       business_sector: sector,
       inventory_enabled: inventoryEnabled,
     });
@@ -50,7 +50,11 @@ export function BusinessSettings() {
 
   return (
     <Card>
-      <CardContent className="p-4 space-y-4">
+      <CardHeader>
+        <CardTitle>Business settings</CardTitle>
+        <CardDescription>Set your business sector and inventory preferences.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="flex flex-col gap-2">
           <Label>Business Sector</Label>
           <Select value={sector} onValueChange={(val) => setSector(val as BusinessSector)}>
@@ -67,7 +71,7 @@ export function BusinessSettings() {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
           <div className="space-y-1">
             <Label className="text-base">Enable Inventory Tracking</Label>
             <p className="text-sm text-muted-foreground">
@@ -83,9 +87,9 @@ export function BusinessSettings() {
         <div className="flex justify-end">
           <Button
             onClick={handleSave}
-            disabled={!sector || onboardingMutation.isPending}
+            disabled={!sector || updateMutation.isPending}
           >
-            {onboardingMutation.isPending ? 'Saving...' : 'Save Settings'}
+            {updateMutation.isPending ? 'Saving...' : 'Save settings'}
           </Button>
         </div>
       </CardContent>
