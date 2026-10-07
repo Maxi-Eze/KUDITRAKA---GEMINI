@@ -81,7 +81,7 @@ export function ProfileForm() {
                 id="name"
                 aria-required="true"
                 aria-invalid={!!errors.name}
-                className={cn(errors.name && 'border-destructive')}
+                className={cn('h-11 sm:h-8', errors.name && 'border-destructive')}
                 {...register('name')}
               />
               {errors.name && (
@@ -95,7 +95,7 @@ export function ProfileForm() {
               <Input
                 id="businessName"
                 aria-invalid={!!errors.businessName}
-                className={cn(errors.businessName && 'border-destructive')}
+                className={cn('h-11 sm:h-8', errors.businessName && 'border-destructive')}
                 {...register('businessName')}
               />
               {errors.businessName && (
@@ -110,7 +110,7 @@ export function ProfileForm() {
                 id="phone"
                 placeholder="+2348012345678"
                 aria-invalid={!!errors.phone}
-                className={cn(errors.phone && 'border-destructive')}
+                className={cn('h-11 sm:h-8', errors.phone && 'border-destructive')}
                 {...register('phone')}
               />
               {errors.phone && (
@@ -118,8 +118,12 @@ export function ProfileForm() {
               )}
             </div>
           </div>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={!isDirty || updateMutation.isPending}>
+          <div className="flex">
+            <Button
+              type="submit"
+              className="h-11 w-full sm:h-8 sm:w-auto"
+              disabled={!isDirty || updateMutation.isPending}
+            >
               {updateMutation.isPending ? 'Saving...' : 'Save changes'}
             </Button>
           </div>

@@ -70,7 +70,7 @@ export function BusinessSettings() {
         <div className="flex flex-col gap-2">
           <Label required>Business Sector</Label>
           <Select value={sector} onValueChange={(val) => setSector(val as BusinessSector)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="min-h-11 w-full sm:min-h-0">
               <SelectValue placeholder="Select your sector" />
             </SelectTrigger>
             <SelectContent>
@@ -83,21 +83,23 @@ export function BusinessSettings() {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
           <div className="space-y-1">
-            <Label className="text-base">Enable Inventory Tracking</Label>
+            <Label htmlFor="inventory-toggle" className="text-base">Enable Inventory Tracking</Label>
             <p className="text-sm text-muted-foreground">
               Track your stock levels and get low-stock alerts
             </p>
           </div>
           <Switch
+            id="inventory-toggle"
             checked={inventoryEnabled}
             onCheckedChange={setInventoryEnabled}
           />
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex">
           <Button
+            className="h-11 w-full sm:h-8 sm:w-auto"
             onClick={handleSave}
             disabled={!sector || updateMutation.isPending}
           >
