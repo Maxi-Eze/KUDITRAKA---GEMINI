@@ -13,9 +13,9 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
 
   return (
     <Card>
-      <CardContent className="flex flex-col items-center gap-5 p-6 text-center sm:flex-row sm:text-left">
-        <Avatar className="size-16">
-          <AvatarFallback className="bg-primary/15 text-lg font-semibold text-primary">
+      <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:flex-row sm:gap-5 sm:p-6 sm:text-left">
+        <Avatar className="size-14 sm:size-16">
+          <AvatarFallback className="bg-primary/15 text-base font-semibold text-primary sm:text-lg">
             {initials}
           </AvatarFallback>
         </Avatar>
