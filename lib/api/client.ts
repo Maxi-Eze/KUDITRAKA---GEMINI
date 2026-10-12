@@ -1,7 +1,7 @@
 import axios, { type AxiosResponse } from 'axios';
 import type { Pagination } from '../types';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://misa.kuditraka.name.ng/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.kuditraka.name.ng/api';
 
 interface ApiEnvelope<T> {
   success: boolean;

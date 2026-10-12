@@ -24,7 +24,7 @@
 | Theme | next-themes | latest |
 | Package Manager | npm | — |
 
-**Backend:** External REST API at `https://misa.kuditraka.name.ng/api` (not part of this repo).
+**Backend:** External REST API at `https://api.kuditraka.name.ng/api` (not part of this repo).
 
 ---
 
@@ -359,7 +359,7 @@ interface ChatMessage {
 
 1. **No test framework** — Verify changes manually or ask user to confirm
 2. **No linter configured** — Follow the conventions in this document
-3. **External backend** — All API changes must be compatible with `https://kudi-v2-xah5.onrender.com/api`
+3. **External backend** — All API changes must be compatible with `https://api.kuditraka.name.ng/api`
 4. **Mobile-first** — All UI must work on 375px+ viewports
 5. **No comments** — Do not add code comments unless explicitly asked
 6. **Nigerian English** — The AI parser must handle local transaction patterns
