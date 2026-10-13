@@ -21,8 +21,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (mounted && !isLoading && !user) {
-      router.push('/');
+    if (mounted && !isLoading) {
+      if (!user) {
+        router.replace('/');
+      } else if (!user.onboarded) {
+        router.replace('/onboarding');
+      }
     }
   }, [mounted, isLoading, user, router]);
 
@@ -38,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [collapsed]);
 
   if (!mounted || isLoading) return <LoadingPage />;
-  if (!user) return null;
+  if (!user || !user.onboarded) return <LoadingPage />;
 
   const toggle = () => setCollapsed((prev) => !prev);
 
