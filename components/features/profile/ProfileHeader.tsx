@@ -13,26 +13,22 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
 
   return (
     <Card>
-      <CardContent className="flex flex-col items-center gap-4 p-5 text-center sm:flex-row sm:gap-5 sm:p-6 sm:text-left">
-        <Avatar className="size-14 sm:size-16">
-          <AvatarFallback className="bg-primary/15 text-base font-semibold text-primary sm:text-lg">
+      <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+        <Avatar className="size-14 shrink-0">
+          <AvatarFallback className="bg-primary text-base font-semibold text-primary-foreground">
             {initials}
           </AvatarFallback>
         </Avatar>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div>
-            <h2 className="text-lg font-semibold leading-tight">
-              {user.ownerName || 'Your name'}
-            </h2>
-            <p className="truncate text-sm text-muted-foreground">{user.email}</p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-            {user.businessName && <Badge variant="secondary">{user.businessName}</Badge>}
-            {user.businessSector && <Badge variant="outline">{user.businessSector}</Badge>}
-            <Badge variant={user.inventoryEnabled ? 'default' : 'secondary'}>
-              {user.inventoryEnabled ? 'Inventory on' : 'Inventory off'}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold leading-tight">
+            {user.ownerName || 'Your name'}
+          </p>
+          <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+          {user.businessSector && (
+            <Badge variant="secondary" className="mt-2">
+              {user.businessSector}
             </Badge>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -70,7 +70,7 @@ export function BusinessSettings() {
         <div className="flex flex-col gap-2">
           <Label required>Business Sector</Label>
           <Select value={sector} onValueChange={(val) => setSector(val as BusinessSector)}>
-            <SelectTrigger className="min-h-11 w-full sm:min-h-0">
+            <SelectTrigger className="min-h-11 w-full sm:min-h-10">
               <SelectValue placeholder="Select your sector" />
             </SelectTrigger>
             <SelectContent>
@@ -99,7 +99,7 @@ export function BusinessSettings() {
 
         <div className="flex">
           <Button
-            className="h-11 w-full sm:h-8 sm:w-auto"
+            className="h-11 w-full sm:h-10 sm:w-auto"
             onClick={handleSave}
             disabled={!sector || updateMutation.isPending}
           >
