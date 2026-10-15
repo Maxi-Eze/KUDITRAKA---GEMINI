@@ -3,10 +3,15 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 import { useWhatsAppStatus, useLinkWhatsApp } from '@/hooks';
 
 export function WhatsAppLink() {
@@ -47,34 +52,34 @@ export function WhatsAppLink() {
         {isLoading ? (
           <div className="space-y-3">
             <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-11 w-full" />
+            <Skeleton className="h-11 w-32" />
           </div>
         ) : isError ? (
           <p className="text-sm text-destructive">
             Failed to load WhatsApp status. Please try again.
           </p>
         ) : showForm ? (
-          <div className="space-y-4">
+          <FieldGroup>
             {isLinked && (
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">Change linked number</p>
                 <Badge variant="secondary">Linked</Badge>
               </div>
             )}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="phone">Phone Number</Label>
+            <Field>
+              <FieldLabel htmlFor="whatsapp-phone">Phone number</FieldLabel>
               <Input
-                id="phone"
+                id="whatsapp-phone"
                 placeholder="+2348012345678"
                 className="h-11 sm:h-10"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
+              <FieldDescription>
                 Must be in international format starting with +234
-              </p>
-            </div>
+              </FieldDescription>
+            </Field>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               {isLinked && (
                 <Button variant="outline" className="h-11 w-full sm:h-10 sm:w-auto" onClick={handleCancel}>
@@ -94,12 +99,12 @@ export function WhatsAppLink() {
                 {linkMutation.isPending ? 'Linking...' : 'Link WhatsApp'}
               </Button>
             </div>
-          </div>
+          </FieldGroup>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium">WhatsApp Linked</p>
+                <p className="text-sm font-medium">WhatsApp linked</p>
                 <p className="text-sm text-muted-foreground">
                   Send messages to Misa AI via WhatsApp to record transactions
                 </p>
@@ -107,7 +112,7 @@ export function WhatsAppLink() {
               <Badge variant="default">Linked</Badge>
             </div>
             <div className="rounded-lg border border-border p-3">
-              <p className="text-xs text-muted-foreground">Linked Number</p>
+              <p className="text-xs text-muted-foreground">Linked number</p>
               <p className="text-sm font-medium">{linkedPhone}</p>
             </div>
             <div className="flex justify-end">
@@ -116,7 +121,7 @@ export function WhatsAppLink() {
                 className="h-11 w-full sm:h-10 sm:w-auto"
                 onClick={() => setEditing(true)}
               >
-                Change Number
+                Change number
               </Button>
             </div>
           </div>
