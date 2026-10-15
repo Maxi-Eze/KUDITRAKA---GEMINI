@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -12,6 +11,13 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
 import { getFieldErrors } from '@/lib/api/errors';
 import type { BusinessSector } from '@/lib/types';
@@ -66,38 +72,44 @@ export function BusinessSettings() {
         <CardTitle>Business settings</CardTitle>
         <CardDescription>Set your business sector and inventory preferences.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col gap-2">
-          <Label required>Business Sector</Label>
-          <Select value={sector} onValueChange={(val) => setSector(val as BusinessSector)}>
-            <SelectTrigger className="min-h-11 w-full sm:min-h-10">
-              <SelectValue placeholder="Select your sector" />
-            </SelectTrigger>
-            <SelectContent>
-              {sectors.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <CardContent>
+        <FieldGroup>
+          <Field>
+            <FieldLabel required>Business sector</FieldLabel>
+            <Select value={sector} onValueChange={(val) => setSector(val as BusinessSector)}>
+              <SelectTrigger className="min-h-11 w-full sm:min-h-10">
+                <SelectValue placeholder="Select your sector" />
+              </SelectTrigger>
+              <SelectContent>
+                {sectors.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
 
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
-          <div className="space-y-1">
-            <Label htmlFor="inventory-toggle" className="text-base">Enable Inventory Tracking</Label>
-            <p className="text-sm text-muted-foreground">
-              Track your stock levels and get low-stock alerts
-            </p>
+          <div className="rounded-lg border border-border p-4">
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldLabel htmlFor="inventory-toggle" className="text-base">
+                  Enable inventory tracking
+                </FieldLabel>
+                <FieldDescription>
+                  Track stock levels and get low-stock alerts
+                </FieldDescription>
+              </FieldContent>
+              <Switch
+                id="inventory-toggle"
+                checked={inventoryEnabled}
+                onCheckedChange={setInventoryEnabled}
+              />
+            </Field>
           </div>
-          <Switch
-            id="inventory-toggle"
-            checked={inventoryEnabled}
-            onCheckedChange={setInventoryEnabled}
-          />
-        </div>
+        </FieldGroup>
 
-        <div className="flex">
+        <div className="mt-6 flex">
           <Button
             className="h-11 w-full sm:h-10 sm:w-auto"
             onClick={handleSave}
@@ -106,7 +118,7 @@ export function BusinessSettings() {
             {updateMutation.isPending ? 'Saving...' : 'Save settings'}
           </Button>
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       </CardContent>
     </Card>
   );

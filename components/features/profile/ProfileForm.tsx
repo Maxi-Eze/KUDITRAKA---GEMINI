@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@/lib/validations/auth';
 import { getFieldErrors } from '@/lib/api/errors';
@@ -69,56 +69,49 @@ export function ProfileForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Personal details</CardTitle>
+        <CardTitle>Personal information</CardTitle>
         <CardDescription>Update your name, business name and phone number.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="name" required>Full Name</Label>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="profile-name" required>Full name</FieldLabel>
               <Input
-                id="name"
+                id="profile-name"
                 aria-required="true"
                 aria-invalid={!!errors.name}
                 className={cn('h-11 sm:h-10', errors.name && 'border-destructive')}
                 {...register('name')}
               />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="businessName">
-                Business Name <span className="text-muted-foreground">(optional)</span>
-              </Label>
+              <FieldError errors={errors.name ? [errors.name] : undefined} />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="profile-businessName">Business name</FieldLabel>
               <Input
-                id="businessName"
+                id="profile-businessName"
                 aria-invalid={!!errors.businessName}
                 className={cn('h-11 sm:h-10', errors.businessName && 'border-destructive')}
                 {...register('businessName')}
               />
-              {errors.businessName && (
-                <p className="text-sm text-destructive">{errors.businessName.message}</p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label htmlFor="phone">
-                Phone Number <span className="text-muted-foreground">(optional)</span>
-              </Label>
+              <FieldError errors={errors.businessName ? [errors.businessName] : undefined} />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="profile-phone">Phone number</FieldLabel>
               <Input
-                id="phone"
+                id="profile-phone"
                 placeholder="+2348012345678"
                 aria-invalid={!!errors.phone}
                 className={cn('h-11 sm:h-10', errors.phone && 'border-destructive')}
                 {...register('phone')}
               />
-              {errors.phone && (
-                <p className="text-sm text-destructive">{errors.phone.message}</p>
-              )}
-            </div>
-          </div>
-          <div className="flex">
+              <FieldError errors={errors.phone ? [errors.phone] : undefined} />
+            </Field>
+          </FieldGroup>
+
+          <div className="mt-6 flex">
             <Button
               type="submit"
               className="h-11 w-full sm:h-10 sm:w-auto"

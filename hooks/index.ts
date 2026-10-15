@@ -6,4 +6,5 @@ export { useInventoryItems, useCreateItem, useUpdateItem, useDeleteItem, useReco
 export { useSummary, useDailyReport, useAnalytics } from './useReports';
 export { useWhatsAppStatus, useLinkWhatsApp } from './useWhatsApp';
 export { useCustomersList, useCustomer, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from './useCustomersApi';
+export { useMediaQuery } from './useMediaQuery';
 export { queryKeys } from './keys';

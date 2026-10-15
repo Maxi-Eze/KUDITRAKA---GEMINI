@@ -9,15 +9,17 @@ import { ProfileInfo } from '@/components/features/profile/ProfileInfo';
 import { BusinessSettings } from '@/components/features/profile/BusinessSettings';
 import { WhatsAppLink } from '@/components/features/profile/WhatsAppLink';
 import { useUser } from '@/hooks/useAuth';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { User, Building2, MessageCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const { data: user, isLoading } = useUser();
   const [tab, setTab] = useState('profile');
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-4">
+      <div className="mx-auto w-full max-w-3xl space-y-6">
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-11 w-full" />
         <Skeleton className="h-64 w-full" />
@@ -27,12 +29,29 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
-  return (
-    <div className="mx-auto w-full max-w-2xl space-y-4">
-      <ProfileHeader user={user} />
+  const handleEdit = () => {
+    setTab('profile');
+    requestAnimationFrame(() => {
+      const el = document.getElementById('profile-name') as HTMLInputElement | null;
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el?.focus();
+    });
+  };
 
-      <Tabs value={tab} onValueChange={(value) => setTab(value as string)}>
-        <TabsList className="w-full">
+  return (
+    <div className="mx-auto w-full max-w-3xl space-y-6">
+      <ProfileHeader user={user} onEdit={handleEdit} />
+
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setTab(value as string)}
+        orientation={isDesktop ? 'vertical' : 'horizontal'}
+        className={isDesktop ? 'gap-6' : undefined}
+      >
+        <TabsList
+          variant="line"
+          className="w-full lg:w-56 lg:shrink-0 lg:flex-col lg:items-stretch"
+        >
           <TabsTrigger value="profile">
             <User className="hidden sm:block" />
             Profile
