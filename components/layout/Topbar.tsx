@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
@@ -10,10 +11,13 @@ import {
   Moon,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Bell,
+  User as UserIcon,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUser } from '@/hooks/useAuth';
+import { useUser, useLogout } from '@/hooks/useAuth';
 
 const routeLabels: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -37,8 +41,11 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { data: user } = useUser();
+  const logout = useLogout();
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -51,6 +58,18 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
       return () => document.removeEventListener('mousedown', handleClick);
     }
   }, [notifOpen]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClick);
+      return () => document.removeEventListener('mousedown', handleClick);
+    }
+  }, [menuOpen]);
 
   const label =
     routeLabels[pathname] ||
@@ -143,12 +162,56 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
           <Moon size={16} className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </button>
 
-        {/* Avatar */}
+        {/* Account menu */}
         {user && (
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-default">
-            <span className="text-primary-foreground font-semibold text-xs">
-              {initials}
-            </span>
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setMenuOpen((prev) => !prev)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              title="Account menu"
+              className="flex items-center gap-1 rounded-full pl-0.5 pr-1.5 py-0.5 text-foreground/60 hover:text-foreground hover:bg-accent transition-colors"
+            >
+              <span className="flex w-8 h-8 items-center justify-center rounded-full bg-primary">
+                <span className="text-primary-foreground font-semibold text-xs">
+                  {initials}
+                </span>
+              </span>
+              <ChevronDown
+                className={cn('h-3.5 w-3.5 transition-transform', menuOpen && 'rotate-180')}
+              />
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 overflow-hidden rounded-lg border border-border bg-popover shadow-lg z-50">
+                <div className="px-4 py-3 border-b border-border">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {user.ownerName || 'Your account'}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                </div>
+                <div className="p-1">
+                  <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-accent hover:text-foreground transition-colors"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-accent hover:text-foreground transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
