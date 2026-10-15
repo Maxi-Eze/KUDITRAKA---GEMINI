@@ -67,7 +67,7 @@ export function WhatsAppLink() {
               <Input
                 id="phone"
                 placeholder="+2348012345678"
-                className="h-11 sm:h-8"
+                className="h-11 sm:h-10"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
@@ -77,12 +77,12 @@ export function WhatsAppLink() {
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               {isLinked && (
-                <Button variant="outline" className="h-11 w-full sm:h-8 sm:w-auto" onClick={handleCancel}>
+                <Button variant="outline" className="h-11 w-full sm:h-10 sm:w-auto" onClick={handleCancel}>
                   Cancel
                 </Button>
               )}
               <Button
-                className="h-11 w-full sm:h-8 sm:w-auto"
+                className="h-11 w-full sm:h-10 sm:w-auto"
                 onClick={handleSubmit}
                 disabled={
                   !phone ||
@@ -113,7 +113,7 @@ export function WhatsAppLink() {
             <div className="flex justify-end">
               <Button
                 variant="outline"
-                className="h-11 w-full sm:h-8 sm:w-auto"
+                className="h-11 w-full sm:h-10 sm:w-auto"
                 onClick={() => setEditing(true)}
               >
                 Change Number

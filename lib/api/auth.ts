@@ -27,6 +27,11 @@ export interface ProfileUpdateData {
   inventory_enabled?: boolean;
 }
 
+export interface OnboardingData {
+  business_sector: string;
+  inventory_enabled: boolean;
+}
+
 export const authApi = {
   register: (data: RegisterData) =>
     client.post<{ userId: string }>('/auth/register', data),
@@ -36,6 +41,9 @@ export const authApi = {
 
   getProfile: () =>
     client.get<User>('/auth/profile'),
+
+  completeOnboarding: (data: OnboardingData) =>
+    client.put<null>('/auth/onboarding', data),
 
   updateProfile: (data: ProfileUpdateData) =>
     client.put<User>('/auth/profile', data),

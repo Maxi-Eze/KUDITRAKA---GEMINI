@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { PageHeader } from '@/components/ui/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ProfileHeader } from '@/components/features/profile/ProfileHeader';
@@ -18,11 +17,10 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-48 w-full" />
+      <div className="mx-auto w-full max-w-2xl space-y-4">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
@@ -30,26 +28,21 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-4">
-      <PageHeader
-        title="Profile"
-        description="Manage your account and business settings"
-      />
-
+    <div className="mx-auto w-full max-w-2xl space-y-4">
       <ProfileHeader user={user} />
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as string)}>
-        <TabsList className="w-full sm:w-auto">
+        <TabsList className="w-full">
           <TabsTrigger value="profile">
-            <User />
+            <User className="hidden sm:block" />
             Profile
           </TabsTrigger>
           <TabsTrigger value="business">
-            <Building2 />
+            <Building2 className="hidden sm:block" />
             Business
           </TabsTrigger>
           <TabsTrigger value="whatsapp">
-            <MessageCircle />
+            <MessageCircle className="hidden sm:block" />
             WhatsApp
           </TabsTrigger>
         </TabsList>

@@ -51,7 +51,7 @@ export function useLogin() {
       const mapped = mapUser(res.user as unknown as Record<string, unknown>);
       qc.setQueryData(queryKeys.auth.user(), mapped);
       toast.success('Logged in successfully');
-      router.push('/dashboard');
+      router.replace(mapped.onboarded ? '/dashboard' : '/onboarding');
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Login failed');
@@ -70,6 +70,33 @@ export function useSignup() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Signup failed');
+    },
+  });
+}
+
+export function useCompleteOnboarding() {
+  const qc = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.completeOnboarding,
+    onSuccess: (_data, variables) => {
+      qc.setQueryData<User | undefined>(queryKeys.auth.user(), (old) =>
+        old
+          ? {
+              ...old,
+              onboarded: true,
+              businessSector: variables.business_sector as User['businessSector'],
+              inventoryEnabled: variables.inventory_enabled,
+            }
+          : old
+      );
+      qc.invalidateQueries({ queryKey: queryKeys.auth.user() });
+      toast.success('Business profile completed!');
+      router.replace('/dashboard');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Onboarding failed');
     },
   });
 }

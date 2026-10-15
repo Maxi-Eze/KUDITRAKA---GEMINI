@@ -43,6 +43,12 @@ export const profileUpdateSchema = z.object({
   phone: phoneSchema,
 });
 
+export const onboardingSchema = z.object({
+  business_sector: z.string().min(1, 'Select a business sector'),
+  inventory_enabled: z.boolean(),
+});
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type SignupFormData = z.infer<typeof signupSchema>;
+export type OnboardingFormData = z.infer<typeof onboardingSchema>;
 export type ProfileUpdateFormData = z.infer<typeof profileUpdateSchema>;
