@@ -10,16 +10,19 @@ interface ParsedCardProps {
   onEdit: () => void;
   onDiscard: () => void;
   isConfirming?: boolean;
+  isConfirmed?: boolean;
 }
 
-export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming }: ParsedCardProps) {
+export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming, isConfirmed }: ParsedCardProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Badge variant={parsed.type === 'income' ? 'default' : 'destructive'}>
           {parsed.type}
         </Badge>
-        <span className="text-sm text-muted-foreground">Transaction Parsed</span>
+        <span className="text-sm text-muted-foreground">
+          {isConfirmed ? 'Saved' : 'Is this right?'}
+        </span>
       </div>
 
       <div className="space-y-2">
@@ -58,36 +61,43 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming 
         </div>
       </div>
 
-      <div className="flex gap-2 pt-2">
-        <Button
-          size="sm"
-          onClick={onConfirm}
-          disabled={isConfirming}
-          className="flex-1"
-        >
+      {isConfirmed ? (
+        <div className="flex items-center gap-2 pt-2 text-sm font-medium text-emerald-500">
           <Check className="h-4 w-4" />
-          Confirm
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onEdit}
-          disabled={isConfirming}
-        >
-          <Pencil className="h-4 w-4" />
-          Edit
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onDiscard}
-          disabled={isConfirming}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <X className="h-4 w-4" />
-          Discard
-        </Button>
-      </div>
+          Saved to your transactions
+        </div>
+      ) : (
+        <div className="flex gap-2 pt-2">
+          <Button
+            size="sm"
+            onClick={onConfirm}
+            disabled={isConfirming}
+            className="flex-1"
+          >
+            <Check className="h-4 w-4" />
+            {isConfirming ? 'Saving...' : 'Confirm'}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onEdit}
+            disabled={isConfirming}
+          >
+            <Pencil className="h-4 w-4" />
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onDiscard}
+            disabled={isConfirming}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <X className="h-4 w-4" />
+            Discard
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
