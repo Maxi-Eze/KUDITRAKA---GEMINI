@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
-import { ChatMessage } from './ChatMessage';
+import { ChatMessage, type CardState } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { MessageSquare } from 'lucide-react';
 import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
@@ -12,8 +12,9 @@ interface ChatWindowProps {
   messages: ChatHistoryMessage[];
   isLoading: boolean;
   onSend: (message: string) => void;
-  onConfirmParsed?: (parsed: ParsedTransaction) => void;
-  onDiscardParsed?: () => void;
+  onConfirmParsed?: (parsed: ParsedTransaction, messageId?: string) => void;
+  onDiscardParsed?: (messageId?: string) => void;
+  cardStates?: Record<string, CardState>;
   isSending?: boolean;
 }
 
@@ -39,6 +40,7 @@ export function ChatWindow({
   onSend,
   onConfirmParsed,
   onDiscardParsed,
+  cardStates,
   isSending,
 }: ChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -84,6 +86,7 @@ export function ChatWindow({
           <ChatMessage
             key={message.id || `msg-${index}`}
             message={message}
+            cardState={message.id ? cardStates?.[message.id] : undefined}
             onConfirmParsed={onConfirmParsed}
             onDiscardParsed={onDiscardParsed}
           />
