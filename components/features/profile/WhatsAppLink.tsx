@@ -13,6 +13,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { useWhatsAppStatus, useLinkWhatsApp } from '@/hooks';
+import { PHONE_ERROR, PHONE_HINT, toNigerianInternational } from '@/lib/phone';
 
 export function WhatsAppLink() {
   const { data: status, isLoading, isError } = useWhatsAppStatus();
@@ -22,10 +23,13 @@ export function WhatsAppLink() {
 
   const isLinked = status?.linked === true;
   const linkedPhone = status?.phone;
+  // Accept 0803…, 803…, 234… or +234…, with or without spaces; always send +234….
+  const international = toNigerianInternational(phone);
+  const showPhoneError = phone.replace(/\D/g, '').length >= 10 && !international;
 
   const handleSubmit = () => {
-    if (!phone || phone.length < 14 || !phone.startsWith('+234')) return;
-    linkMutation.mutate(phone, {
+    if (!international) return;
+    linkMutation.mutate(international, {
       onSuccess: () => {
         setEditing(false);
         setPhone('');
@@ -71,13 +75,16 @@ export function WhatsAppLink() {
               <FieldLabel htmlFor="whatsapp-phone">Phone number</FieldLabel>
               <Input
                 id="whatsapp-phone"
-                placeholder="+2348012345678"
+                type="tel"
+                inputMode="tel"
+                placeholder="0803 456 7890"
                 className="h-11 sm:h-10"
+                aria-invalid={showPhoneError}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
-              <FieldDescription>
-                Must be in international format starting with +234
+              <FieldDescription className={showPhoneError ? 'text-destructive' : undefined}>
+                {showPhoneError ? PHONE_ERROR : `Your WhatsApp number, ${PHONE_HINT}`}
               </FieldDescription>
             </Field>
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -89,12 +96,7 @@ export function WhatsAppLink() {
               <Button
                 className="h-11 w-full sm:h-10 sm:w-auto"
                 onClick={handleSubmit}
-                disabled={
-                  !phone ||
-                  phone.length < 14 ||
-                  !phone.startsWith('+234') ||
-                  linkMutation.isPending
-                }
+                disabled={!international || linkMutation.isPending}
               >
                 {linkMutation.isPending ? 'Linking...' : 'Link WhatsApp'}
               </Button>

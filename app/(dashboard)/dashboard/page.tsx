@@ -7,6 +7,7 @@ import { RevenueChart } from '@/components/features/dashboard/RevenueChart';
 import { ExpenseChart } from '@/components/features/dashboard/ExpenseChart';
 import { RecentTransactions } from '@/components/features/dashboard/RecentTransactions';
 import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
+import { GetStarted } from '@/components/features/dashboard/GetStarted';
 
 export default function DashboardPage() {
   const { data: summary, isLoading: summaryLoading } = useSummary('daily');
@@ -14,9 +15,12 @@ export default function DashboardPage() {
   const { data: transactions, isLoading: txLoading } = useTransactions();
 
   const isAnyLoading = summaryLoading || analyticsLoading || txLoading;
+  // New business with nothing recorded yet: show what to do first.
+  const isNewUser = !txLoading && Array.isArray(transactions) && transactions.length === 0;
 
   return (
     <div className="space-y-6">
+      {isNewUser && <GetStarted />}
       <KpiCards
         summary={summary}
         analytics={analytics}

@@ -1,11 +1,14 @@
 import { z } from 'zod';
+import { PHONE_ERROR, toNigerianInternational } from '@/lib/phone';
 
+// Accepts "0803 456 7890", "+234 803 456 7890" etc. Forms convert it with
+// toNigerianInternational() before sending, so the backend always gets +234….
 export const phoneSchema = z
   .string()
   .trim()
-  .max(20, 'Phone number is too long')
+  .max(25, 'Phone number is too long')
   .optional()
-  .refine((v) => !v || /^\+?[0-9]{10,15}$/.test(v), 'Enter a valid phone number');
+  .refine((v) => !v || toNigerianInternational(v) !== null, PHONE_ERROR);
 
 export const loginSchema = z.object({
   email: z.string().trim().email('Enter a valid email address'),

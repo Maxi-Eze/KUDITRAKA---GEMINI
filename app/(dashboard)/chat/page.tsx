@@ -198,7 +198,10 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    // Fill exactly the space between the top bar (3.5rem) and the page padding: 1rem top +
+    // 5rem bottom on phones (room for the bottom menu), 1.5rem + 1.5rem on desktop. Using
+    // the old 100vh-4rem made the chat taller than the screen, hiding the message box on phones.
+    <div className="flex h-[calc(100dvh-9.5rem)] lg:h-[calc(100dvh-6.5rem)]">
       <div className="hidden lg:block w-64 border-r border-border bg-background">
         <SessionList
           sessions={sessionList}
