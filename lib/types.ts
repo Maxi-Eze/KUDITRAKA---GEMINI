@@ -15,6 +15,24 @@ export interface Transaction {
   quantity?: number;
   created_at?: string;
   updated_at?: string;
+  /** What saving this transaction did to inventory (create/update responses only). */
+  stock?: StockResult;
+}
+
+/** Returned by the backend when a sale/restock is saved. */
+export interface StockResult {
+  status: 'updated' | 'not_tracked' | 'ignored' | 'tracking_off' | 'not_applicable';
+  item: string;
+  item_id?: string;
+  inventory_name?: string;
+  change?: number;
+  previous?: number;
+  current?: number;
+  min_stock?: number;
+  oversold?: number;
+  low_stock?: boolean;
+  should_offer_tracking?: boolean;
+  suggested_price?: number | null;
 }
 
 export interface Pagination {

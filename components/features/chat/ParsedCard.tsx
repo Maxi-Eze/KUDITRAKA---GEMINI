@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
 import { Check, Pencil, X } from 'lucide-react';
-import type { ParsedTransaction } from '@/lib/types';
+import { StockNoteLine, TrackItemPrompt } from '@/components/features/stock/StockFeedback';
+import type { ParsedTransaction, StockResult } from '@/lib/types';
 
 interface ParsedCardProps {
   parsed: ParsedTransaction;
@@ -11,9 +12,10 @@ interface ParsedCardProps {
   onDiscard: () => void;
   isConfirming?: boolean;
   isConfirmed?: boolean;
+  stock?: StockResult;
 }
 
-export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming, isConfirmed }: ParsedCardProps) {
+export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming, isConfirmed, stock }: ParsedCardProps) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-3">
       <div className="flex items-center gap-2">
@@ -62,9 +64,13 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
       </div>
 
       {isConfirmed ? (
-        <div className="flex items-center gap-2 pt-2 text-sm font-medium text-emerald-500">
-          <Check className="h-4 w-4" />
-          Saved to your transactions
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-emerald-500">
+            <Check className="h-4 w-4" />
+            Saved to your transactions
+          </div>
+          <StockNoteLine stock={stock} />
+          <TrackItemPrompt stock={stock} />
         </div>
       ) : (
         <div className="flex gap-2 pt-2">

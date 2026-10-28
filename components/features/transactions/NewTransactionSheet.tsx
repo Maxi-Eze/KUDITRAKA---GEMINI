@@ -28,7 +28,29 @@ import {
   type TransactionFormInput,
   type TransactionFormData,
 } from '@/lib/validations/transaction';
-import type { PaymentMethod } from '@/lib/types';
+import type { PaymentMethod, StockResult } from '@/lib/types';
+import { toast } from 'sonner';
+import { shouldOfferTracking, stockNote } from '@/lib/stock';
+import { TrackItemPrompt } from '@/components/features/stock/StockFeedback';
+
+/** After saving, say what happened to stock: "18 Rice left", a warning, or "track this item?". */
+function announceStock(stock?: StockResult) {
+  const note = stockNote(stock);
+  if (note) {
+    if (note.tone === 'warning') toast.warning(note.text);
+    else toast.info(note.text);
+  }
+  if (shouldOfferTracking(stock)) {
+    toast.custom(
+      (id) => (
+        <div className="w-[min(92vw,360px)] rounded-xl border border-border bg-card p-1 shadow-lg">
+          <TrackItemPrompt stock={stock} onDone={() => setTimeout(() => toast.dismiss(id), 2500)} />
+        </div>
+      ),
+      { duration: 30000 },
+    );
+  }
+}
 
 interface NewTransactionSheetProps {
   open: boolean;
@@ -109,9 +131,10 @@ export function NewTransactionSheet({ open, onOpenChange }: NewTransactionSheetP
         quantity: data.quantity,
       },
       {
-        onSuccess: () => {
+        onSuccess: (saved) => {
           reset(getDefaults());
           onOpenChange(false);
+          announceStock(saved?.stock);
         },
         onError: (error) => {
           const fieldErrors = getFieldErrors(error);
@@ -196,6 +219,23 @@ export function NewTransactionSheet({ open, onOpenChange }: NewTransactionSheetP
               {...register('customer')}
             />
             {errors.customer && <p className="text-sm text-destructive">{errors.customer.message}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="quantity">
+              Quantity <span className="text-muted-foreground">(optional)</span>
+            </Label>
+            <Input
+              id="quantity"
+              type="number"
+              min="1"
+              inputMode="numeric"
+              placeholder="e.g. 2"
+              aria-invalid={!!errors.quantity}
+              className={cn(errors.quantity && 'border-destructive')}
+              {...register('quantity')}
+            />
+            {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
