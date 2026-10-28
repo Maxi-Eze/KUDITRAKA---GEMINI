@@ -60,13 +60,25 @@ export function useLogin() {
 }
 
 export function useSignup() {
+  const qc = useQueryClient();
   const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: () => {
-      toast.success('Account created! Please log in.');
-      router.push('/');
+    onSuccess: async (_data, variables) => {
+      // Sign the new user straight in with the details they just typed, so they go on to set up
+      // their business. If that fails, the account still exists: fall back to the login page.
+      try {
+        const res = await authApi.login({ email: variables.email, password: variables.password });
+        localStorage.setItem('ai-bk-token', res.token);
+        const mapped = mapUser(res.user as unknown as Record<string, unknown>);
+        qc.setQueryData(queryKeys.auth.user(), mapped);
+        toast.success('Account created!');
+        router.replace(mapped.onboarded ? '/dashboard' : '/onboarding');
+      } catch {
+        toast.success('Account created! Please log in.');
+        router.push('/');
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Signup failed');
