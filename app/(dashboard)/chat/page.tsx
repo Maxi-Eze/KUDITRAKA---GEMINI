@@ -246,10 +246,12 @@ function ChatPageContent() {
           quantity: parsed.quantity,
         },
         {
-          onSuccess: () => {
+          onSuccess: (saved) => {
             if (messageId) {
-              cardStatesRef.current[messageId] = { status: 'confirmed', parsed };
-              setCardState(messageId, { status: 'confirmed', parsed });
+              // Keep what the save did to stock, so the card can say "18 Rice left" or offer to track it.
+              const state: CardState = { status: 'confirmed', parsed, stock: saved?.stock };
+              cardStatesRef.current[messageId] = state;
+              setCardState(messageId, state);
             }
             toast.success('Transaction saved');
           },

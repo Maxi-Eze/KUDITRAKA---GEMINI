@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ParsedCard } from './ParsedCard';
 import { ParsedCardEdit } from './ParsedCardEdit';
-import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
+import type { ChatHistoryMessage, ParsedTransaction, StockResult } from '@/lib/types';
 import { Bot, User } from 'lucide-react';
 
 export interface CardState {
   status: 'confirming' | 'confirmed' | 'discarded';
   parsed?: ParsedTransaction;
+  /** What saving this card did to stock (from the server). */
+  stock?: StockResult;
 }
 
 interface ChatMessageProps {
@@ -74,6 +76,7 @@ export function ChatMessage({ message, cardState, onConfirmParsed, onDiscardPars
                 parsed={shownParsed}
                 isConfirming={isConfirming}
                 isConfirmed={isConfirmed}
+                stock={cardState?.stock}
                 onConfirm={() => onConfirmParsed?.(shownParsed, message.id)}
                 onEdit={() => setIsEditing(true)}
                 onDiscard={() => onDiscardParsed?.(message.id)}
