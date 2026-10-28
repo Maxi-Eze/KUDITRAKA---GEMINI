@@ -14,6 +14,7 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useSignup } from '@/hooks/useAuth';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
+import { toNigerianInternational } from '@/lib/phone';
 
 interface StepProps {
   currentStep: number;
@@ -107,7 +108,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
       email: data.email,
       password: data.password,
       business_name: data.businessName || undefined,
-      phone: data.phone || undefined,
+      phone: (data.phone && toNigerianInternational(data.phone)) || undefined,
     });
   };
 
@@ -216,7 +217,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
                 </Label>
                 <Input
                   id="phone"
-                  placeholder="+2348012345678"
+                  placeholder="0803 456 7890"
                   className={cn('h-11', errors.phone && 'border-destructive')}
                   {...register('phone')}
                 />
