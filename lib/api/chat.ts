@@ -1,5 +1,5 @@
 import { client } from './client';
-import type { ChatSession, ChatHistoryMessage, ParsedTransaction, FinancialSnapshot } from '../types';
+import type { CardStatus, ChatSession, ChatHistoryMessage, ParsedTransaction, FinancialSnapshot } from '../types';
 
 export interface ChatReply {
   reply: string;
@@ -31,4 +31,8 @@ export const chatApi = {
 
   clearHistory: (sessionId: string) =>
     client.delete(`/ai/chat/history?session_id=${sessionId}`),
+
+  /** Remember that a card was saved or discarded, so it shows the same after a refresh. */
+  setCardStatus: (messageId: string, status: CardStatus) =>
+    client.patch<{ id: string; card_status: CardStatus }>(`/ai/chat/messages/${messageId}/card`, { status }),
 };

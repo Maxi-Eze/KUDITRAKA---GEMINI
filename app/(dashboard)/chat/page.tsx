@@ -17,8 +17,17 @@ import { ChatWindow } from '@/components/features/chat/ChatWindow';
 import type { CardState } from '@/components/features/chat/ChatMessage';
 import { Button } from '@/components/ui/button';
 import { Menu, Plus } from 'lucide-react';
-import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
-import { customersApi } from '@/lib/api';
+import type { CardStatus, ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
+import { chatApi, customersApi } from '@/lib/api';
+
+// Only messages the server has stored (real ids, not temp-…) can remember their card status.
+const SAVED_MESSAGE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Tell the server what happened to a card. Best effort: if it fails, the card just asks again after a refresh. */
+function rememberCardStatus(messageId: string, status: CardStatus) {
+  if (!SAVED_MESSAGE_ID.test(messageId)) return;
+  chatApi.setCardStatus(messageId, status).catch(() => {});
+}
 
 const TRANSACTION_KEYWORDS = ['sold', 'bought', 'spent', 'earned', 'paid', 'received', 'purchased', 'cost', 'expense', 'income'];
 const QUESTION_KEYWORDS = ['how much', 'what', 'when', 'where', 'why', 'how many', 'total', 'balance', 'summary'];
@@ -94,6 +103,16 @@ function ChatPageContent() {
     : [];
 
   const allMessages = historyList.length > 0 ? historyList : localMessages;
+
+  // Cards answered in an earlier visit come back from the server as saved/discarded;
+  // anything answered in this visit (incl. stock results) takes priority.
+  const historyCardStates: Record<string, CardState> = {};
+  for (const m of historyList) {
+    if (!m.id || !m.parsed) continue;
+    if (m.card_status === 'saved') historyCardStates[m.id] = { status: 'confirmed', parsed: m.parsed };
+    else if (m.card_status === 'discarded') historyCardStates[m.id] = { status: 'discarded' };
+  }
+  const shownCardStates = { ...historyCardStates, ...cardStates };
 
   const handleNewSession = useCallback(() => {
     const title = `Chat ${new Date().toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}`;
@@ -210,6 +229,7 @@ function ChatPageContent() {
     (messageId?: string) => {
       if (!messageId) return;
       setCardState(messageId, { status: 'discarded' });
+      rememberCardStatus(messageId, 'discarded');
     },
     [setCardState]
   );
@@ -252,6 +272,7 @@ function ChatPageContent() {
               const state: CardState = { status: 'confirmed', parsed, stock: saved?.stock };
               cardStatesRef.current[messageId] = state;
               setCardState(messageId, state);
+              rememberCardStatus(messageId, 'saved');
             }
             toast.success('Transaction saved');
           },
@@ -330,7 +351,7 @@ function ChatPageContent() {
             onSend={handleSend}
             onConfirmParsed={handleConfirmParsed}
             onDiscardParsed={handleDiscardParsed}
-            cardStates={cardStates}
+            cardStates={shownCardStates}
             isSending={sendMessage.isPending}
           />
         </div>

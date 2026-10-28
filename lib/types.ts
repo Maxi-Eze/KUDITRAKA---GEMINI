@@ -140,8 +140,12 @@ export interface ChatHistoryMessage {
   content: string;
   parsed?: ParsedTransaction;
   confirmed?: boolean;
+  /** What the user did with a transaction card; null/absent = not answered yet. */
+  card_status?: CardStatus | null;
   created_at: string;
 }
+
+export type CardStatus = 'saved' | 'discarded';
 
 export interface FinancialSnapshot {
   today_income: number;
