@@ -17,6 +17,11 @@ export interface Transaction {
   updated_at?: string;
   /** What saving this transaction did to inventory (create/update responses only). */
   stock?: StockResult;
+  /** Staff member who recorded it; null/absent = the owner. */
+  recorded_by_member_id?: string | null;
+  recorded_by_name?: string | null;
+  /** How it arrived: 'web', 'whatsapp', … (older records: null). */
+  source?: string | null;
 }
 
 /** Returned by the backend when a sale/restock is saved. */
@@ -73,6 +78,59 @@ export interface User {
   businessType?: string;
   businessSize?: string;
   salesChannel?: string;
+  /** Set when a staff member is logged in (not the owner). */
+  staff?: StaffInfo | null;
+}
+
+export type StaffRole = 'attendant' | 'manager' | 'viewer';
+
+/** What a staff member is allowed to do (the owner ticks these). */
+export type StaffRight =
+  | 'record_sales'
+  | 'fix_own_sales'
+  | 'add_stock_items'
+  | 'change_stock'
+  | 'change_prices'
+  | 'see_cost_prices'
+  | 'see_shop_sales'
+  | 'see_reports'
+  | 'delete_sales';
+
+export interface StaffInfo {
+  memberId: string;
+  name: string;
+  role: StaffRole;
+  rights: StaffRight[];
+}
+
+export interface SalesSummary {
+  count: number;
+  total: number;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  phone: string;
+  role: StaffRole;
+  permissions: StaffRight[];
+  status: 'active' | 'removed';
+  last_active_at: string | null;
+  created_at: string;
+  today?: SalesSummary;
+}
+
+export interface ActivityEntry {
+  id: string;
+  action: string;
+  details: Record<string, any> | null;
+  source: string | null;
+  created_at: string;
+}
+
+export interface TeamMemberDetail extends TeamMember {
+  week: SalesSummary;
+  activity: ActivityEntry[];
 }
 
 export interface Customer {

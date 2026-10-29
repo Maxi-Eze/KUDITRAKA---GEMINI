@@ -8,8 +8,8 @@ import type { Transaction } from '@/lib/types';
 interface TransactionCardProps {
   transaction: Transaction;
   onView: (transaction: Transaction) => void;
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (transaction: Transaction) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function TransactionCard({ transaction, onView, onEdit, onDelete }: TransactionCardProps) {
@@ -32,6 +32,7 @@ export function TransactionCard({ transaction, onView, onEdit, onDelete }: Trans
             >
               <Eye className="h-3.5 w-3.5" />
             </Button>
+            {onEdit && (
             <Button
               variant="ghost"
               size="icon-xs"
@@ -41,6 +42,8 @@ export function TransactionCard({ transaction, onView, onEdit, onDelete }: Trans
             >
               <Pencil className="h-3.5 w-3.5" />
             </Button>
+            )}
+            {onDelete && (
             <Button
               variant="ghost"
               size="icon-xs"
@@ -50,9 +53,16 @@ export function TransactionCard({ transaction, onView, onEdit, onDelete }: Trans
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
+            )}
           </div>
         </div>
         <p className="text-sm font-medium">{transaction.item}</p>
+        {transaction.recorded_by_name && (
+          <p className="text-xs text-muted-foreground">
+            by {transaction.recorded_by_name}
+            {transaction.source === 'web' ? ' · web' : transaction.source === 'whatsapp' ? ' · WhatsApp' : ''}
+          </p>
+        )}
         {(transaction.customer_name || transaction.customer_id) && (
           <p className="text-xs text-muted-foreground">
             {transaction.customer_name || transaction.customer_id}
