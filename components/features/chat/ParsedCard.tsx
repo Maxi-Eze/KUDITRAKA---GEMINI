@@ -61,6 +61,13 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
           <span className="text-sm text-muted-foreground">Payment</span>
           <span className="font-medium capitalize">{parsed.payment_method}</span>
         </div>
+
+        {parsed.is_debt_payment && parsed.customer && (
+          <p className="text-xs text-muted-foreground">{`Paying back a debt. This lowers what ${parsed.customer} owes; it isn't a new sale.`}</p>
+        )}
+        {parsed.is_credit && !parsed.is_debt_payment && parsed.customer && (
+          <p className="text-xs text-amber-500">{`On credit: ${parsed.customer} will owe you for this.`}</p>
+        )}
       </div>
 
       {isConfirmed ? (

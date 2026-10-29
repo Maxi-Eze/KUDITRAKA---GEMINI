@@ -28,6 +28,11 @@ export const queryKeys = {
     list: () => [...queryKeys.inventory.all, 'list'] as const,
     logs: () => [...queryKeys.inventory.all, 'logs'] as const,
   },
+  debts: {
+    all: ['debts'] as const,
+    list: (status: string) => [...queryKeys.debts.all, 'list', status] as const,
+    customer: (name: string) => [...queryKeys.debts.all, 'customer', name.toLowerCase()] as const,
+  },
   team: {
     all: ['team'] as const,
     list: () => [...queryKeys.team.all, 'list'] as const,

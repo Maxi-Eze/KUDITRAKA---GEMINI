@@ -22,6 +22,53 @@ export interface Transaction {
   recorded_by_name?: string | null;
   /** How it arrived: 'web', 'whatsapp', … (older records: null). */
   source?: string | null;
+  /** Credit sales only: what went into the debtors book. */
+  debt?: { customer_name: string; balance: number };
+  /** Sold on credit (create only). */
+  is_credit?: boolean;
+  credit_amount?: number | null;
+}
+
+/** One customer in the debtors book. */
+export interface Debtor {
+  customerName: string;
+  customerPhone: string | null;
+  totalCredit: number;
+  totalPaid: number;
+  balance: number;
+  items: string[];
+  oldestOpenAt: string | null;
+  lastActivityAt: string;
+}
+
+export interface DebtsSummary {
+  totalOutstanding: number;
+  debtorCount: number;
+  overdueAmount: number;
+  overdueDays: number;
+  debtors: Debtor[];
+}
+
+export interface DebtEntry {
+  id: string;
+  customer_name: string;
+  customer_phone: string | null;
+  total_amount: number;
+  amount_paid: number;
+  balance: number;
+  item_description: string | null;
+  status: 'pending' | 'partial' | 'paid';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomerDebts {
+  customerName: string;
+  customerPhone: string | null;
+  totalCredit: number;
+  totalPaid: number;
+  balance: number;
+  debts: DebtEntry[];
 }
 
 /** Returned by the backend when a sale/restock is saved. */
@@ -56,6 +103,11 @@ export interface ParsedTransaction {
   customer: string;
   payment_method: string;
   quantity?: number;
+  /** Sold on credit: the customer still owes (all or credit_amount). */
+  is_credit?: boolean;
+  credit_amount?: number | null;
+  /** The customer is paying back what they owe (not a new sale). */
+  is_debt_payment?: boolean;
   isQuery?: boolean;
   queryType?: 'spend' | 'income' | 'stock' | 'balance';
   queryItem?: string;

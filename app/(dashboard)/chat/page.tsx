@@ -18,7 +18,10 @@ import type { CardState } from '@/components/features/chat/ChatMessage';
 import { Button } from '@/components/ui/button';
 import { Menu, Plus } from 'lucide-react';
 import type { CardStatus, ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
-import { chatApi, customersApi } from '@/lib/api';
+import { chatApi, customersApi, debtsApi } from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/hooks/keys';
+import { formatCurrency } from '@/lib/utils';
 
 // Only messages the server has stored (real ids, not temp-…) can remember their card status.
 const SAVED_MESSAGE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -74,6 +77,7 @@ function ChatPageContent() {
   const renameSession = useRenameSession();
   const deleteSession = useDeleteSession();
   const createTransaction = useCreateTransaction();
+  const qc = useQueryClient();
 
   const sessionList = Array.isArray(sessions) ? sessions : [];
   const historyList: ChatHistoryMessage[] = Array.isArray(historyMessages)
@@ -245,6 +249,32 @@ function ChatPageContent() {
         setCardState(messageId, { status: 'confirming', parsed });
       }
 
+      // "Mama Bisi paid 20k": lower what she owes. It is not a new sale.
+      if (parsed.is_debt_payment && parsed.customer) {
+        try {
+          const res = await debtsApi.payment({ customer_name: parsed.customer, amount: parsed.amount });
+          if (messageId) {
+            const state: CardState = { status: 'confirmed', parsed };
+            cardStatesRef.current[messageId] = state;
+            setCardState(messageId, state);
+            rememberCardStatus(messageId, 'saved');
+          }
+          qc.invalidateQueries({ queryKey: queryKeys.debts.all });
+          toast.success(
+            res.remaining > 0
+              ? `Saved. ${parsed.customer} now owes ${formatCurrency(res.remaining)}`
+              : `Saved. ${parsed.customer} has paid everything`
+          );
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Could not record the payment');
+          if (messageId) {
+            delete cardStatesRef.current[messageId];
+            setCardState(messageId, null);
+          }
+        }
+        return;
+      }
+
       let customerId: string | null = null;
       if (parsed.customer) {
         try {
@@ -264,9 +294,12 @@ function ChatPageContent() {
           date: new Date().toISOString().split('T')[0],
           raw_input: '',
           quantity: parsed.quantity,
+          // Sold on credit: the server also adds it to the debtors book (same as WhatsApp).
+          ...(parsed.is_credit && customerId ? { is_credit: true, credit_amount: parsed.credit_amount ?? null } : {}),
         },
         {
           onSuccess: (saved) => {
+            if (saved?.debt) qc.invalidateQueries({ queryKey: queryKeys.debts.all });
             if (messageId) {
               // Keep what the save did to stock, so the card can say "18 Rice left" or offer to track it.
               const state: CardState = { status: 'confirmed', parsed, stock: saved?.stock };
@@ -274,7 +307,9 @@ function ChatPageContent() {
               setCardState(messageId, state);
               rememberCardStatus(messageId, 'saved');
             }
-            toast.success('Transaction saved');
+            toast.success(
+              saved?.debt ? `Saved. ${saved.debt.customer_name} now owes ${formatCurrency(saved.debt.balance)}` : 'Transaction saved'
+            );
           },
           onError: () => {
             // Let the user try again.
@@ -286,7 +321,7 @@ function ChatPageContent() {
         }
       );
     },
-    [createTransaction, setCardState]
+    [createTransaction, setCardState, qc]
   );
 
   return (
