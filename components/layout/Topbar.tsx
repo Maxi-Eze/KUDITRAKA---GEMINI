@@ -17,6 +17,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ROLE_LABEL, staffPageLabel } from '@/lib/permissions';
 import { useUser, useLogout } from '@/hooks/useAuth';
 
 const routeLabels: Record<string, string> = {
@@ -71,7 +72,9 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
     }
   }, [menuOpen]);
 
+  // Staff see plainer page names, matching their menu.
   const label =
+    staffPageLabel(user, '/' + pathname.split('/')[1]) ||
     routeLabels[pathname] ||
     routeLabels['/' + pathname.split('/')[1]] ||
     'Dashboard';
@@ -188,9 +191,12 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
                   <p className="truncate text-sm font-semibold text-foreground">
                     {user.ownerName || 'Your account'}
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {user.staff ? `${ROLE_LABEL[user.staff.role]} · ${user.businessName}` : user.email}
+                  </p>
                 </div>
                 <div className="p-1">
+                  {!user.staff && (
                   <Link
                     href="/profile"
                     onClick={() => setMenuOpen(false)}
@@ -199,6 +205,7 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
                     <UserIcon className="h-4 w-4" />
                     Profile
                   </Link>
+                  )}
                   <button
                     onClick={() => {
                       setMenuOpen(false);

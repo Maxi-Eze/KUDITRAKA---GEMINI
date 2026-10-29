@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Lock } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import { canOpenPage } from '@/lib/permissions';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
@@ -12,6 +16,7 @@ import { LoadingPage } from '@/components/ui/loading-page';
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -68,7 +73,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onToggle={toggle}
         />
         <main className="flex-1 p-4 pb-20 lg:p-6 lg:pb-6">
-          {children}
+          {canOpenPage(user, pathname) ? children : (
+            // Staff opened an owner page (e.g. by typing the address). The server blocks the data too.
+            <div className="mx-auto mt-16 max-w-sm text-center">
+              <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
+              <p className="mt-3 font-medium">Only the shop owner can see this page.</p>
+              <Link href="/dashboard" className={buttonVariants({ className: 'mt-4' })}>Go home</Link>
+            </div>
+          )}
         </main>
       </div>
 

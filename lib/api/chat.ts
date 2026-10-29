@@ -14,7 +14,7 @@ export const chatApi = {
     client.post<ParsedTransaction>('/ai/parse', { text, save: false, session_id: sessionId }),
 
   chat: (message: string, sessionId?: string) =>
-    client.post<ChatReply>('/ai/chat', { message, sessionId }),
+    client.post<ChatReply>('/ai/chat', { message, session_id: sessionId }),
 
   getSessions: () => client.get<ChatSession[]>('/ai/chat/sessions'),
 
