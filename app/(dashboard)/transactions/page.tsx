@@ -11,15 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
 import { useUser } from '@/hooks/useAuth';
-import { canDelete, canEdit } from '@/lib/permissions';
+import { hasRight } from '@/lib/permissions';
 
 const PAGE_SIZE = 20;
 
 export default function TransactionsPage() {
   const { data: user } = useUser();
-  // Only owners delete; viewers only look (the server enforces both).
-  const mayDelete = canDelete(user);
-  const mayEdit = canEdit(user);
+  // Buttons follow the person's rights (the server enforces the same).
+  const mayDelete = hasRight(user, 'delete_sales');
+  const mayEdit = hasRight(user, 'fix_own_sales');
+  const mayAdd = hasRight(user, 'record_sales');
   const { data: rawTransactions, isLoading } = useTransactions();
   const deleteMutation = useDeleteTransaction();
 
@@ -113,7 +114,7 @@ export default function TransactionsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div />
-        {mayEdit && (
+        {mayAdd && (
           <Button onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4" />
             Add Transaction

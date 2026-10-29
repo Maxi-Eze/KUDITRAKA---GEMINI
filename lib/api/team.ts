@@ -1,10 +1,11 @@
 import { client } from './client';
-import type { SalesSummary, StaffRole, TeamMember, TeamMemberDetail } from '../types';
+import type { SalesSummary, StaffRight, StaffRole, TeamMember, TeamMemberDetail } from '../types';
 
 export interface AddStaffData {
   name: string;
   phone: string;
   role: StaffRole;
+  permissions: StaffRight[];
 }
 
 /** The PIN is only ever returned here, once. */
@@ -19,5 +20,7 @@ export const teamApi = {
   detail: (id: string) => client.get<TeamMemberDetail>(`/team/${id}`),
   newPin: (id: string) => client.post<StaffWithPin>(`/team/${id}/pin`, {}),
   remove: (id: string) => client.delete(`/team/${id}`),
+  updateRights: (id: string, data: { role: StaffRole; permissions: StaffRight[] }) =>
+    client.patch<TeamMember>(`/team/${id}/rights`, data),
   me: () => client.get<{ today: SalesSummary } | null>('/team/me'),
 };

@@ -17,7 +17,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ROLE_LABEL } from '@/lib/permissions';
+import { ROLE_LABEL, staffPageLabel } from '@/lib/permissions';
 import { useUser, useLogout } from '@/hooks/useAuth';
 
 const routeLabels: Record<string, string> = {
@@ -72,11 +72,9 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
     }
   }, [menuOpen]);
 
-  // Sales attendants see plainer page names, matching their menu.
-  const staffLabels: Record<string, string> =
-    user?.staff?.role === 'attendant' ? { '/dashboard': 'Home', '/transactions': 'My sales', '/inventory': 'Stock' } : {};
+  // Staff see plainer page names, matching their menu.
   const label =
-    staffLabels['/' + pathname.split('/')[1]] ||
+    staffPageLabel(user, '/' + pathname.split('/')[1]) ||
     routeLabels[pathname] ||
     routeLabels['/' + pathname.split('/')[1]] ||
     'Dashboard';

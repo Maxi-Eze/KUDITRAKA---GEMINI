@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Home, MessageSquare, ArrowLeftRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/useAuth';
-import { canOpenPage, isAttendant } from '@/lib/permissions';
+import { canOpenPage, staffPageLabel } from '@/lib/permissions';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -18,7 +18,7 @@ export function MobileNav() {
   const { data: user } = useUser();
   const items = navItems
     .filter((item) => canOpenPage(user, item.href))
-    .map((item) => (isAttendant(user) && item.href === '/transactions' ? { ...item, label: 'My sales' } : item));
+    .map((item) => (item.href === '/transactions' && staffPageLabel(user, item.href) ? { ...item, label: staffPageLabel(user, item.href)! } : item));
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-sidebar border-t border-sidebar-border z-50 pb-[env(safe-area-inset-bottom)]">

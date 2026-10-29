@@ -38,9 +38,15 @@ interface InventoryDetailProps {
   item: InventoryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Staff: look only (no adjust, reconcile or edit). */
-  readOnly?: boolean;
-  /** Attendants can't open the adjustment history. */
+  /** Owner only: the quick +/- buttons. */
+  canQuickAdjust?: boolean;
+  /** Owner, or staff with "change stock counts": count again with a reason. */
+  canCount?: boolean;
+  /** Owner only: edit every field. */
+  canEditItem?: boolean;
+  /** Staff with "change selling prices": edit the selling price only. */
+  canEditPrice?: boolean;
+  /** The adjustment history (owner, or staff who can count stock). */
   showLogs?: boolean;
 }
 
@@ -76,7 +82,17 @@ function toEditValues(item: InventoryItem): InventoryItemFormInput {
   };
 }
 
-export function InventoryDetail({ item, open, onOpenChange, readOnly = false, showLogs = true }: InventoryDetailProps) {
+export function InventoryDetail({
+  item,
+  open,
+  onOpenChange,
+  canQuickAdjust = true,
+  canCount = true,
+  canEditItem = true,
+  canEditPrice = false,
+  showLogs = true,
+}: InventoryDetailProps) {
+  const [newPrice, setNewPrice] = useState('');
   const updateMutation = useUpdateItem();
   const adjustStock = useAdjustStock();
   const reconcileStock = useReconcileStock();
@@ -295,7 +311,7 @@ export function InventoryDetail({ item, open, onOpenChange, readOnly = false, sh
                 </div>
               )}
 
-              {!readOnly && (
+              {canQuickAdjust && (
               <>
               <Separator />
 
@@ -338,7 +354,11 @@ export function InventoryDetail({ item, open, onOpenChange, readOnly = false, sh
                   </Button>
                 </div>
               </div>
+              </>
+              )}
 
+              {canCount && (
+              <>
               <Separator />
 
               <div className="space-y-3">
@@ -411,10 +431,44 @@ export function InventoryDetail({ item, open, onOpenChange, readOnly = false, sh
                 </>
               )}
 
-              {!readOnly && (
+              {canEditItem && (
                 <Button variant="outline" className="w-full" onClick={() => setEditing(true)}>
                   Edit Item
                 </Button>
+              )}
+
+              {!canEditItem && canEditPrice && (
+                <>
+                  <Separator />
+                  <form
+                    className="space-y-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const price = Number(newPrice);
+                      if (!newPrice || Number.isNaN(price) || price < 0) return;
+                      updateMutation.mutate(
+                        { id: item.id, data: { selling_price: price } },
+                        { onSuccess: () => setNewPrice('') }
+                      );
+                    }}
+                  >
+                    <Label htmlFor="new-price" className="text-xs">New selling price</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="new-price"
+                        type="number"
+                        min="0"
+                        inputMode="numeric"
+                        placeholder={String(item.selling_price)}
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                      />
+                      <Button type="submit" size="sm" disabled={!newPrice || updateMutation.isPending}>
+                        Change price
+                      </Button>
+                    </div>
+                  </form>
+                </>
               )}
             </>
           )}

@@ -10,12 +10,12 @@ import { RecentTransactions } from '@/components/features/dashboard/RecentTransa
 import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
 import { StaffHome } from '@/components/features/team/StaffHome';
-import { isAttendant, isOwner } from '@/lib/permissions';
+import { isOwner, usesStaffHome } from '@/lib/permissions';
 
 export default function DashboardPage() {
   const { data: user } = useUser();
-  // Sales attendants get their own simple home; reports are for the owner (and viewers).
-  if (isAttendant(user)) return <StaffHome />;
+  // Staff without the reports right get their own simple home.
+  if (usesStaffHome(user)) return <StaffHome />;
   return <BusinessDashboard showGetStarted={isOwner(user)} />;
 }
 

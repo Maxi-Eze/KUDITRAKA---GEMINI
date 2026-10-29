@@ -8,7 +8,7 @@ import { InventoryList } from '@/components/features/inventory/InventoryList';
 import { InventoryDetail } from '@/components/features/inventory/InventoryDetail';
 import { NewInventorySheet } from '@/components/features/inventory/NewInventorySheet';
 import { useUser } from '@/hooks/useAuth';
-import { isAttendant, isViewer } from '@/lib/permissions';
+import { hasRight, isOwner } from '@/lib/permissions';
 import { DeleteInventoryDialog } from '@/components/features/inventory/DeleteInventoryDialog';
 import { useInventoryItems, useDeleteItem } from '@/hooks/useInventory';
 import { Plus } from 'lucide-react';
@@ -20,8 +20,8 @@ const PAGE_SIZE = 20;
 
 export default function InventoryPage() {
   const { data: user } = useUser();
-  // Attendants can add new stock items; editing, adjusting and deleting stay with the owner.
-  const staff = !!user?.staff;
+  // What this person can do with stock (the server enforces the same).
+  const owner = isOwner(user);
   const { data: rawItems, isLoading } = useInventoryItems();
   const deleteMutation = useDeleteItem();
 
@@ -103,7 +103,7 @@ export default function InventoryPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div />
-        {!isViewer(user) && (
+        {hasRight(user, 'add_stock_items') && (
           <Button onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4" />
             Add Item
@@ -135,8 +135,11 @@ export default function InventoryPage() {
         item={selectedItem}
         open={detailOpen}
         onOpenChange={setDetailOpen}
-        readOnly={staff}
-        showLogs={!isAttendant(user)}
+        canQuickAdjust={owner}
+        canCount={hasRight(user, 'change_stock')}
+        canEditItem={owner}
+        canEditPrice={hasRight(user, 'change_prices')}
+        showLogs={hasRight(user, 'change_stock')}
       />
 
       <DeleteInventoryDialog

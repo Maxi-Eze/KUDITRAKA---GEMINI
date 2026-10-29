@@ -17,26 +17,84 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useUser } from '@/hooks/useAuth';
-import { useAddStaff, useNewPin, useRemoveStaff, useTeam, useTeamMember } from '@/hooks/useTeam';
+import { useAddStaff, useNewPin, useRemoveStaff, useTeam, useTeamMember, useUpdateRights } from '@/hooks/useTeam';
 import { PHONE_ERROR, toNigerianInternational } from '@/lib/phone';
-import { ROLE_LABEL } from '@/lib/permissions';
+import { RIGHTS, ROLE_DEFAULTS, ROLE_LABEL } from '@/lib/permissions';
 import { cn, formatCurrency, getInitials } from '@/lib/utils';
-import type { ActivityEntry, StaffRole, TeamMember } from '@/lib/types';
+import type { ActivityEntry, StaffRight, StaffRole, TeamMember } from '@/lib/types';
 
-const ROLE_OPTIONS: { value: StaffRole; title: string; can: string; cannot: string }[] = [
-  {
-    value: 'attendant',
-    title: 'Sales attendant',
-    can: 'Can record sales and check stock.',
-    cannot: "Can't see profit or delete anything.",
-  },
-  {
-    value: 'viewer',
-    title: 'Viewer',
-    can: 'Can look at your books and reports. Good for your accountant.',
-    cannot: "Can't change anything.",
-  },
+const LEVELS: { value: StaffRole; title: string }[] = [
+  { value: 'attendant', title: 'Sales attendant' },
+  { value: 'manager', title: 'Manager' },
+  { value: 'viewer', title: 'Viewer' },
 ];
+
+/** Pick a level (it ticks the usual boxes), then tick or untick any right. */
+function RightsPicker({
+  who,
+  role,
+  rights,
+  onRoleChange,
+  onRightsChange,
+}: {
+  who: string;
+  role: StaffRole;
+  rights: StaffRight[];
+  onRoleChange: (role: StaffRole) => void;
+  onRightsChange: (rights: StaffRight[]) => void;
+}) {
+  const toggle = (key: StaffRight) =>
+    onRightsChange(rights.includes(key) ? rights.filter((r) => r !== key) : [...rights, key]);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="mb-2 text-sm font-medium">Start from</p>
+        <div className="flex flex-wrap gap-2">
+          {LEVELS.map((level) => (
+            <button
+              key={level.value}
+              type="button"
+              aria-pressed={role === level.value}
+              onClick={() => {
+                onRoleChange(level.value);
+                onRightsChange(ROLE_DEFAULTS[level.value]);
+              }}
+              className={cn(
+                'rounded-full border px-3 py-1 text-sm',
+                role === level.value ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+              )}
+            >
+              {level.title}
+            </button>
+          ))}
+        </div>
+      </div>
+      <fieldset>
+        <legend className="mb-1 text-sm font-medium">{`What ${who} can do`}</legend>
+        <div className="divide-y divide-border">
+          {RIGHTS.map((r) => (
+            <label key={r.key} className="flex cursor-pointer items-start gap-3 py-2">
+              <input
+                type="checkbox"
+                checked={rights.includes(r.key)}
+                onChange={() => toggle(r.key)}
+                className="mt-0.5 h-4 w-4 accent-[var(--primary)]"
+              />
+              <span>
+                <span className="block text-sm">{r.label}</span>
+                {r.hint && (
+                  <span className={cn('block text-xs', r.warn ? 'text-amber-500' : 'text-muted-foreground')}>{r.hint}</span>
+                )}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <p className="text-xs text-muted-foreground">You can change these any time from their page.</p>
+    </div>
+  );
+}
 
 /** "0803 456 7890" from "+2348034567890" */
 const localPhone = (phone: string) => {
@@ -73,6 +131,10 @@ function describe(entry: ActivityEntry): { text: string; warn?: boolean } {
       return { text: `Deleted ${d.item}, ${formatCurrency(d.amount)}`, warn: true };
     case 'staff.login':
       return { text: 'Logged in' };
+    case 'stock.counted':
+      return { text: `Counted ${d.item}: ${d.before} → ${d.after} (${d.reason})`, warn: true };
+    case 'stock.price_changed':
+      return { text: `Changed the price of ${d.item}: ${formatCurrency(d.before)} → ${formatCurrency(d.after)}`, warn: true };
     default:
       return { text: entry.action };
   }
@@ -135,7 +197,7 @@ export function TeamPanel() {
                 {ROLE_LABEL[m.role]} · {lastSeen(m.last_active_at)}
               </p>
             </div>
-            {m.role === 'attendant' && (
+            {m.permissions?.includes('record_sales') && (
               <div className="text-right">
                 <p className="text-sm font-medium">{formatCurrency(m.today?.total ?? 0)}</p>
                 <p className="text-xs text-muted-foreground">today</p>
@@ -181,12 +243,14 @@ function AddStaffDialog({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<StaffRole>('attendant');
+  const [rights, setRights] = useState<StaffRight[]>(ROLE_DEFAULTS.attendant);
   const [error, setError] = useState<string | null>(null);
 
   const reset = () => {
     setName('');
     setPhone('');
     setRole('attendant');
+    setRights(ROLE_DEFAULTS.attendant);
     setError(null);
   };
 
@@ -195,9 +259,10 @@ function AddStaffDialog({
     if (!name.trim()) return setError("Enter the staff member's name");
     const international = toNigerianInternational(phone);
     if (!international) return setError(PHONE_ERROR);
+    if (rights.length === 0) return setError('Tick at least one thing they can do');
     setError(null);
     addStaff.mutate(
-      { name: name.trim(), phone: international, role },
+      { name: name.trim(), phone: international, role, permissions: rights },
       {
         onSuccess: (res) => {
           reset();
@@ -236,32 +301,13 @@ function AddStaffDialog({
               onChange={(e) => setPhone(e.target.value)}
             />
           </div>
-          <fieldset className="space-y-2">
-            <legend className="mb-2 text-sm font-medium">What can they do?</legend>
-            {ROLE_OPTIONS.map((opt) => (
-              <label
-                key={opt.value}
-                className={cn(
-                  'flex cursor-pointer gap-3 rounded-lg border p-3',
-                  role === opt.value ? 'border-primary ring-1 ring-primary' : 'border-border'
-                )}
-              >
-                <input
-                  type="radio"
-                  name="staff-role"
-                  value={opt.value}
-                  checked={role === opt.value}
-                  onChange={() => setRole(opt.value)}
-                  className="mt-1 accent-[var(--primary)]"
-                />
-                <span>
-                  <span className="block text-sm font-medium">{opt.title}</span>
-                  <span className="block text-xs text-muted-foreground">{opt.can}</span>
-                  <span className="block text-xs text-muted-foreground">{opt.cannot}</span>
-                </span>
-              </label>
-            ))}
-          </fieldset>
+          <RightsPicker
+            who={name.trim().split(/\s+/)[0] || 'they'}
+            role={role}
+            rights={rights}
+            onRoleChange={setRole}
+            onRightsChange={setRights}
+          />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={addStaff.isPending} className="w-full sm:w-auto">
@@ -335,7 +381,10 @@ function MemberDialog({
   const { data: detail, isLoading } = useTeamMember(memberId);
   const newPin = useNewPin();
   const removeStaff = useRemoveStaff();
-  const [confirm, setConfirm] = useState<'pin' | 'remove' | null>(null);
+  const [confirm, setConfirm] = useState<'pin' | 'remove' | 'rights' | null>(null);
+  const updateRights = useUpdateRights();
+  const [editRole, setEditRole] = useState<StaffRole>('attendant');
+  const [editRights, setEditRights] = useState<StaffRight[]>([]);
 
   if (!memberId) return null;
   const name = detail?.name || member?.name || 'Staff';
@@ -370,6 +419,33 @@ function MemberDialog({
                 }
               >
                 Remove
+              </Button>
+            </DialogFooter>
+          </>
+        ) : confirm === 'rights' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>{`What ${name} can do`}</DialogTitle>
+              <DialogDescription>Changes work straight away. {name} doesn&apos;t need to log in again.</DialogDescription>
+            </DialogHeader>
+            <RightsPicker who={name} role={editRole} rights={editRights} onRoleChange={setEditRole} onRightsChange={setEditRights} />
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setConfirm(null)}>Cancel</Button>
+              <Button
+                disabled={updateRights.isPending || editRights.length === 0}
+                onClick={() =>
+                  updateRights.mutate(
+                    { id: memberId, role: editRole, permissions: editRights },
+                    {
+                      onSuccess: () => {
+                        toast.success('Saved');
+                        setConfirm(null);
+                      },
+                    }
+                  )
+                }
+              >
+                Save
               </Button>
             </DialogFooter>
           </>
@@ -409,7 +485,28 @@ function MemberDialog({
               <Skeleton className="h-32 w-full" />
             ) : (
               <div className="space-y-4">
-                {detail.role === 'attendant' && (
+                <div className="rounded-lg border p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium">{`What ${name} can do`}</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditRole(detail.role);
+                        setEditRights(detail.permissions || []);
+                        setConfirm('rights');
+                      }}
+                    >
+                      Change
+                    </Button>
+                  </div>
+                  <ul className="mt-1 text-xs text-muted-foreground">
+                    {RIGHTS.filter((r) => detail.permissions?.includes(r.key)).map((r) => (
+                      <li key={r.key}>{`✓ ${r.label}`}</li>
+                    ))}
+                  </ul>
+                </div>
+                {detail.permissions?.includes('record_sales') && (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg bg-muted p-3">
                       <p className="text-xs text-muted-foreground">Sales today</p>

@@ -7,7 +7,7 @@ import { authApi } from '@/lib/api';
 import type { ProfileUpdateData } from '@/lib/api/auth';
 
 import { queryKeys } from './keys';
-import type { StaffRole, User } from '@/lib/types';
+import type { StaffRight, StaffRole, User } from '@/lib/types';
 
 function mapUser(raw: Record<string, unknown>): User {
   return {
@@ -29,6 +29,7 @@ function mapUser(raw: Record<string, unknown>): User {
           memberId: (raw.staff as Record<string, string>).member_id,
           name: (raw.staff as Record<string, string>).name,
           role: (raw.staff as Record<string, string>).role as StaffRole,
+          rights: ((raw.staff as Record<string, unknown>).rights as StaffRight[]) || [],
         }
       : null,
   };

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { teamApi, type AddStaffData } from '@/lib/api/team';
 import { queryKeys } from './keys';
+import type { StaffRight, StaffRole } from '@/lib/types';
 
 /** Owner: the team with today's sales. */
 export function useTeam(enabled = true) {
@@ -47,6 +48,15 @@ export function useNewPin() {
     mutationFn: (id: string) => teamApi.newPin(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.team.all }),
     onError: (error: Error) => toast.error(error.message || 'Could not make a new PIN'),
+  });
+}
+
+export function useUpdateRights() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: string; role: StaffRole; permissions: StaffRight[] }) => teamApi.updateRights(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.team.all }),
+    onError: (error: Error) => toast.error(error.message || 'Could not save the changes'),
   });
 }
 

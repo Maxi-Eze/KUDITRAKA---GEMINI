@@ -9,6 +9,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { useUser } from '@/hooks/useAuth';
 import { useMySummary } from '@/hooks/useTeam';
 import { cn, formatCurrency } from '@/lib/utils';
+import { hasRight } from '@/lib/permissions';
 
 /** Home screen for a sales attendant: only their own sales today, and the things they can do. */
 export function StaffHome() {
@@ -40,10 +41,12 @@ export function StaffHome() {
         </CardContent>
       </Card>
 
-      <Link href="/chat" className={cn(buttonVariants({ size: 'lg' }), 'w-full')}>
-        <MessageSquare className="h-4 w-4" />
-        Record a sale
-      </Link>
+      {hasRight(user, 'record_sales') && (
+        <Link href="/chat" className={cn(buttonVariants({ size: 'lg' }), 'w-full')}>
+          <MessageSquare className="h-4 w-4" />
+          Record a sale
+        </Link>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <Link href="/inventory" className={cn(buttonVariants({ variant: 'outline' }), 'w-full')}>
           <Package className="h-4 w-4" />

@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useUser } from '@/hooks/useAuth';
-import { canOpenPage, isAttendant } from '@/lib/permissions';
+import { canOpenPage, staffPageLabel, usesStaffHome } from '@/lib/permissions';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,15 +38,10 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
   const pathname = usePathname();
   const { data: user } = useUser();
-  // Staff only see the pages they can use; attendants get plainer names.
-  const attendant = isAttendant(user);
+  // Staff only see the pages they can use, with plainer names; the staff home links to their chats.
   const items = navItems
-    .filter((item) => canOpenPage(user, item.href) && !(attendant && item.href === '/chat-history'))
-    .map((item) =>
-      attendant
-        ? { ...item, label: ({ '/dashboard': 'Home', '/transactions': 'My sales', '/inventory': 'Stock' } as Record<string, string>)[item.href] || item.label }
-        : item
-    );
+    .filter((item) => canOpenPage(user, item.href) && !(usesStaffHome(user) && item.href === '/chat-history'))
+    .map((item) => ({ ...item, label: staffPageLabel(user, item.href) || item.label }));
 
   return (
     <aside

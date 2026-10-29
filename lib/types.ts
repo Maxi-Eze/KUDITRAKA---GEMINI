@@ -82,12 +82,25 @@ export interface User {
   staff?: StaffInfo | null;
 }
 
-export type StaffRole = 'attendant' | 'viewer';
+export type StaffRole = 'attendant' | 'manager' | 'viewer';
+
+/** What a staff member is allowed to do (the owner ticks these). */
+export type StaffRight =
+  | 'record_sales'
+  | 'fix_own_sales'
+  | 'add_stock_items'
+  | 'change_stock'
+  | 'change_prices'
+  | 'see_cost_prices'
+  | 'see_shop_sales'
+  | 'see_reports'
+  | 'delete_sales';
 
 export interface StaffInfo {
   memberId: string;
   name: string;
   role: StaffRole;
+  rights: StaffRight[];
 }
 
 export interface SalesSummary {
@@ -100,6 +113,7 @@ export interface TeamMember {
   name: string;
   phone: string;
   role: StaffRole;
+  permissions: StaffRight[];
   status: 'active' | 'removed';
   last_active_at: string | null;
   created_at: string;
