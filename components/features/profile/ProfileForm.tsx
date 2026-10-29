@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
 import { profileUpdateSchema, type ProfileUpdateFormData } from '@/lib/validations/auth';
+import { toNigerianInternational } from '@/lib/phone';
 import { getFieldErrors } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
 
@@ -39,18 +40,20 @@ export function ProfileForm() {
   if (!user) return null;
 
   const onSubmit = (data: ProfileUpdateFormData) => {
+    // Always send +234… whatever format was typed (0803…, +234 803…).
+    const phone = data.phone ? toNigerianInternational(data.phone) ?? data.phone : data.phone;
     updateMutation.mutate(
       {
         name: data.name,
         business_name: data.businessName,
-        phone: data.phone,
+        phone,
       },
       {
         onSuccess: () => {
           reset({
             name: data.name,
             businessName: data.businessName,
-            phone: data.phone,
+            phone,
           });
         },
         onError: (error) => {
@@ -102,7 +105,7 @@ export function ProfileForm() {
               <FieldLabel htmlFor="profile-phone">Phone number</FieldLabel>
               <Input
                 id="profile-phone"
-                placeholder="+2348012345678"
+                placeholder="0803 456 7890"
                 aria-invalid={!!errors.phone}
                 className={cn('h-11 sm:h-10', errors.phone && 'border-destructive')}
                 {...register('phone')}

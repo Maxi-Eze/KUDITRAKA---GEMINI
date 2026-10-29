@@ -11,4 +11,9 @@ export const inventoryApi = {
   adjustStock: (id: string, data: { quantity: number }) =>
     client.patch<InventoryItem>(`/inventory/${id}/stock`, data),
   getLogs: () => client.get<ReconciliationLog[]>('/inventory/logs'),
+  /** Start tracking an item that was just sold or bought ("Add to stock"). */
+  track: (data: { name: string; stock: number; selling_price?: number | null }) =>
+    client.post<InventoryItem>('/inventory/track', data),
+  /** "Not a stock item": stop offering to track it. */
+  ignore: (name: string) => client.post<{ name: string }>('/inventory/ignore', { name }),
 };

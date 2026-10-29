@@ -12,11 +12,18 @@ export function useTransactions() {
   });
 }
 
+// Saving, editing or deleting a transaction can change stock levels on the server,
+// so refresh inventory as well as the transaction list.
+const refreshAfterChange = (qc: ReturnType<typeof useQueryClient>) => {
+  qc.invalidateQueries({ queryKey: queryKeys.transactions.all });
+  qc.invalidateQueries({ queryKey: queryKeys.inventory.all });
+};
+
 export function useCreateTransaction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: transactionsApi.create,
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    onSuccess: () => refreshAfterChange(qc),
     onError: (error: Error) => toast.error(error.message || 'Failed to create transaction'),
   });
 }
@@ -26,7 +33,7 @@ export function useUpdateTransaction() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Parameters<typeof transactionsApi.update>[1] }) =>
       transactionsApi.update(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    onSuccess: () => refreshAfterChange(qc),
     onError: (error: Error) => toast.error(error.message || 'Failed to update transaction'),
   });
 }
@@ -35,7 +42,7 @@ export function useDeleteTransaction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: transactionsApi.remove,
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    onSuccess: () => refreshAfterChange(qc),
     onError: (error: Error) => toast.error(error.message || 'Failed to delete transaction'),
   });
 }

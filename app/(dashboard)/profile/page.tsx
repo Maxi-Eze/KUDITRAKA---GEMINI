@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ProfileHeader } from '@/components/features/profile/ProfileHeader';
@@ -16,6 +16,12 @@ export default function ProfilePage() {
   const { data: user, isLoading } = useUser();
   const [tab, setTab] = useState('profile');
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+
+  // Allow links like /profile?tab=whatsapp (e.g. from the dashboard's "Link WhatsApp" step).
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    if (requested === 'profile' || requested === 'business' || requested === 'whatsapp') setTab(requested);
+  }, []);
 
   if (isLoading) {
     return (

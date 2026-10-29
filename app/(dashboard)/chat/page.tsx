@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   useChatSessions,
   useChatHistory,
@@ -12,10 +14,20 @@ import {
 import { useCreateTransaction } from '@/hooks/useTransactions';
 import { SessionList } from '@/components/features/chat/SessionList';
 import { ChatWindow } from '@/components/features/chat/ChatWindow';
+import type { CardState } from '@/components/features/chat/ChatMessage';
 import { Button } from '@/components/ui/button';
 import { Menu, Plus } from 'lucide-react';
-import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
-import { customersApi } from '@/lib/api';
+import type { CardStatus, ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
+import { chatApi, customersApi } from '@/lib/api';
+
+// Only messages the server has stored (real ids, not temp-…) can remember their card status.
+const SAVED_MESSAGE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Tell the server what happened to a card. Best effort: if it fails, the card just asks again after a refresh. */
+function rememberCardStatus(messageId: string, status: CardStatus) {
+  if (!SAVED_MESSAGE_ID.test(messageId)) return;
+  chatApi.setCardStatus(messageId, status).catch(() => {});
+}
 
 const TRANSACTION_KEYWORDS = ['sold', 'bought', 'spent', 'earned', 'paid', 'received', 'purchased', 'cost', 'expense', 'income'];
 const QUESTION_KEYWORDS = ['how much', 'what', 'when', 'where', 'why', 'how many', 'total', 'balance', 'summary'];
@@ -29,9 +41,31 @@ function detectIntent(message: string): boolean {
 }
 
 export default function ChatPage() {
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  // useSearchParams needs a Suspense boundary for the build to prerender this page.
+  return (
+    <Suspense fallback={null}>
+      <ChatPageContent />
+    </Suspense>
+  );
+}
+
+function ChatPageContent() {
+  const searchParams = useSearchParams();
+  const sessionFromUrl = searchParams.get('session');
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(sessionFromUrl);
   const [localMessages, setLocalMessages] = useState<ChatHistoryMessage[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cardStates, setCardStates] = useState<Record<string, CardState>>({});
+  // Mirrors cardStates so a fast double click is caught before React re-renders.
+  const cardStatesRef = useRef<Record<string, CardState>>({});
+
+  // Chat History links here as /chat?session=<id>; open that session.
+  useEffect(() => {
+    if (sessionFromUrl) {
+      setActiveSessionId(sessionFromUrl);
+      setLocalMessages([]);
+    }
+  }, [sessionFromUrl]);
 
   const { data: sessions, isLoading: sessionsLoading } = useChatSessions();
   const { data: historyMessages, isLoading: historyLoading } = useChatHistory(activeSessionId || '');
@@ -54,8 +88,8 @@ export default function ChatPage() {
             const json = JSON.parse(m.content);
             if (json && typeof json === 'object' && !Array.isArray(json) && 'type' in json) {
               parsed = json as ParsedTransaction;
-              const amount = typeof json.amount === 'number' && json.amount > 0 ? ` (₦${json.amount.toLocaleString()})` : '';
-              content = `Transaction recorded: ${json.type} — ${json.item || 'Item'}${amount}`;
+              // Not saved yet: the card asks "Is this right?" itself, so no extra text here.
+              content = '';
             } else if (Array.isArray(json)) {
               content = '';
             }
@@ -69,6 +103,16 @@ export default function ChatPage() {
     : [];
 
   const allMessages = historyList.length > 0 ? historyList : localMessages;
+
+  // Cards answered in an earlier visit come back from the server as saved/discarded;
+  // anything answered in this visit (incl. stock results) takes priority.
+  const historyCardStates: Record<string, CardState> = {};
+  for (const m of historyList) {
+    if (!m.id || !m.parsed) continue;
+    if (m.card_status === 'saved') historyCardStates[m.id] = { status: 'confirmed', parsed: m.parsed };
+    else if (m.card_status === 'discarded') historyCardStates[m.id] = { status: 'discarded' };
+  }
+  const shownCardStates = { ...historyCardStates, ...cardStates };
 
   const handleNewSession = useCallback(() => {
     const title = `Chat ${new Date().toLocaleDateString('en-NG', { month: 'short', day: 'numeric' })}`;
@@ -133,7 +177,7 @@ export default function ChatPage() {
         { message, sessionId, isQuery },
         {
           onSuccess: (data) => {
-            let content = 'Transaction parsed successfully!';
+            let content = 'Is this right?';
             let parsed: ParsedTransaction | undefined;
 
             if (isQuery) {
@@ -142,7 +186,7 @@ export default function ChatPage() {
             } else {
               parsed = data as ParsedTransaction;
               if (parsed && parsed.type) {
-                content = `Transaction parsed: ${parsed.type} - ${parsed.item}`;
+                content = '';
               }
             }
 
@@ -172,8 +216,35 @@ export default function ChatPage() {
     [activeSessionId, createSession, sendMessage]
   );
 
+  const setCardState = useCallback((messageId: string, state: CardState | null) => {
+    setCardStates((prev) => {
+      const next = { ...prev };
+      if (state) next[messageId] = state;
+      else delete next[messageId];
+      return next;
+    });
+  }, []);
+
+  const handleDiscardParsed = useCallback(
+    (messageId?: string) => {
+      if (!messageId) return;
+      setCardState(messageId, { status: 'discarded' });
+      rememberCardStatus(messageId, 'discarded');
+    },
+    [setCardState]
+  );
+
   const handleConfirmParsed = useCallback(
-    async (parsed: ParsedTransaction) => {
+    async (parsed: ParsedTransaction, messageId?: string) => {
+      // Ignore repeat clicks while saving or once saved, so one card can never
+      // create more than one transaction.
+      if (messageId) {
+        const current = cardStatesRef.current[messageId]?.status;
+        if (current === 'confirming' || current === 'confirmed') return;
+        cardStatesRef.current[messageId] = { status: 'confirming', parsed };
+        setCardState(messageId, { status: 'confirming', parsed });
+      }
+
       let customerId: string | null = null;
       if (parsed.customer) {
         try {
@@ -183,22 +254,46 @@ export default function ChatPage() {
           // proceed without customer ID on error
         }
       }
-      createTransaction.mutate({
-        type: parsed.type,
-        amount: parsed.amount,
-        item: parsed.item,
-        customer_id: customerId,
-        payment_method: parsed.payment_method,
-        date: new Date().toISOString().split('T')[0],
-        raw_input: '',
-        quantity: parsed.quantity,
-      });
+      createTransaction.mutate(
+        {
+          type: parsed.type,
+          amount: parsed.amount,
+          item: parsed.item,
+          customer_id: customerId,
+          payment_method: parsed.payment_method,
+          date: new Date().toISOString().split('T')[0],
+          raw_input: '',
+          quantity: parsed.quantity,
+        },
+        {
+          onSuccess: (saved) => {
+            if (messageId) {
+              // Keep what the save did to stock, so the card can say "18 Rice left" or offer to track it.
+              const state: CardState = { status: 'confirmed', parsed, stock: saved?.stock };
+              cardStatesRef.current[messageId] = state;
+              setCardState(messageId, state);
+              rememberCardStatus(messageId, 'saved');
+            }
+            toast.success('Transaction saved');
+          },
+          onError: () => {
+            // Let the user try again.
+            if (messageId) {
+              delete cardStatesRef.current[messageId];
+              setCardState(messageId, null);
+            }
+          },
+        }
+      );
     },
-    [createTransaction]
+    [createTransaction, setCardState]
   );
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    // Fill exactly the space between the top bar (3.5rem) and the page padding: 1rem top +
+    // 5rem bottom on phones (room for the bottom menu), 1.5rem + 1.5rem on desktop. Using
+    // the old 100vh-4rem made the chat taller than the screen, hiding the message box on phones.
+    <div className="flex h-[calc(100dvh-9.5rem)] lg:h-[calc(100dvh-6.5rem)]">
       <div className="hidden lg:block w-64 border-r border-border bg-background">
         <SessionList
           sessions={sessionList}
@@ -258,6 +353,8 @@ export default function ChatPage() {
             isLoading={historyLoading && !!activeSessionId}
             onSend={handleSend}
             onConfirmParsed={handleConfirmParsed}
+            onDiscardParsed={handleDiscardParsed}
+            cardStates={shownCardStates}
             isSending={sendMessage.isPending}
           />
         </div>

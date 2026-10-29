@@ -4,23 +4,37 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ParsedCard } from './ParsedCard';
 import { ParsedCardEdit } from './ParsedCardEdit';
-import type { ChatHistoryMessage, ParsedTransaction } from '@/lib/types';
+import type { ChatHistoryMessage, ParsedTransaction, StockResult } from '@/lib/types';
 import { Bot, User } from 'lucide-react';
+
+export interface CardState {
+  status: 'confirming' | 'confirmed' | 'discarded';
+  parsed?: ParsedTransaction;
+  /** What saving this card did to stock (from the server). */
+  stock?: StockResult;
+}
 
 interface ChatMessageProps {
   message: ChatHistoryMessage;
-  onConfirmParsed?: (parsed: ParsedTransaction) => void;
-  onDiscardParsed?: () => void;
+  cardState?: CardState;
+  onConfirmParsed?: (parsed: ParsedTransaction, messageId?: string) => void;
+  onDiscardParsed?: (messageId?: string) => void;
 }
 
-export function ChatMessage({ message, onConfirmParsed, onDiscardParsed }: ChatMessageProps) {
+export function ChatMessage({ message, cardState, onConfirmParsed, onDiscardParsed }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const isUser = message.role === 'user';
   const timestamp = message.created_at;
+  const isConfirming = cardState?.status === 'confirming';
+  const isConfirmed = cardState?.status === 'confirmed';
+  const isDiscarded = cardState?.status === 'discarded';
+  // After a save, show the values that were actually saved (they may differ from
+  // the original parse if the user edited them).
+  const shownParsed = cardState?.parsed ?? message.parsed;
 
   const handleSaveEdit = (updated: ParsedTransaction) => {
     setIsEditing(false);
-    onConfirmParsed?.(updated);
+    onConfirmParsed?.(updated, message.id);
   };
 
   return (
@@ -38,29 +52,34 @@ export function ChatMessage({ message, onConfirmParsed, onDiscardParsed }: ChatM
         'max-w-[80%] space-y-2',
         isUser ? 'items-end' : 'items-start'
       )}>
-        <div className={cn(
-          'rounded-2xl px-4 py-2',
-          isUser
-            ? 'bg-primary text-primary-foreground rounded-br-md'
-            : 'bg-muted rounded-bl-md'
-        )}>
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-        </div>
+        {message.content && (
+          <div className={cn(
+            'rounded-2xl px-4 py-2',
+            isUser
+              ? 'bg-primary text-primary-foreground rounded-br-md'
+              : 'bg-muted rounded-bl-md'
+          )}>
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          </div>
+        )}
 
-        {message.parsed && !isUser && (
+        {shownParsed && !isUser && !isDiscarded && (
           <div className="w-full max-w-sm">
-            {isEditing ? (
+            {isEditing && !isConfirmed ? (
               <ParsedCardEdit
-                parsed={message.parsed}
+                parsed={shownParsed}
                 onSave={handleSaveEdit}
                 onCancel={() => setIsEditing(false)}
               />
             ) : (
               <ParsedCard
-                parsed={message.parsed}
-                onConfirm={() => onConfirmParsed?.(message.parsed!)}
+                parsed={shownParsed}
+                isConfirming={isConfirming}
+                isConfirmed={isConfirmed}
+                stock={cardState?.stock}
+                onConfirm={() => onConfirmParsed?.(shownParsed, message.id)}
                 onEdit={() => setIsEditing(true)}
-                onDiscard={() => onDiscardParsed?.()}
+                onDiscard={() => onDiscardParsed?.(message.id)}
               />
             )}
           </div>
