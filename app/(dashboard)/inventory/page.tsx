@@ -7,6 +7,8 @@ import { InventoryFilters } from '@/components/features/inventory/InventoryFilte
 import { InventoryList } from '@/components/features/inventory/InventoryList';
 import { InventoryDetail } from '@/components/features/inventory/InventoryDetail';
 import { NewInventorySheet } from '@/components/features/inventory/NewInventorySheet';
+import { useUser } from '@/hooks/useAuth';
+import { isAttendant, isViewer } from '@/lib/permissions';
 import { DeleteInventoryDialog } from '@/components/features/inventory/DeleteInventoryDialog';
 import { useInventoryItems, useDeleteItem } from '@/hooks/useInventory';
 import { Plus } from 'lucide-react';
@@ -17,6 +19,9 @@ type SortField = 'name' | 'stock' | 'selling_price' | 'category';
 const PAGE_SIZE = 20;
 
 export default function InventoryPage() {
+  const { data: user } = useUser();
+  // Attendants can add new stock items; editing, adjusting and deleting stay with the owner.
+  const staff = !!user?.staff;
   const { data: rawItems, isLoading } = useInventoryItems();
   const deleteMutation = useDeleteItem();
 
@@ -98,10 +103,12 @@ export default function InventoryPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div />
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Add Item
-        </Button>
+        {!isViewer(user) && (
+          <Button onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Button>
+        )}
       </div>
 
       <InventoryFilters
@@ -128,6 +135,8 @@ export default function InventoryPage() {
         item={selectedItem}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+        readOnly={staff}
+        showLogs={!isAttendant(user)}
       />
 
       <DeleteInventoryDialog

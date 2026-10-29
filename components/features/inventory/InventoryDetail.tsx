@@ -38,6 +38,10 @@ interface InventoryDetailProps {
   item: InventoryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Staff: look only (no adjust, reconcile or edit). */
+  readOnly?: boolean;
+  /** Attendants can't open the adjustment history. */
+  showLogs?: boolean;
 }
 
 const PRESETS = [-10, -5, -1, 1, 5, 10];
@@ -72,11 +76,11 @@ function toEditValues(item: InventoryItem): InventoryItemFormInput {
   };
 }
 
-export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailProps) {
+export function InventoryDetail({ item, open, onOpenChange, readOnly = false, showLogs = true }: InventoryDetailProps) {
   const updateMutation = useUpdateItem();
   const adjustStock = useAdjustStock();
   const reconcileStock = useReconcileStock();
-  const { data: logsData } = useReconciliationLogs();
+  const { data: logsData } = useReconciliationLogs(showLogs);
 
   const [editing, setEditing] = useState(false);
 
@@ -264,10 +268,12 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                   <p className="text-xs text-muted-foreground">Min Stock</p>
                   <p className="text-lg font-medium">{item.min_stock}</p>
                 </div>
-                <div className="rounded-lg border p-3">
-                  <p className="text-xs text-muted-foreground">Cost Price</p>
-                  <p className="text-lg font-medium">{formatCurrency(item.cost_price)}</p>
-                </div>
+                {item.cost_price !== undefined && (
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Cost Price</p>
+                    <p className="text-lg font-medium">{formatCurrency(item.cost_price)}</p>
+                  </div>
+                )}
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">Selling Price</p>
                   <p className="text-lg font-medium">{formatCurrency(item.selling_price)}</p>
@@ -289,6 +295,8 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                 </div>
               )}
 
+              {!readOnly && (
+              <>
               <Separator />
 
               <div className="space-y-3">
@@ -373,6 +381,9 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                 </Button>
               </div>
 
+              </>
+              )}
+
               {itemLogs.length > 0 && (
                 <>
                   <Separator />
@@ -400,9 +411,11 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                 </>
               )}
 
-              <Button variant="outline" className="w-full" onClick={() => setEditing(true)}>
-                Edit Item
-              </Button>
+              {!readOnly && (
+                <Button variant="outline" className="w-full" onClick={() => setEditing(true)}>
+                  Edit Item
+                </Button>
+              )}
             </>
           )}
         </div>

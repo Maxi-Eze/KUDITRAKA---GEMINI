@@ -7,7 +7,7 @@ import { authApi } from '@/lib/api';
 import type { ProfileUpdateData } from '@/lib/api/auth';
 
 import { queryKeys } from './keys';
-import type { User } from '@/lib/types';
+import type { StaffRole, User } from '@/lib/types';
 
 function mapUser(raw: Record<string, unknown>): User {
   return {
@@ -24,6 +24,13 @@ function mapUser(raw: Record<string, unknown>): User {
     businessType: raw.business_type as string,
     businessSize: raw.business_size as string,
     salesChannel: raw.sales_channel as string,
+    staff: raw.staff
+      ? {
+          memberId: (raw.staff as Record<string, string>).member_id,
+          name: (raw.staff as Record<string, string>).name,
+          role: (raw.staff as Record<string, string>).role as StaffRole,
+        }
+      : null,
   };
 }
 
@@ -55,6 +62,28 @@ export function useLogin() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Login failed');
+    },
+  });
+}
+
+/** Staff log in with the phone number and PIN the owner gave them. */
+export function useStaffLogin() {
+  const qc = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.staffLogin,
+    onSuccess: async (res) => {
+      localStorage.setItem('ai-bk-token', res.token);
+      // Load the staff profile (business + role) before opening the app.
+      qc.removeQueries({ queryKey: queryKeys.auth.user() });
+      const raw = (await authApi.getProfile()) as unknown as Record<string, unknown>;
+      qc.setQueryData(queryKeys.auth.user(), mapUser(raw));
+      toast.success(`Welcome, ${res.staff.name}`);
+      router.replace('/dashboard');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Could not log in');
     },
   });
 }

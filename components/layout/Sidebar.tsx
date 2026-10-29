@@ -15,6 +15,8 @@ import {
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { useUser } from '@/hooks/useAuth';
+import { canOpenPage, isAttendant } from '@/lib/permissions';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -35,6 +37,16 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
   const pathname = usePathname();
+  const { data: user } = useUser();
+  // Staff only see the pages they can use; attendants get plainer names.
+  const attendant = isAttendant(user);
+  const items = navItems
+    .filter((item) => canOpenPage(user, item.href) && !(attendant && item.href === '/chat-history'))
+    .map((item) =>
+      attendant
+        ? { ...item, label: ({ '/dashboard': 'Home', '/transactions': 'My sales', '/inventory': 'Stock' } as Record<string, string>)[item.href] || item.label }
+        : item
+    );
 
   return (
     <aside
@@ -61,7 +73,7 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href !== '/' && pathname.startsWith(item.href));

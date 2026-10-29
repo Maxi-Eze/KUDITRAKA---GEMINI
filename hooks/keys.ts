@@ -28,6 +28,12 @@ export const queryKeys = {
     list: () => [...queryKeys.inventory.all, 'list'] as const,
     logs: () => [...queryKeys.inventory.all, 'logs'] as const,
   },
+  team: {
+    all: ['team'] as const,
+    list: () => [...queryKeys.team.all, 'list'] as const,
+    detail: (id: string) => [...queryKeys.team.all, 'detail', id] as const,
+    me: () => [...queryKeys.team.all, 'me'] as const,
+  },
   whatsapp: {
     all: ['whatsapp'] as const,
     status: () => [...queryKeys.whatsapp.all, 'status'] as const,

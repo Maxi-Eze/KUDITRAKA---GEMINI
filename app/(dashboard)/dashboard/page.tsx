@@ -2,14 +2,24 @@
 
 import { useTransactions } from '@/hooks/useTransactions';
 import { useSummary, useAnalytics } from '@/hooks/useReports';
+import { useUser } from '@/hooks/useAuth';
 import { KpiCards } from '@/components/features/dashboard/KpiCards';
 import { RevenueChart } from '@/components/features/dashboard/RevenueChart';
 import { ExpenseChart } from '@/components/features/dashboard/ExpenseChart';
 import { RecentTransactions } from '@/components/features/dashboard/RecentTransactions';
 import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
+import { StaffHome } from '@/components/features/team/StaffHome';
+import { isAttendant, isOwner } from '@/lib/permissions';
 
 export default function DashboardPage() {
+  const { data: user } = useUser();
+  // Sales attendants get their own simple home; reports are for the owner (and viewers).
+  if (isAttendant(user)) return <StaffHome />;
+  return <BusinessDashboard showGetStarted={isOwner(user)} />;
+}
+
+function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
   const { data: summary, isLoading: summaryLoading } = useSummary('daily');
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
   const { data: transactions, isLoading: txLoading } = useTransactions();
@@ -20,7 +30,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {isNewUser && <GetStarted />}
+      {showGetStarted && isNewUser && <GetStarted />}
       <KpiCards
         summary={summary}
         analytics={analytics}
