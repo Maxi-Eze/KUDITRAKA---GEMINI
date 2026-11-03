@@ -22,7 +22,7 @@ interface LoginFormProps {
 
 type LoginMode = 'owner' | 'staff';
 
-/** Staff log in with the phone number and 6-digit PIN the shop owner gave them. */
+/** Staff log in with the phone number and 6-digit PIN their employer gave them. */
 function StaffLoginFields() {
   const staffLogin = useStaffLogin();
   const [phone, setPhone] = useState('');
@@ -87,7 +87,7 @@ function StaffLoginFields() {
             'Log in'
           )}
         </Button>
-        <p className="text-sm text-muted-foreground text-center">Forgot your PIN? Ask the shop owner for a new one.</p>
+        <p className="text-sm text-muted-foreground text-center">Forgot your PIN? Ask your employer for a new one.</p>
       </CardFooter>
     </form>
   );
@@ -117,7 +117,7 @@ export function LoginForm({ className }: LoginFormProps) {
         </div>
         <h2 className="text-2xl font-bold text-foreground">{mode === 'owner' ? 'Welcome back' : 'Staff login'}</h2>
         <p className="text-muted-foreground">
-          {mode === 'owner' ? 'Sign in to your account' : 'Use the phone number and PIN from the shop owner'}
+          {mode === 'owner' ? 'Sign in to your account' : 'Use the phone number and PIN your employer gave you'}
         </p>
         <div role="tablist" aria-label="Who is logging in" className="mt-3 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
           {(['owner', 'staff'] as const).map((m) => (
