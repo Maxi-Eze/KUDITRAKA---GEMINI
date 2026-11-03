@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { DailySummaryCard } from '@/components/features/reports/DailySummaryCard';
 import { MonthlyChart } from '@/components/features/reports/MonthlyChart';
 import { ReportOverview } from '@/components/features/reports/ReportOverview';
+import { MonthlyPdfCard } from '@/components/features/reports/MonthlyPdfCard';
 import { useSummary, useAnalytics } from '@/hooks/useReports';
 import type { ReportPeriod } from '@/lib/api/reports';
 
@@ -35,6 +36,7 @@ export default function ReportsPage() {
           analytics={analytics}
           isLoading={analyticsLoading}
         />
+        <MonthlyPdfCard />
       </div>
     </div>
   );
