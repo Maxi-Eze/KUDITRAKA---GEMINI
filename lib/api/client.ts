@@ -88,4 +88,11 @@ export const client = {
   put: <T>(url: string, data: unknown) => instance.put<T>(url, data).then((r) => r.data),
   patch: <T>(url: string, data: unknown) => instance.patch<T>(url, data).then((r) => r.data),
   delete: <T>(url: string) => instance.delete<T>(url).then((r) => r.data),
+  /** A file download (e.g. a PDF), with the file name the server suggests. */
+  getFile: (url: string) =>
+    instance.get<Blob>(url, { responseType: 'blob' }).then((r) => {
+      const disposition = String(r.headers['content-disposition'] || '');
+      const filename = /filename="?([^";]+)"?/i.exec(disposition)?.[1];
+      return { blob: r.data, filename };
+    }),
 };
