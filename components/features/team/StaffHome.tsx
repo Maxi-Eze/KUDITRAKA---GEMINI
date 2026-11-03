@@ -10,6 +10,7 @@ import { useUser } from '@/hooks/useAuth';
 import { useMySummary } from '@/hooks/useTeam';
 import { cn, formatCurrency } from '@/lib/utils';
 import { hasRight } from '@/lib/permissions';
+import { STAFF_COPY } from '@/lib/copy';
 
 /** Home screen for a sales attendant: only their own sales today, and the things they can do. */
 export function StaffHome() {
@@ -60,7 +61,7 @@ export function StaffHome() {
 
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
         <Lock className="h-4 w-4 shrink-0" />
-        Only the shop owner can see profit and reports.
+        {STAFF_COPY.noReports}
       </p>
     </div>
   );
