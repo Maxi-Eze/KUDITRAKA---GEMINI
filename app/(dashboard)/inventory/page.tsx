@@ -10,6 +10,7 @@ import { NewInventorySheet } from '@/components/features/inventory/NewInventoryS
 import { AddStockSheet } from '@/components/features/inventory/add-stock/AddStockSheet';
 import { useUser } from '@/hooks/useAuth';
 import { hasRight, isOwner } from '@/lib/permissions';
+import { DuplicateItemsCard } from '@/components/features/inventory/DuplicateItemsCard';
 import { DeleteInventoryDialog } from '@/components/features/inventory/DeleteInventoryDialog';
 import { useInventoryItems, useDeleteItem } from '@/hooks/useInventory';
 import { Plus } from 'lucide-react';
@@ -112,6 +113,8 @@ export default function InventoryPage() {
           </Button>
         )}
       </div>
+
+      {owner && <DuplicateItemsCard />}
 
       <InventoryFilters
         search={search}

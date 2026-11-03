@@ -27,6 +27,7 @@ export const queryKeys = {
     all: ['inventory'] as const,
     list: () => [...queryKeys.inventory.all, 'list'] as const,
     logs: () => [...queryKeys.inventory.all, 'logs'] as const,
+    duplicates: () => [...queryKeys.inventory.all, 'duplicates'] as const,
   },
   team: {
     all: ['team'] as const,
