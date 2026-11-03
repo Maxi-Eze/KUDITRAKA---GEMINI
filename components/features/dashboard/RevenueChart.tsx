@@ -104,7 +104,7 @@ export function RevenueChart({ transactions, isLoading }: RevenueChartProps) {
               plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
               scales: {
                 x: { grid: { display: false }, ticks: { color: 'oklch(0.65 0.01 285)', font: { size: 11 } } },
-                y: { grid: { color: 'oklch(0.2 0.005 285)' }, ticks: { color: 'oklch(0.65 0.01 285)', font: { size: 11 } } },
+                y: { grid: { color: '#333333' }, ticks: { color: 'oklch(0.65 0.01 285)', font: { size: 11 } } },
               },
             }}
           />

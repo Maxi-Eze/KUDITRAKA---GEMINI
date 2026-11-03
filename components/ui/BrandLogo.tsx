@@ -1,7 +1,3 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
 interface BrandLogoProps {
@@ -9,14 +5,8 @@ interface BrandLogoProps {
   className?: string;
 }
 
+/** The app is always dark, so the lime logo is the one that shows up. */
 export function BrandLogo({ variant = 'full', className }: BrandLogoProps) {
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   if (variant === 'icon') {
     return (
       <img
@@ -27,11 +17,9 @@ export function BrandLogo({ variant = 'full', className }: BrandLogoProps) {
     );
   }
 
-  const dark = !mounted || resolvedTheme === 'dark';
-
   return (
     <img
-      src={dark ? '/brand/logo.svg' : '/brand/logo-dark.svg'}
+      src="/brand/logo.svg"
       alt="MISA"
       className={cn('h-10 w-auto', className)}
     />

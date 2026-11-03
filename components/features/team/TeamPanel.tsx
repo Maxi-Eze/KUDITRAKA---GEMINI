@@ -62,7 +62,7 @@ function RightsPicker({
               }}
               className={cn(
                 'rounded-full border px-3 py-1 text-sm',
-                role === level.value ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                role === level.value ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground'
               )}
             >
               {level.title}
