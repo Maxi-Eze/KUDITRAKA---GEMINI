@@ -16,6 +16,7 @@ export function stockNote(stock?: StockResult | null): StockNote | null {
     return { tone: 'warning', text: `You only had ${stock.previous} ${name} in stock, so it's now 0. Please check your count.` };
   }
   if ((stock.change ?? 0) > 0) return { tone: 'info', text: `${name} stock is now ${stock.current}.` };
+  if ((stock.current ?? 0) <= 0) return { tone: 'warning', text: `${name} is now out of stock. Time to restock?` };
   if (stock.low_stock) return { tone: 'warning', text: `Only ${stock.current} ${name} left. Time to restock?` };
   return { tone: 'info', text: `${stock.current} ${name} left in stock.` };
 }
