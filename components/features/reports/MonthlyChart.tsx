@@ -66,7 +66,7 @@ export function MonthlyChart({ analytics, isLoading }: MonthlyChartProps) {
         {
           label: 'Expense',
           data: last6Months.map((m) => expenseByMonth[m.key]),
-          backgroundColor: 'oklch(0.65 0.2 25)',
+          backgroundColor: '#f87171',
           borderRadius: 4,
         },
       ],
@@ -111,7 +111,7 @@ export function MonthlyChart({ analytics, isLoading }: MonthlyChartProps) {
                 },
                 scales: {
                   x: { grid: { display: false }, ticks: { color: 'oklch(0.65 0.01 285)', font: { size: 11 } } },
-                  y: { grid: { color: 'oklch(0.2 0.005 285)' }, ticks: { color: 'oklch(0.65 0.01 285)', font: { size: 11 } } },
+                  y: { grid: { color: '#333333' }, ticks: { color: 'oklch(0.65 0.01 285)', font: { size: 11 } } },
                 },
               }}
             />

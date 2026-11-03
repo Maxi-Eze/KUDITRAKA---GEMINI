@@ -3,12 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import {
   Menu,
   Search,
-  Sun,
-  Moon,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -40,7 +37,6 @@ interface TopbarProps {
 
 export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarProps) {
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
   const { data: user } = useUser();
   const logout = useLogout();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -129,7 +125,7 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
         </div>
       </div>
 
-      {/* Right: notifications + theme toggle + avatar */}
+      {/* Right: notifications + avatar */}
       <div className="flex items-center gap-1.5 ml-auto">
         {/* Notification bell */}
         <div className="relative" ref={notifRef}>
@@ -154,16 +150,6 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
             </div>
           )}
         </div>
-
-        {/* Theme toggle */}
-        <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="relative flex items-center justify-center w-9 h-9 rounded-md text-foreground/60 hover:text-foreground hover:bg-accent transition-colors"
-          title="Toggle theme"
-        >
-          <Sun size={16} className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon size={16} className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        </button>
 
         {/* Account menu */}
         {user && (

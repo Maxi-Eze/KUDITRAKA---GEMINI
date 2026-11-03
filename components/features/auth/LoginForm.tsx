@@ -129,7 +129,7 @@ export function LoginForm({ className }: LoginFormProps) {
               onClick={() => setMode(m)}
               className={cn(
                 'rounded-md py-1.5 text-sm font-medium transition-colors',
-                mode === m ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                mode === m ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {m === 'owner' ? 'Owner' : 'Staff'}
