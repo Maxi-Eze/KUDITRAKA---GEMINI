@@ -8,6 +8,7 @@ export const STAFF_COPY = {
   forgotPin: 'Forgot your PIN? Ask your employer for a new one.',
   noReports: 'Only your employer can see profit and reports.',
   pageBlocked: 'Only your employer can see this page.',
+  countedByOwner: 'your employer',
 } as const;
 
 export const OWNER_COPY = {

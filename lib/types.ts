@@ -248,6 +248,33 @@ export interface MergeResult {
   dropped_barcodes: string[];
 }
 
+/** One item that came out different in an evening count. */
+export interface CountDifference {
+  item_id: string;
+  name: string;
+  expected: number;
+  counted: number;
+  /** counted − expected: below 0 means missing. */
+  difference: number;
+  /** Worth of the difference. Missing for staff who can't see cost prices. */
+  value?: number;
+  reason: string | null;
+}
+
+export interface StockCount {
+  id: string;
+  created_at: string;
+  /** Staff member's name; null when the owner counted. */
+  recorded_by: string | null;
+  items_counted: number;
+  items_matched: number;
+  short: CountDifference[];
+  over: CountDifference[];
+  short_value?: number;
+  over_value?: number;
+  note: string | null;
+}
+
 export interface ReconciliationLog {
   id: string;
   item_id: string;
