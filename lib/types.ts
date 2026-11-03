@@ -38,6 +38,10 @@ export interface StockResult {
   low_stock?: boolean;
   should_offer_tracking?: boolean;
   suggested_price?: number | null;
+  /** Stock items with a similar name, for "Did you mean Milo 500g?" (only when not_tracked). */
+  suggestions?: StockRef[];
+  /** The saved transaction, so "Yes, that one" can be linked to it. */
+  transaction_id?: string;
 }
 
 export interface Pagination {

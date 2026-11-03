@@ -6,6 +6,7 @@ import type {
   StockIntakeLine,
   StockReadResult,
   StockSaveLine,
+  StockResult,
   StockSaveResult,
 } from '@/lib/types';
 
@@ -32,5 +33,7 @@ export const inventoryApi = {
   /** Add the checked lines to stock. */
   saveMany: (data: { items: StockSaveLine[]; record_expense?: boolean; source?: StockSource }) =>
     client.post<StockSaveResult>('/inventory/bulk', data),
+  /** "Did you mean Milo 500g?" → Yes: take a saved sale off that item and remember the name. */
+  link: (data: { transaction_id: string; item_id: string }) => client.post<StockResult>('/inventory/link', data),
   byBarcode: (code: string) => client.get<BarcodeLookup>(`/inventory/barcode/${encodeURIComponent(code)}`),
 };

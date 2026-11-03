@@ -26,7 +26,9 @@ export function StockNoteLine({ stock, className }: { stock?: StockResult | null
 
 /**
  * "Indomie isn't in your stock list. Track it?" — shown after saving a sale or purchase
- * of something that looks like stock but isn't tracked yet.
+ * of something that looks like stock but isn't tracked yet. When the name looks like an item
+ * already in stock, it first asks "Did you mean Milo 500g?"; Yes takes the sale off that item
+ * and remembers the name for next time.
  */
 export function TrackItemPrompt({ stock, onDone }: { stock?: StockResult | null; onDone?: () => void }) {
   const qc = useQueryClient();
@@ -34,6 +36,7 @@ export function TrackItemPrompt({ stock, onDone }: { stock?: StockResult | null;
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isNew, setIsNew] = useState(false);
 
   if (!shouldOfferTracking(stock) || !stock) return null;
   const name = stock.item;
@@ -43,6 +46,42 @@ export function TrackItemPrompt({ stock, onDone }: { stock?: StockResult | null;
       <div className="flex items-start gap-2 text-sm text-emerald-500">
         <Check className="mt-0.5 h-4 w-4 shrink-0" />
         <span>{result}</span>
+      </div>
+    );
+  }
+
+  const link = async (itemId: string) => {
+    if (!stock.transaction_id) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await inventoryApi.link({ transaction_id: stock.transaction_id, item_id: itemId });
+      qc.invalidateQueries({ queryKey: queryKeys.inventory.all });
+      setResult(`${stockNote(updated)?.text ?? 'Stock updated.'} Next time "${name}" goes straight to ${updated.inventory_name}.`);
+      onDone?.();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not update the stock. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const suggestions = stock.transaction_id ? stock.suggestions ?? [] : [];
+  if (suggestions.length && !isNew) {
+    return (
+      <div className="space-y-2 rounded-lg border border-border p-3">
+        <p className="text-sm font-medium">{`"${name}" isn't in your stock list. Did you mean…`}</p>
+        <div className="flex flex-wrap gap-2">
+          {suggestions.map((s) => (
+            <Button key={s.id} size="sm" variant="outline" disabled={busy} onClick={() => link(s.id)}>
+              {s.name}
+            </Button>
+          ))}
+          <Button size="sm" variant="ghost" disabled={busy} onClick={() => setIsNew(true)}>
+            No, it&apos;s new
+          </Button>
+        </div>
+        {error && <p className="text-xs text-destructive">{error}</p>}
       </div>
     );
   }
