@@ -60,7 +60,7 @@ export function StaffHome() {
 
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
         <Lock className="h-4 w-4 shrink-0" />
-        Only the shop owner can see profit and reports.
+        Only your employer can see profit and reports.
       </p>
     </div>
   );
