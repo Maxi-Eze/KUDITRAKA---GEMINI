@@ -13,7 +13,7 @@ export const RIGHTS: { key: StaffRight; label: string; hint?: string; warn?: boo
   { key: 'change_stock', label: 'Change stock counts', hint: 'They must give a reason. It shows in your history.' },
   { key: 'change_prices', label: 'Change selling prices' },
   { key: 'see_cost_prices', label: 'See cost prices' },
-  { key: 'see_shop_sales', label: "See the shop's total sales" },
+  { key: 'see_shop_sales', label: "See everyone's sales" },
   { key: 'see_reports', label: 'See profit and reports' },
   { key: 'delete_sales', label: 'Delete sales', hint: 'Only for someone you trust fully', warn: true },
 ];

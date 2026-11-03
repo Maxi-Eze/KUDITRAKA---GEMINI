@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { useLogin, useStaffLogin } from '@/hooks/useAuth';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { PHONE_ERROR, toNigerianInternational } from '@/lib/phone';
+import { STAFF_COPY } from '@/lib/copy';
 
 interface LoginFormProps {
   className?: string;
@@ -87,7 +88,7 @@ function StaffLoginFields() {
             'Log in'
           )}
         </Button>
-        <p className="text-sm text-muted-foreground text-center">Forgot your PIN? Ask your employer for a new one.</p>
+        <p className="text-sm text-muted-foreground text-center">{STAFF_COPY.forgotPin}</p>
       </CardFooter>
     </form>
   );
@@ -117,7 +118,7 @@ export function LoginForm({ className }: LoginFormProps) {
         </div>
         <h2 className="text-2xl font-bold text-foreground">{mode === 'owner' ? 'Welcome back' : 'Staff login'}</h2>
         <p className="text-muted-foreground">
-          {mode === 'owner' ? 'Sign in to your account' : 'Use the phone number and PIN your employer gave you'}
+          {mode === 'owner' ? 'Sign in to your account' : STAFF_COPY.loginSubtitle}
         </p>
         <div role="tablist" aria-label="Who is logging in" className="mt-3 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
           {(['owner', 'staff'] as const).map((m) => (
