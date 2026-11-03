@@ -169,6 +169,61 @@ export interface InventoryItem {
   selling_price: number | string;
   category: string;
   last_restocked?: string;
+  barcode?: string | null;
+}
+
+/** One line read from a list, photo, PDF or file, before the trader confirms it. */
+export interface StockIntakeLine {
+  name: string;
+  quantity: number | null;
+  unit_cost: number | null;
+  selling_price: number | null;
+  barcode?: string | null;
+}
+
+export interface StockRef {
+  id: string;
+  name: string;
+  stock: number;
+}
+
+/** exact: same item · alias: the trader's saved name for it · suggest: "Did you mean…?" · new */
+export interface StockLineMatch {
+  type: 'exact' | 'alias' | 'suggest' | 'new';
+  item?: StockRef;
+  suggestions?: StockRef[];
+}
+
+export interface StockReadResult {
+  items: (StockIntakeLine & { match: StockLineMatch })[];
+  supplier: string | null;
+  total: number | null;
+  unreadable: string[];
+  used_ai: boolean;
+}
+
+export interface StockSaveLine {
+  name: string;
+  quantity: number;
+  unit_cost?: number | null;
+  selling_price?: number | null;
+  barcode?: string | null;
+  item_id?: string | null;
+  original_name?: string | null;
+}
+
+export interface StockSaveResult {
+  added: StockRef[];
+  restocked: (StockRef & { added: number })[];
+  expenses_recorded: number;
+  total_cost: number;
+}
+
+export interface BarcodeLookup {
+  barcode: string;
+  item: (StockRef & { selling_price: number }) | null;
+  /** A name another business gave this barcode. */
+  suggested_name: string | null;
 }
 
 export interface ReconciliationLog {

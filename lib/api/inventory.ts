@@ -1,5 +1,15 @@
 import { client } from './client';
-import type { InventoryItem, ReconciliationLog } from '@/lib/types';
+import type {
+  BarcodeLookup,
+  InventoryItem,
+  ReconciliationLog,
+  StockIntakeLine,
+  StockReadResult,
+  StockSaveLine,
+  StockSaveResult,
+} from '@/lib/types';
+
+export type StockSource = 'barcode' | 'photo' | 'file' | 'list';
 
 export const inventoryApi = {
   list: () => client.get<InventoryItem[]>('/inventory'),
@@ -16,4 +26,11 @@ export const inventoryApi = {
     client.post<InventoryItem>('/inventory/track', data),
   /** "Not a stock item": stop offering to track it. */
   ignore: (name: string) => client.post<{ name: string }>('/inventory/ignore', { name }),
+  /** Read a list, a photo/PDF (base64) or spreadsheet rows into lines to check. Saves nothing. */
+  read: (data: { text?: string; file?: { data: string; media_type: string }; items?: Partial<StockIntakeLine>[] }) =>
+    client.post<StockReadResult>('/inventory/read', data),
+  /** Add the checked lines to stock. */
+  saveMany: (data: { items: StockSaveLine[]; record_expense?: boolean; source?: StockSource }) =>
+    client.post<StockSaveResult>('/inventory/bulk', data),
+  byBarcode: (code: string) => client.get<BarcodeLookup>(`/inventory/barcode/${encodeURIComponent(code)}`),
 };

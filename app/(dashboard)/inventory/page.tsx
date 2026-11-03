@@ -7,6 +7,7 @@ import { InventoryFilters } from '@/components/features/inventory/InventoryFilte
 import { InventoryList } from '@/components/features/inventory/InventoryList';
 import { InventoryDetail } from '@/components/features/inventory/InventoryDetail';
 import { NewInventorySheet } from '@/components/features/inventory/NewInventorySheet';
+import { AddStockSheet } from '@/components/features/inventory/add-stock/AddStockSheet';
 import { useUser } from '@/hooks/useAuth';
 import { hasRight, isOwner } from '@/lib/permissions';
 import { DeleteInventoryDialog } from '@/components/features/inventory/DeleteInventoryDialog';
@@ -38,6 +39,7 @@ export default function InventoryPage() {
   const [deleteTarget, setDeleteTarget] = useState<InventoryItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [stockOpen, setStockOpen] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -104,9 +106,9 @@ export default function InventoryPage() {
       <div className="flex items-center justify-between">
         <div />
         {hasRight(user, 'add_stock_items') && (
-          <Button onClick={() => setAddOpen(true)}>
+          <Button onClick={() => setStockOpen(true)}>
             <Plus className="h-4 w-4" />
-            Add Item
+            Add stock
           </Button>
         )}
       </div>
@@ -130,6 +132,7 @@ export default function InventoryPage() {
       />
 
       <NewInventorySheet open={addOpen} onOpenChange={setAddOpen} />
+      <AddStockSheet open={stockOpen} onOpenChange={setStockOpen} onManual={() => setAddOpen(true)} />
 
       <InventoryDetail
         item={selectedItem}
