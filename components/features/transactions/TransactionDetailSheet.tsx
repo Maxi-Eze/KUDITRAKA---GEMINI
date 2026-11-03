@@ -58,6 +58,8 @@ interface TransactionDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete?: (transaction: Transaction) => void;
+  /** False for viewers, who can only look. */
+  canEdit?: boolean;
 }
 
 function toFormValues(transaction: Transaction): TransactionFormInput {
@@ -77,6 +79,7 @@ export function TransactionDetailSheet({
   open,
   onOpenChange,
   onDelete,
+  canEdit = true,
 }: TransactionDetailSheetProps) {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const updateMutation = useUpdateTransaction();
@@ -239,11 +242,15 @@ export function TransactionDetailSheet({
 
             <Separator />
 
+            {(canEdit || onDelete) && (
             <div className="flex gap-2">
+              {canEdit && (
               <Button onClick={handleEdit} className="flex-1">
                 <Pencil className="h-4 w-4" />
                 Edit
               </Button>
+              )}
+              {onDelete && (
               <Button
                 variant="destructive"
                 onClick={handleDelete}
@@ -252,7 +259,9 @@ export function TransactionDetailSheet({
                 <Trash2 className="h-4 w-4" />
                 Delete
               </Button>
+              )}
             </div>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit(handleSave)} className="flex flex-col gap-4 px-4 mt-4">

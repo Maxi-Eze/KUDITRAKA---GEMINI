@@ -38,6 +38,16 @@ interface InventoryDetailProps {
   item: InventoryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Owner only: the quick +/- buttons. */
+  canQuickAdjust?: boolean;
+  /** Owner, or staff with "change stock counts": count again with a reason. */
+  canCount?: boolean;
+  /** Owner only: edit every field. */
+  canEditItem?: boolean;
+  /** Staff with "change selling prices": edit the selling price only. */
+  canEditPrice?: boolean;
+  /** The adjustment history (owner, or staff who can count stock). */
+  showLogs?: boolean;
 }
 
 const PRESETS = [-10, -5, -1, 1, 5, 10];
@@ -72,11 +82,21 @@ function toEditValues(item: InventoryItem): InventoryItemFormInput {
   };
 }
 
-export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailProps) {
+export function InventoryDetail({
+  item,
+  open,
+  onOpenChange,
+  canQuickAdjust = true,
+  canCount = true,
+  canEditItem = true,
+  canEditPrice = false,
+  showLogs = true,
+}: InventoryDetailProps) {
+  const [newPrice, setNewPrice] = useState('');
   const updateMutation = useUpdateItem();
   const adjustStock = useAdjustStock();
   const reconcileStock = useReconcileStock();
-  const { data: logsData } = useReconciliationLogs();
+  const { data: logsData } = useReconciliationLogs(showLogs);
 
   const [editing, setEditing] = useState(false);
 
@@ -264,10 +284,12 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                   <p className="text-xs text-muted-foreground">Min Stock</p>
                   <p className="text-lg font-medium">{item.min_stock}</p>
                 </div>
-                <div className="rounded-lg border p-3">
-                  <p className="text-xs text-muted-foreground">Cost Price</p>
-                  <p className="text-lg font-medium">{formatCurrency(item.cost_price)}</p>
-                </div>
+                {item.cost_price !== undefined && (
+                  <div className="rounded-lg border p-3">
+                    <p className="text-xs text-muted-foreground">Cost Price</p>
+                    <p className="text-lg font-medium">{formatCurrency(item.cost_price)}</p>
+                  </div>
+                )}
                 <div className="rounded-lg border p-3">
                   <p className="text-xs text-muted-foreground">Selling Price</p>
                   <p className="text-lg font-medium">{formatCurrency(item.selling_price)}</p>
@@ -289,6 +311,8 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                 </div>
               )}
 
+              {canQuickAdjust && (
+              <>
               <Separator />
 
               <div className="space-y-3">
@@ -330,7 +354,11 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                   </Button>
                 </div>
               </div>
+              </>
+              )}
 
+              {canCount && (
+              <>
               <Separator />
 
               <div className="space-y-3">
@@ -373,6 +401,9 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                 </Button>
               </div>
 
+              </>
+              )}
+
               {itemLogs.length > 0 && (
                 <>
                   <Separator />
@@ -400,9 +431,45 @@ export function InventoryDetail({ item, open, onOpenChange }: InventoryDetailPro
                 </>
               )}
 
-              <Button variant="outline" className="w-full" onClick={() => setEditing(true)}>
-                Edit Item
-              </Button>
+              {canEditItem && (
+                <Button variant="outline" className="w-full" onClick={() => setEditing(true)}>
+                  Edit Item
+                </Button>
+              )}
+
+              {!canEditItem && canEditPrice && (
+                <>
+                  <Separator />
+                  <form
+                    className="space-y-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const price = Number(newPrice);
+                      if (!newPrice || Number.isNaN(price) || price < 0) return;
+                      updateMutation.mutate(
+                        { id: item.id, data: { selling_price: price } },
+                        { onSuccess: () => setNewPrice('') }
+                      );
+                    }}
+                  >
+                    <Label htmlFor="new-price" className="text-xs">New selling price</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="new-price"
+                        type="number"
+                        min="0"
+                        inputMode="numeric"
+                        placeholder={String(item.selling_price)}
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                      />
+                      <Button type="submit" size="sm" disabled={!newPrice || updateMutation.isPending}>
+                        Change price
+                      </Button>
+                    </div>
+                  </form>
+                </>
+              )}
             </>
           )}
         </div>

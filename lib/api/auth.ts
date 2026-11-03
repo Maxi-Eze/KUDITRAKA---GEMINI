@@ -14,6 +14,16 @@ export interface LoginData {
   password: string;
 }
 
+export interface StaffLoginData {
+  phone: string;
+  pin: string;
+}
+
+export interface StaffLoginResponse {
+  token: string;
+  staff: { member_id: string; name: string; role: string; business_name: string | null };
+}
+
 export interface LoginResponse {
   token: string;
   user: User;
@@ -38,6 +48,9 @@ export const authApi = {
 
   login: (data: LoginData) =>
     client.post<LoginResponse>('/auth/login', data),
+
+  staffLogin: (data: StaffLoginData) =>
+    client.post<StaffLoginResponse>('/auth/staff-login', data),
 
   getProfile: () =>
     client.get<User>('/auth/profile'),

@@ -8,8 +8,8 @@ import type { Transaction } from '@/lib/types';
 interface TransactionRowProps {
   transaction: Transaction;
   onView: (transaction: Transaction) => void;
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (id: string) => void;
+  onEdit?: (transaction: Transaction) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function TransactionRow({ transaction, onView, onEdit, onDelete }: TransactionRowProps) {
@@ -24,6 +24,12 @@ export function TransactionRow({ transaction, onView, onEdit, onDelete }: Transa
       </TableCell>
       <TableCell>
         <span className="font-medium truncate block max-w-[200px]">{transaction.item}</span>
+        {transaction.recorded_by_name && (
+          <p className="text-xs text-muted-foreground">
+            by {transaction.recorded_by_name}
+            {transaction.source === 'web' ? ' · web' : transaction.source === 'whatsapp' ? ' · WhatsApp' : ''}
+          </p>
+        )}
       </TableCell>
       <TableCell>
         <span className="text-muted-foreground">
@@ -52,6 +58,7 @@ export function TransactionRow({ transaction, onView, onEdit, onDelete }: Transa
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
+          {onEdit && (
           <Button
             variant="ghost"
             size="icon-xs"
@@ -61,6 +68,8 @@ export function TransactionRow({ transaction, onView, onEdit, onDelete }: Transa
           >
             <Pencil className="h-3.5 w-3.5" />
           </Button>
+          )}
+          {onDelete && (
           <Button
             variant="ghost"
             size="icon-xs"
@@ -70,6 +79,7 @@ export function TransactionRow({ transaction, onView, onEdit, onDelete }: Transa
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
+          )}
         </div>
       </TableCell>
     </TableRow>

@@ -10,10 +10,17 @@ import { NewTransactionSheet } from '@/components/features/transactions/NewTrans
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import type { Transaction } from '@/lib/types';
+import { useUser } from '@/hooks/useAuth';
+import { hasRight } from '@/lib/permissions';
 
 const PAGE_SIZE = 20;
 
 export default function TransactionsPage() {
+  const { data: user } = useUser();
+  // Buttons follow the person's rights (the server enforces the same).
+  const mayDelete = hasRight(user, 'delete_sales');
+  const mayEdit = hasRight(user, 'fix_own_sales');
+  const mayAdd = hasRight(user, 'record_sales');
   const { data: rawTransactions, isLoading } = useTransactions();
   const deleteMutation = useDeleteTransaction();
 
@@ -107,10 +114,12 @@ export default function TransactionsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div />
-        <Button onClick={() => setAddOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Add Transaction
-        </Button>
+        {mayAdd && (
+          <Button onClick={() => setAddOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add Transaction
+          </Button>
+        )}
       </div>
 
       <TransactionFilters
@@ -128,8 +137,8 @@ export default function TransactionsPage() {
         transactions={paginatedTransactions}
         isLoading={isLoading}
         onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+        onEdit={mayEdit ? handleEdit : undefined}
+        onDelete={mayDelete ? handleDelete : undefined}
         currentPage={currentPage}
         totalItems={totalItems}
         pageSize={PAGE_SIZE}
@@ -143,7 +152,8 @@ export default function TransactionsPage() {
         transaction={detailTarget}
         open={detailOpen}
         onOpenChange={setDetailOpen}
-        onDelete={handleDeleteFromDetail}
+        onDelete={mayDelete ? handleDeleteFromDetail : undefined}
+        canEdit={mayEdit}
       />
 
       <DeleteTransactionDialog

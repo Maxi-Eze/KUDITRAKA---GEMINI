@@ -60,9 +60,10 @@ export function useAdjustStock() {
   });
 }
 
-export function useReconciliationLogs() {
+export function useReconciliationLogs(enabled = true) {
   return useQuery({
     queryKey: queryKeys.inventory.logs(),
     queryFn: inventoryApi.getLogs,
+    enabled,
   });
 }

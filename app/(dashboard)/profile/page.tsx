@@ -8,9 +8,10 @@ import { ProfileForm } from '@/components/features/profile/ProfileForm';
 import { ProfileInfo } from '@/components/features/profile/ProfileInfo';
 import { BusinessSettings } from '@/components/features/profile/BusinessSettings';
 import { WhatsAppLink } from '@/components/features/profile/WhatsAppLink';
+import { TeamPanel } from '@/components/features/team/TeamPanel';
 import { useUser } from '@/hooks/useAuth';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { User, Building2, MessageCircle } from 'lucide-react';
+import { User, Building2, MessageCircle, Users } from 'lucide-react';
 
 export default function ProfilePage() {
   const { data: user, isLoading } = useUser();
@@ -20,7 +21,7 @@ export default function ProfilePage() {
   // Allow links like /profile?tab=whatsapp (e.g. from the dashboard's "Link WhatsApp" step).
   useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get('tab');
-    if (requested === 'profile' || requested === 'business' || requested === 'whatsapp') setTab(requested);
+    if (requested === 'profile' || requested === 'business' || requested === 'whatsapp' || requested === 'team') setTab(requested);
   }, []);
 
   if (isLoading) {
@@ -70,6 +71,10 @@ export default function ProfilePage() {
             <MessageCircle className="hidden sm:block" />
             WhatsApp
           </TabsTrigger>
+          <TabsTrigger value="team">
+            <Users className="hidden sm:block" />
+            Team
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
@@ -83,6 +88,10 @@ export default function ProfilePage() {
 
         <TabsContent value="whatsapp">
           <WhatsAppLink />
+        </TabsContent>
+
+        <TabsContent value="team">
+          <TeamPanel />
         </TabsContent>
       </Tabs>
     </div>

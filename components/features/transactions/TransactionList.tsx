@@ -11,8 +11,9 @@ interface TransactionListProps {
   transactions: Transaction[];
   isLoading: boolean;
   onView: (transaction: Transaction) => void;
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (id: string) => void;
+  /** Omitted when this login can't edit (viewer) or delete (staff). */
+  onEdit?: (transaction: Transaction) => void;
+  onDelete?: (id: string) => void;
   currentPage: number;
   totalItems: number;
   pageSize: number;
