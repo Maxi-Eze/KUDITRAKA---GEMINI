@@ -12,6 +12,7 @@ import { Topbar } from './Topbar';
 import { MobileNav } from './MobileNav';
 import { useUser } from '@/hooks/useAuth';
 import { LoadingPage } from '@/components/ui/loading-page';
+import { STAFF_COPY } from '@/lib/copy';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading } = useUser();
@@ -77,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             // Staff opened an owner page (e.g. by typing the address). The server blocks the data too.
             <div className="mx-auto mt-16 max-w-sm text-center">
               <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
-              <p className="mt-3 font-medium">Only your employer can see this page.</p>
+              <p className="mt-3 font-medium">{STAFF_COPY.pageBlocked}</p>
               <Link href="/dashboard" className={buttonVariants({ className: 'mt-4' })}>Go home</Link>
             </div>
           )}

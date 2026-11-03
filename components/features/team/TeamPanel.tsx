@@ -22,6 +22,7 @@ import { PHONE_ERROR, toNigerianInternational } from '@/lib/phone';
 import { RIGHTS, ROLE_DEFAULTS, ROLE_LABEL } from '@/lib/permissions';
 import { cn, formatCurrency, getInitials } from '@/lib/utils';
 import type { ActivityEntry, StaffRight, StaffRole, TeamMember } from '@/lib/types';
+import { OWNER_COPY } from '@/lib/copy';
 
 const LEVELS: { value: StaffRole; title: string }[] = [
   { value: 'attendant', title: 'Sales attendant' },
@@ -154,7 +155,7 @@ export function TeamPanel() {
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
         <div>
           <CardTitle>Your team</CardTitle>
-          <CardDescription>Staff can record sales. Only you can see profit and reports.</CardDescription>
+          <CardDescription>{OWNER_COPY.teamIntro}</CardDescription>
         </div>
         <Button size="sm" onClick={() => setAdding(true)} className="shrink-0">
           <Plus className="h-4 w-4" />
