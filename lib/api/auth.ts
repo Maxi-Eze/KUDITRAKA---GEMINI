@@ -35,6 +35,9 @@ export interface ProfileUpdateData {
   business_sector?: string;
   phone?: string;
   inventory_enabled?: boolean;
+  bank_name?: string | null;
+  bank_account_number?: string | null;
+  bank_account_name?: string | null;
 }
 
 export interface OnboardingData {

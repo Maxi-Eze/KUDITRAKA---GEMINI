@@ -24,6 +24,9 @@ function mapUser(raw: Record<string, unknown>): User {
     businessType: raw.business_type as string,
     businessSize: raw.business_size as string,
     salesChannel: raw.sales_channel as string,
+    bankName: raw.bank_name as string | null | undefined,
+    bankAccountNumber: raw.bank_account_number as string | null | undefined,
+    bankAccountName: raw.bank_account_name as string | null | undefined,
     staff: raw.staff
       ? {
           memberId: (raw.staff as Record<string, string>).member_id,
