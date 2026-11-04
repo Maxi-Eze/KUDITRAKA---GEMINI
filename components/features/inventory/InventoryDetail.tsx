@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -102,6 +102,7 @@ export function InventoryDetail({
   canEditPrice = false,
   showLogs = true,
 }: InventoryDetailProps) {
+  const popupRef = useRef<HTMLDivElement>(null);
   const [newPrice, setNewPrice] = useState('');
   const updateMutation = useUpdateItem();
   const adjustStock = useAdjustStock();
@@ -193,7 +194,8 @@ export function InventoryDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+      {/* Focus the window itself so it opens at the top, not scrolled to the first button */}
+      <DialogContent ref={popupRef} initialFocus={popupRef} className="sm:max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editing ? 'Edit Item' : item.name}</DialogTitle>
         </DialogHeader>
