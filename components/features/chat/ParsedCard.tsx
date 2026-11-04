@@ -74,7 +74,9 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
         <div className="space-y-2 pt-2">
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-500">
             <Check className="h-4 w-4" />
-            Saved to your transactions
+            {parsed.is_debt_payment && parsed.customer
+              ? `Payment saved. It came off what ${parsed.customer} owes.`
+              : 'Saved to your transactions'}
           </div>
           <StockNoteLine stock={stock} />
           <TrackItemPrompt stock={stock} />

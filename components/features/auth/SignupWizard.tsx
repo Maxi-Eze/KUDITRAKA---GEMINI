@@ -7,6 +7,7 @@ import { Check, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -166,9 +167,8 @@ export function SignupWizard({ className }: SignupWizardProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" required>Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   placeholder="Create a password"
                   aria-required="true"
                   aria-invalid={!!errors.password}
@@ -181,9 +181,8 @@ export function SignupWizard({ className }: SignupWizardProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm-password" required>Confirm Password</Label>
-                <Input
+                <PasswordInput
                   id="confirm-password"
-                  type="password"
                   placeholder="Confirm your password"
                   aria-required="true"
                   aria-invalid={!!errors.confirmPassword}

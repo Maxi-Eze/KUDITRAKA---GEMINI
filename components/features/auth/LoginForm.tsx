@@ -7,6 +7,7 @@ import { Mail, Lock, Loader2, Phone, KeyRound } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -62,9 +63,9 @@ function StaffLoginFields() {
           <Label htmlFor="staff-pin" required>PIN</Label>
           <div className="relative">
             <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
+            <PasswordInput
               id="staff-pin"
-              type="password"
+              what="PIN"
               inputMode="numeric"
               autoComplete="one-time-code"
               maxLength={6}
@@ -169,9 +170,8 @@ export function LoginForm({ className }: LoginFormProps) {
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="Enter your password"
                 aria-required="true"
                 aria-invalid={!!errors.password}
