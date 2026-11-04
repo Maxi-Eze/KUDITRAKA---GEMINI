@@ -30,6 +30,11 @@ export const queryKeys = {
     duplicates: () => [...queryKeys.inventory.all, 'duplicates'] as const,
     counts: () => [...queryKeys.inventory.all, 'counts'] as const,
   },
+  debts: {
+    all: ['debts'] as const,
+    list: (status: string) => [...queryKeys.debts.all, 'list', status] as const,
+    customer: (name: string) => [...queryKeys.debts.all, 'customer', name.toLowerCase()] as const,
+  },
   team: {
     all: ['team'] as const,
     list: () => [...queryKeys.team.all, 'list'] as const,

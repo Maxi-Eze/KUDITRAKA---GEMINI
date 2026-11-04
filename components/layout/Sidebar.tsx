@@ -11,6 +11,7 @@ import {
   BarChart3,
   Clock,
   User,
+  HandCoins,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
@@ -23,6 +24,7 @@ const navItems = [
   { href: '/chat', label: 'Chat', icon: MessageSquare },
   { href: '/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/customers', label: 'Customers', icon: Users },
+  { href: '/debts', label: 'Debts', icon: HandCoins },
   { href: '/inventory', label: 'Inventory', icon: Package },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/chat-history', label: 'Chat History', icon: Clock },

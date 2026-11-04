@@ -51,6 +51,7 @@ export function canOpenPage(user: User | null | undefined, pathname: string): bo
     '/chat': hasRight(user, 'record_sales'),
     '/chat-history': hasRight(user, 'record_sales'),
     '/customers': hasRight(user, 'see_shop_sales'),
+    '/debts': hasRight(user, 'see_shop_sales'),
     '/reports': hasRight(user, 'see_reports'),
   };
   return Object.entries(allowed).some(([p, ok]) => ok && (pathname === p || pathname.startsWith(`${p}/`)));
