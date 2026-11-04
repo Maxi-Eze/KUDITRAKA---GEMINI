@@ -134,6 +134,10 @@ export interface User {
   businessType?: string;
   businessSize?: string;
   salesChannel?: string;
+  /** Where customers pay debts. null = not set; undefined = the server can't save these yet. */
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
+  bankAccountName?: string | null;
   /** Set when a staff member is logged in (not the owner). */
   staff?: StaffInfo | null;
 }
