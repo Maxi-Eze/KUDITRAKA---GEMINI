@@ -67,3 +67,33 @@ export function useReconciliationLogs(enabled = true) {
     enabled,
   });
 }
+
+/** Stock items that look like the same thing. Owner only, so pass `enabled` false for staff. */
+export function useDuplicateItems(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.inventory.duplicates(),
+    queryFn: inventoryApi.duplicates,
+    enabled,
+  });
+}
+
+export function useMergeItems() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ keepId, mergeIds }: { keepId: string; mergeIds: string[] }) => inventoryApi.merge(keepId, mergeIds),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.inventory.all });
+      qc.invalidateQueries({ queryKey: queryKeys.reports.all });
+    },
+    onError: (error: Error) => toast.error(error.message || "Couldn't merge these items"),
+  });
+}
+
+export function useNotDuplicates() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (itemIds: [string, string]) => inventoryApi.notDuplicates(itemIds),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.inventory.duplicates() }),
+    onError: (error: Error) => toast.error(error.message || "Couldn't save that"),
+  });
+}

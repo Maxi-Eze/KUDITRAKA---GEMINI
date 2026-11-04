@@ -234,6 +234,20 @@ export interface BarcodeLookup {
   suggested_name: string | null;
 }
 
+/** Two stock items that look like the same thing ("Milo" and "Milo refill"). */
+export interface DuplicatePair {
+  items: [StockRef & { selling_price: number }, StockRef & { selling_price: number }];
+  score: number;
+}
+
+export interface MergeResult {
+  item: InventoryItem;
+  /** Names of the items folded in. */
+  merged: string[];
+  /** Barcodes that couldn't move over, because the kept item already has one. */
+  dropped_barcodes: string[];
+}
+
 export interface ReconciliationLog {
   id: string;
   item_id: string;

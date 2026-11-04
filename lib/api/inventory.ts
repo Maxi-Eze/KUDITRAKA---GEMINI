@@ -1,7 +1,9 @@
 import { client } from './client';
 import type {
   BarcodeLookup,
+  DuplicatePair,
   InventoryItem,
+  MergeResult,
   ReconciliationLog,
   StockIntakeLine,
   StockReadResult,
@@ -35,5 +37,11 @@ export const inventoryApi = {
     client.post<StockSaveResult>('/inventory/bulk', data),
   /** "Did you mean Milo 500g?" → Yes: take a saved sale off that item and remember the name. */
   link: (data: { transaction_id: string; item_id: string }) => client.post<StockResult>('/inventory/link', data),
+  /** Stock items that look like the same thing (owner only). */
+  duplicates: () => client.get<DuplicatePair[]>('/inventory/duplicates'),
+  /** "Not the same item": stop suggesting this pair. */
+  notDuplicates: (itemIds: [string, string]) => client.post<null>('/inventory/not-duplicates', { item_ids: itemIds }),
+  /** Fold `mergeIds` into `keepId`: stock adds up, history and names move over. */
+  merge: (keepId: string, mergeIds: string[]) => client.post<MergeResult>(`/inventory/${keepId}/merge`, { merge_ids: mergeIds }),
   byBarcode: (code: string) => client.get<BarcodeLookup>(`/inventory/barcode/${encodeURIComponent(code)}`),
 };
