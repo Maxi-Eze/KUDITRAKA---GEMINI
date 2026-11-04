@@ -61,13 +61,22 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
           <span className="text-sm text-muted-foreground">Payment</span>
           <span className="font-medium capitalize">{parsed.payment_method}</span>
         </div>
+
+        {parsed.is_debt_payment && parsed.customer && (
+          <p className="text-xs text-muted-foreground">{`Paying back a debt. This lowers what ${parsed.customer} owes; it isn't a new sale.`}</p>
+        )}
+        {parsed.is_credit && !parsed.is_debt_payment && parsed.customer && (
+          <p className="text-xs text-amber-500">{`On credit: ${parsed.customer} will owe you for this.`}</p>
+        )}
       </div>
 
       {isConfirmed ? (
         <div className="space-y-2 pt-2">
           <div className="flex items-center gap-2 text-sm font-medium text-emerald-500">
             <Check className="h-4 w-4" />
-            Saved to your transactions
+            {parsed.is_debt_payment && parsed.customer
+              ? `Payment saved. It came off what ${parsed.customer} owes.`
+              : 'Saved to your transactions'}
           </div>
           <StockNoteLine stock={stock} />
           <TrackItemPrompt stock={stock} />

@@ -22,6 +22,53 @@ export interface Transaction {
   recorded_by_name?: string | null;
   /** How it arrived: 'web', 'whatsapp', … (older records: null). */
   source?: string | null;
+  /** Credit sales only: what went into the debtors book. */
+  debt?: { customer_name: string; balance: number };
+  /** Sold on credit (create only). */
+  is_credit?: boolean;
+  credit_amount?: number | null;
+}
+
+/** One customer in the debtors book. */
+export interface Debtor {
+  customerName: string;
+  customerPhone: string | null;
+  totalCredit: number;
+  totalPaid: number;
+  balance: number;
+  items: string[];
+  oldestOpenAt: string | null;
+  lastActivityAt: string;
+}
+
+export interface DebtsSummary {
+  totalOutstanding: number;
+  debtorCount: number;
+  overdueAmount: number;
+  overdueDays: number;
+  debtors: Debtor[];
+}
+
+export interface DebtEntry {
+  id: string;
+  customer_name: string;
+  customer_phone: string | null;
+  total_amount: number;
+  amount_paid: number;
+  balance: number;
+  item_description: string | null;
+  status: 'pending' | 'partial' | 'paid';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomerDebts {
+  customerName: string;
+  customerPhone: string | null;
+  totalCredit: number;
+  totalPaid: number;
+  balance: number;
+  debts: DebtEntry[];
 }
 
 /** Returned by the backend when a sale/restock is saved. */
@@ -38,6 +85,10 @@ export interface StockResult {
   low_stock?: boolean;
   should_offer_tracking?: boolean;
   suggested_price?: number | null;
+  /** Stock items with a similar name, for "Did you mean Milo 500g?" (only when not_tracked). */
+  suggestions?: StockRef[];
+  /** The saved transaction, so "Yes, that one" can be linked to it. */
+  transaction_id?: string;
 }
 
 export interface Pagination {
@@ -56,6 +107,11 @@ export interface ParsedTransaction {
   customer: string;
   payment_method: string;
   quantity?: number;
+  /** Sold on credit: the customer still owes (all or credit_amount). */
+  is_credit?: boolean;
+  credit_amount?: number | null;
+  /** The customer is paying back what they owe (not a new sale). */
+  is_debt_payment?: boolean;
   isQuery?: boolean;
   queryType?: 'spend' | 'income' | 'stock' | 'balance';
   queryItem?: string;
@@ -78,6 +134,10 @@ export interface User {
   businessType?: string;
   businessSize?: string;
   salesChannel?: string;
+  /** Where customers pay debts. null = not set; undefined = the server can't save these yet. */
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
+  bankAccountName?: string | null;
   /** Set when a staff member is logged in (not the owner). */
   staff?: StaffInfo | null;
 }
@@ -169,6 +229,106 @@ export interface InventoryItem {
   selling_price: number | string;
   category: string;
   last_restocked?: string;
+  barcode?: string | null;
+  /** On: Misa sets min_stock from how fast it sells (about 3 days of sales). Off: the trader chose it. */
+  min_stock_auto?: boolean;
+  /** Average sold per day over the last 4 weeks. */
+  daily_sales?: number;
+}
+
+/** One line read from a list, photo, PDF or file, before the trader confirms it. */
+export interface StockIntakeLine {
+  name: string;
+  quantity: number | null;
+  unit_cost: number | null;
+  selling_price: number | null;
+  barcode?: string | null;
+}
+
+export interface StockRef {
+  id: string;
+  name: string;
+  stock: number;
+}
+
+/** exact: same item · alias: the trader's saved name for it · suggest: "Did you mean…?" · new */
+export interface StockLineMatch {
+  type: 'exact' | 'alias' | 'suggest' | 'new';
+  item?: StockRef;
+  suggestions?: StockRef[];
+}
+
+export interface StockReadResult {
+  items: (StockIntakeLine & { match: StockLineMatch })[];
+  supplier: string | null;
+  total: number | null;
+  unreadable: string[];
+  used_ai: boolean;
+}
+
+export interface StockSaveLine {
+  name: string;
+  quantity: number;
+  unit_cost?: number | null;
+  selling_price?: number | null;
+  barcode?: string | null;
+  item_id?: string | null;
+  original_name?: string | null;
+}
+
+export interface StockSaveResult {
+  added: StockRef[];
+  restocked: (StockRef & { added: number })[];
+  expenses_recorded: number;
+  total_cost: number;
+}
+
+export interface BarcodeLookup {
+  barcode: string;
+  item: (StockRef & { selling_price: number }) | null;
+  /** A name another business gave this barcode. */
+  suggested_name: string | null;
+}
+
+/** Two stock items that look like the same thing ("Milo" and "Milo refill"). */
+export interface DuplicatePair {
+  items: [StockRef & { selling_price: number }, StockRef & { selling_price: number }];
+  score: number;
+}
+
+export interface MergeResult {
+  item: InventoryItem;
+  /** Names of the items folded in. */
+  merged: string[];
+  /** Barcodes that couldn't move over, because the kept item already has one. */
+  dropped_barcodes: string[];
+}
+
+/** One item that came out different in an evening count. */
+export interface CountDifference {
+  item_id: string;
+  name: string;
+  expected: number;
+  counted: number;
+  /** counted − expected: below 0 means missing. */
+  difference: number;
+  /** Worth of the difference. Missing for staff who can't see cost prices. */
+  value?: number;
+  reason: string | null;
+}
+
+export interface StockCount {
+  id: string;
+  created_at: string;
+  /** Staff member's name; null when the owner counted. */
+  recorded_by: string | null;
+  items_counted: number;
+  items_matched: number;
+  short: CountDifference[];
+  over: CountDifference[];
+  short_value?: number;
+  over_value?: number;
+  note: string | null;
 }
 
 export interface ReconciliationLog {

@@ -122,7 +122,7 @@ export function NewInventorySheet({ open, onOpenChange }: NewInventorySheetProps
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="minStock">Min Stock</Label>
+              <Label htmlFor="minStock">Running low at</Label>
               <Input
                 id="minStock"
                 type="number"
@@ -132,6 +132,7 @@ export function NewInventorySheet({ open, onOpenChange }: NewInventorySheetProps
                 {...register('min_stock')}
               />
               {errors.min_stock && <p className="text-sm text-destructive">{errors.min_stock.message}</p>}
+              <p className="text-xs text-muted-foreground">Leave 0 and Misa works it out from your sales.</p>
             </div>
           </div>
 

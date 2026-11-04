@@ -6,3 +6,4 @@ export { inventoryApi } from './inventory';
 export { reportsApi } from './reports';
 export { whatsappApi } from './whatsapp';
 export { teamApi } from './team';
+export { debtsApi } from './debts';

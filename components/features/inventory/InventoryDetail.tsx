@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -71,6 +72,15 @@ function StockBadge({ stock, minStock }: { stock: number; minStock: number }) {
   return <Badge variant="secondary" className="bg-green-500/10 text-green-500">In Stock</Badge>;
 }
 
+/** Why the "running low" number is what it is, in plain words. */
+function lowStockHint(item: InventoryItem): string {
+  if (item.min_stock_auto === false) return 'Set by you';
+  const daily = item.daily_sales ?? 0;
+  if (daily <= 0) return 'Automatic: no sales in the last 4 weeks yet';
+  const perDay = daily < 1 ? 'less than 1' : `about ${Math.round(daily)}`;
+  return `Automatic: ${perDay} sold a day, so 3 days' worth`;
+}
+
 function toEditValues(item: InventoryItem): InventoryItemFormInput {
   return {
     name: item.name,
@@ -92,6 +102,7 @@ export function InventoryDetail({
   canEditPrice = false,
   showLogs = true,
 }: InventoryDetailProps) {
+  const popupRef = useRef<HTMLDivElement>(null);
   const [newPrice, setNewPrice] = useState('');
   const updateMutation = useUpdateItem();
   const adjustStock = useAdjustStock();
@@ -183,7 +194,8 @@ export function InventoryDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+      {/* Focus the window itself so it opens at the top, not scrolled to the first button */}
+      <DialogContent ref={popupRef} initialFocus={popupRef} className="sm:max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editing ? 'Edit Item' : item.name}</DialogTitle>
         </DialogHeader>
@@ -226,7 +238,7 @@ export function InventoryDetail({
                   {editErrors.stock && <p className="text-sm text-destructive">{editErrors.stock.message}</p>}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-minStock">Min Stock</Label>
+                  <Label htmlFor="edit-minStock">Running low at</Label>
                   <Input
                     id="edit-minStock"
                     type="number"
@@ -236,6 +248,7 @@ export function InventoryDetail({
                     {...editForm.register('min_stock')}
                   />
                   {editErrors.min_stock && <p className="text-sm text-destructive">{editErrors.min_stock.message}</p>}
+                  <p className="text-xs text-muted-foreground">Change it to set your own number.</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -281,8 +294,24 @@ export function InventoryDetail({
                   <p className="text-lg font-medium">{item.stock}</p>
                 </div>
                 <div className="rounded-lg border p-3">
-                  <p className="text-xs text-muted-foreground">Min Stock</p>
+                  <p className="text-xs text-muted-foreground">Running low at</p>
                   <p className="text-lg font-medium">{item.min_stock}</p>
+                  <p className="text-xs text-muted-foreground">{lowStockHint(item)}</p>
+                  {canEditItem && item.min_stock_auto === false && (
+                    <button
+                      type="button"
+                      className="mt-1 text-xs text-primary underline-offset-2 hover:underline"
+                      disabled={updateMutation.isPending}
+                      onClick={() =>
+                        updateMutation.mutate(
+                          { id: item.id, data: { min_stock_auto: true } },
+                          { onSuccess: (updated) => toast.success(`Misa will now set it for you: ${updated.min_stock}.`) }
+                        )
+                      }
+                    >
+                      Let Misa set it
+                    </button>
+                  )}
                 </div>
                 {item.cost_price !== undefined && (
                   <div className="rounded-lg border p-3">

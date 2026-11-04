@@ -7,11 +7,14 @@ import { InventoryFilters } from '@/components/features/inventory/InventoryFilte
 import { InventoryList } from '@/components/features/inventory/InventoryList';
 import { InventoryDetail } from '@/components/features/inventory/InventoryDetail';
 import { NewInventorySheet } from '@/components/features/inventory/NewInventorySheet';
+import { AddStockSheet } from '@/components/features/inventory/add-stock/AddStockSheet';
 import { useUser } from '@/hooks/useAuth';
 import { hasRight, isOwner } from '@/lib/permissions';
+import { EveningCountSheet } from '@/components/features/inventory/EveningCountSheet';
+import { DuplicateItemsCard } from '@/components/features/inventory/DuplicateItemsCard';
 import { DeleteInventoryDialog } from '@/components/features/inventory/DeleteInventoryDialog';
 import { useInventoryItems, useDeleteItem } from '@/hooks/useInventory';
-import { Plus } from 'lucide-react';
+import { ClipboardCheck, Plus } from 'lucide-react';
 import type { InventoryItem } from '@/lib/types';
 
 type SortField = 'name' | 'stock' | 'selling_price' | 'category';
@@ -38,6 +41,8 @@ export default function InventoryPage() {
   const [deleteTarget, setDeleteTarget] = useState<InventoryItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [stockOpen, setStockOpen] = useState(false);
+  const [countOpen, setCountOpen] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -101,15 +106,22 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div />
+      <div className="flex items-center justify-end gap-2">
+        {hasRight(user, 'change_stock') && items.length > 0 && (
+          <Button variant="outline" onClick={() => setCountOpen(true)}>
+            <ClipboardCheck className="h-4 w-4" />
+            Count stock
+          </Button>
+        )}
         {hasRight(user, 'add_stock_items') && (
-          <Button onClick={() => setAddOpen(true)}>
+          <Button onClick={() => setStockOpen(true)}>
             <Plus className="h-4 w-4" />
-            Add Item
+            Add stock
           </Button>
         )}
       </div>
+
+      {owner && <DuplicateItemsCard />}
 
       <InventoryFilters
         search={search}
@@ -130,6 +142,8 @@ export default function InventoryPage() {
       />
 
       <NewInventorySheet open={addOpen} onOpenChange={setAddOpen} />
+      <EveningCountSheet open={countOpen} onOpenChange={setCountOpen} items={items} isStaff={!owner} />
+      <AddStockSheet open={stockOpen} onOpenChange={setStockOpen} onManual={() => setAddOpen(true)} />
 
       <InventoryDetail
         item={selectedItem}
