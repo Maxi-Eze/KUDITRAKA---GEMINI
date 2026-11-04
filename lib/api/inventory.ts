@@ -9,6 +9,7 @@ import type {
   StockReadResult,
   StockSaveLine,
   StockResult,
+  StockCount,
   StockSaveResult,
 } from '@/lib/types';
 
@@ -37,6 +38,10 @@ export const inventoryApi = {
     client.post<StockSaveResult>('/inventory/bulk', data),
   /** "Did you mean Milo 500g?" → Yes: take a saved sale off that item and remember the name. */
   link: (data: { transaction_id: string; item_id: string }) => client.post<StockResult>('/inventory/link', data),
+  /** Evening count: the real number for each counted item, saved together. */
+  saveCount: (data: { counts: { item_id: string; actual_stock: number; reason?: string | null }[]; note?: string | null }) =>
+    client.post<StockCount>('/inventory/count', data),
+  counts: () => client.get<StockCount[]>('/inventory/counts'),
   /** Stock items that look like the same thing (owner only). */
   duplicates: () => client.get<DuplicatePair[]>('/inventory/duplicates'),
   /** "Not the same item": stop suggesting this pair. */

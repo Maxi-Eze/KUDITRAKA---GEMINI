@@ -97,3 +97,23 @@ export function useNotDuplicates() {
     onError: (error: Error) => toast.error(error.message || "Couldn't save that"),
   });
 }
+
+export function useStockCounts(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.inventory.counts(),
+    queryFn: inventoryApi.counts,
+    enabled,
+  });
+}
+
+export function useSaveStockCount() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: inventoryApi.saveCount,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.inventory.all });
+      qc.invalidateQueries({ queryKey: queryKeys.reports.all });
+    },
+    onError: (error: Error) => toast.error(error.message || "Couldn't save the count"),
+  });
+}
