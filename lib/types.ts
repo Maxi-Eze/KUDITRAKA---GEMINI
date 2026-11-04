@@ -174,6 +174,10 @@ export interface InventoryItem {
   category: string;
   last_restocked?: string;
   barcode?: string | null;
+  /** On: Misa sets min_stock from how fast it sells (about 3 days of sales). Off: the trader chose it. */
+  min_stock_auto?: boolean;
+  /** Average sold per day over the last 4 weeks. */
+  daily_sales?: number;
 }
 
 /** One line read from a list, photo, PDF or file, before the trader confirms it. */
