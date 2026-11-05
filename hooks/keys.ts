@@ -12,6 +12,7 @@ export const queryKeys = {
     summary: (period: string) => [...queryKeys.reports.all, 'summary', period] as const,
     daily: () => [...queryKeys.reports.all, 'daily'] as const,
     analytics: () => [...queryKeys.reports.all, 'analytics'] as const,
+    weeklyCheckup: () => [...queryKeys.reports.all, 'weekly-checkup'] as const,
   },
   customers: {
     all: ['customers'] as const,
