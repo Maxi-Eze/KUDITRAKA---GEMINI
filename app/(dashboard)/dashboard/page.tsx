@@ -8,6 +8,7 @@ import { RevenueChart } from '@/components/features/dashboard/RevenueChart';
 import { ExpenseChart } from '@/components/features/dashboard/ExpenseChart';
 import { RecentTransactions } from '@/components/features/dashboard/RecentTransactions';
 import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
+import { YourWeek } from '@/components/features/dashboard/YourWeek';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
 import { StaffHome } from '@/components/features/team/StaffHome';
 import { isOwner, usesStaffHome } from '@/lib/permissions';
@@ -37,6 +38,8 @@ function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
         transactionCount={Array.isArray(transactions) ? transactions.length : 0}
         isLoading={isAnyLoading}
       />
+
+      <YourWeek />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <RevenueChart
