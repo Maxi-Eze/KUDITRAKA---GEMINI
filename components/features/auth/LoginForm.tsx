@@ -210,6 +210,11 @@ export function LoginForm({ className }: LoginFormProps) {
               Sign up
             </Link>
           </p>
+          <p className="text-xs text-muted-foreground text-center">
+            <Link href="/terms" className="hover:underline">Terms of Use</Link>
+            {' · '}
+            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+          </p>
         </CardFooter>
       </form>
       )}

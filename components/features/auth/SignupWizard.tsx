@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { useSignup } from '@/hooks/useAuth';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 import { toNigerianInternational } from '@/lib/phone';
+import { LEGAL_VERSION } from '@/lib/legal';
 
 interface StepProps {
   currentStep: number;
@@ -91,6 +92,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
       confirmPassword: '',
       businessName: '',
       phone: '',
+      acceptTerms: false,
     },
   });
 
@@ -110,6 +112,7 @@ export function SignupWizard({ className }: SignupWizardProps) {
       password: data.password,
       business_name: data.businessName || undefined,
       phone: (data.phone && toNigerianInternational(data.phone)) || undefined,
+      terms_version: LEGAL_VERSION,
     });
   };
 
@@ -225,6 +228,32 @@ export function SignupWizard({ className }: SignupWizardProps) {
                 </p>
                 {errors.phone && (
                   <p className="text-sm text-destructive">{errors.phone.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="accept-terms" className="flex items-start gap-3 text-sm leading-snug">
+                  <input
+                    id="accept-terms"
+                    type="checkbox"
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-primary"
+                    aria-invalid={!!errors.acceptTerms}
+                    {...register('acceptTerms')}
+                  />
+                  <span>
+                    I agree to the{' '}
+                    <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">
+                      Terms of Use
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" target="_blank" className="text-primary hover:underline font-medium">
+                      Privacy Policy
+                    </Link>
+                    . Misa will keep my business records and use AI services, some outside Nigeria, to read my messages
+                    and voice notes.
+                  </span>
+                </label>
+                {errors.acceptTerms && (
+                  <p className="text-sm text-destructive">{errors.acceptTerms.message}</p>
                 )}
               </div>
             </div>

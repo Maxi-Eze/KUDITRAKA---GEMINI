@@ -30,6 +30,7 @@ export const signupSchema = z
     confirmPassword: z.string(),
     businessName: z.string().trim().max(120, 'Business name is too long').optional(),
     phone: phoneSchema,
+    acceptTerms: z.boolean().refine((v) => v, 'Tick the box to agree before you sign up'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
