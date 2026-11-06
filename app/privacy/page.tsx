@@ -13,7 +13,7 @@ export default function PrivacyPage() {
 
       <h2>Who we are</h2>
       <p>
-        Misa is run by [Company legal name, RC number], [registered address], Nigeria (&quot;Kuditraka&quot;,
+        Misa is run by KUDITRAKA TECHNOLOGIES.AI (CAC registration number 7101960), [registered address], Nigeria (&quot;Kuditraka&quot;,
         &quot;we&quot;, &quot;us&quot;). We decide how your personal data is used, so we are the data controller under
         the Nigeria Data Protection Act 2023 (NDPA).
       </p>
@@ -133,14 +133,14 @@ export default function PrivacyPage() {
         <li>withdraw consent you gave, for example for reminders (turn them off in the app or tell Misa &quot;stop reminders&quot;).</li>
       </ul>
       <p>
-        To do any of these, email [privacy email] from the address on your account. We reply within 30 days. If you are not
+        To do any of these, email kuditraka.ai@gmail.com from the address on your account. We reply within 30 days. If you are not
         happy with our answer, you can complain to the Nigeria Data Protection Commission (NDPC) at ndpc.gov.ng.
       </p>
 
       <h2>Deleting your account</h2>
       <p>
         You can delete single records, customers, debts, stock items and staff yourself in the app, and clear your chat
-        history. To delete your whole account and all its records, email [privacy email] from the address on your account.
+        history. To delete your whole account and all its records, email kuditraka.ai@gmail.com from the address on your account.
         We confirm it is you, then delete within [30 days].
       </p>
 
@@ -161,8 +161,8 @@ export default function PrivacyPage() {
 
       <h2>Contact</h2>
       <p>
-        [Company legal name], [address]. Email: [privacy email]. WhatsApp: Misa, +234 816 112 2458. Data Protection Officer:
-        [name or firm], [email]. NDPC registration number: [number].
+        KUDITRAKA TECHNOLOGIES.AI, [address]. Email: kuditraka.ai@gmail.com. WhatsApp: Misa, +234 816 112 2458. You can
+        contact our Data Protection Officer at kuditraka.ai@gmail.com.
       </p>
     </LegalPage>
   );

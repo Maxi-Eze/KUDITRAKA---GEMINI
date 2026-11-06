@@ -125,7 +125,7 @@ export default function TermsPage() {
       </p>
 
       <h2>Contact</h2>
-      <p>[Company legal name], [address]. Email: [support email].</p>
+      <p>KUDITRAKA TECHNOLOGIES.AI, [address]. Email: kuditraka.ai@gmail.com.</p>
     </LegalPage>
   );
 }
