@@ -62,8 +62,9 @@ export default function TermsPage() {
       <ul>
         <li>You buy <strong>credits</strong> with naira, and Misa uses credits as you use it. The price of credits is shown before you pay.</li>
         <li>
-          <strong>Credits can never be exchanged for money, sold or transferred, and are not refundable,</strong> unless the
-          law requires a refund or we charged you by mistake.
+          <strong>Credits are never exchanged for cash, sold or transferred.</strong> Unused credits stay in your account. If
+          Misa fails to give you the service you used credits for, we give the credits back. If you paid but the credits never
+          arrived, or you were charged twice, your payment is reversed, as with a failed airtime top-up.
         </li>
         <li>Free credits Misa gives you may expire, and we will say when.</li>
         <li>Payments go through a licensed payment provider. We never see or store your card details.</li>
