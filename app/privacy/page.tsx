@@ -48,7 +48,10 @@ export default function PrivacyPage() {
           ['To meet the law, for example a court order', 'Legal obligation'],
         ]}
       />
-      <p>We do not use your records to show you adverts, and we do not sell your data.</p>
+      <p>
+        We do not use your records to show you adverts, and we do not sell your data. We only send you offers or news about
+        new features if you say yes.
+      </p>
 
       <h2>Who we share it with</h2>
       <p>
@@ -76,9 +79,17 @@ export default function PrivacyPage() {
 
       <h2>Data sent outside Nigeria</h2>
       <p>
-        Some services above process data outside Nigeria, mainly in the United States. We do this because Misa cannot
-        understand messages or voice notes without them. We rely on the safeguards in Part VIII of the NDPA, including the
-        providers&apos; contract terms and their security measures.
+        Some services above process data outside Nigeria, mainly in the United States. Misa can&apos;t read your messages,
+        voice notes or photos without them.
+      </p>
+      <p>
+        The NDPC has not declared that the United States gives adequate protection to personal data. This means Nigerian law
+        may not fully protect your data there, and a foreign court or authority could ask a provider for it. To reduce this
+        risk, we send each service only what it needs, and they may not use it for anything else.
+      </p>
+      <p>
+        When you tick &quot;I agree&quot; at sign-up, you consent to this transfer (NDPA s.43). You can withdraw that consent
+        by deleting your account; Misa can&apos;t work without these services.
       </p>
 
       <h2>How long we keep it</h2>
@@ -149,7 +160,10 @@ export default function PrivacyPage() {
       </p>
 
       <h2>Contact</h2>
-      <p>[Company legal name], [address]. Email: [privacy email]. WhatsApp: Misa, +234 816 112 2458.</p>
+      <p>
+        [Company legal name], [address]. Email: [privacy email]. WhatsApp: Misa, +234 816 112 2458. Data Protection Officer:
+        [name or firm], [email]. NDPC registration number: [number].
+      </p>
     </LegalPage>
   );
 }

@@ -37,6 +37,25 @@ export default function TermsPage() {
         and for removing them when they leave. Staff use your account under these terms.
       </p>
 
+      <h2>Your customers&apos; data</h2>
+      <p>
+        When you save your customers&apos; names, phone numbers or debts in Misa, you are responsible for that information
+        under the NDPA, and we keep it for you on your instructions. We will:
+      </p>
+      <ul>
+        <li>use it only to provide Misa to you;</li>
+        <li>keep it secure and confidential;</li>
+        <li>
+          share it only with the services listed in the{' '}
+          <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>;
+        </li>
+        <li>help you if a customer asks to see, correct or delete their details;</li>
+        <li>delete it when you delete it or close your account.</li>
+      </ul>
+      <p>
+        You agree to save only what you need, and to let your customers know you keep a record of what they owe in Misa.
+      </p>
+
       <h2>Misa can make mistakes</h2>
       <p>Misa uses AI to read messages, voice notes and photos. It can misread an amount, an item or a name.</p>
       <ul>
