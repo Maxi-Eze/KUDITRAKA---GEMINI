@@ -7,6 +7,8 @@ export interface RegisterData {
   password: string;
   business_name?: string;
   phone?: string;
+  /** Which Terms and Privacy Policy the trader agreed to (lib/legal.ts LEGAL_VERSION). */
+  terms_version?: string;
 }
 
 export interface LoginData {
