@@ -13,7 +13,7 @@ export default function PrivacyPage() {
 
       <h2>Who we are</h2>
       <p>
-        Misa is run by KUDITRAKA TECHNOLOGIES.AI (CAC registration number 7101960), [registered address], Nigeria (&quot;Kuditraka&quot;,
+        Misa is run by KUDITRAKA TECHNOLOGIES.AI (CAC registration number 7101960), Gbagada, Lagos, Nigeria (&quot;Kuditraka&quot;,
         &quot;we&quot;, &quot;us&quot;). We decide how your personal data is used, so we are the data controller under
         the Nigeria Data Protection Act 2023 (NDPA).
       </p>
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
 
       <h2>Contact</h2>
       <p>
-        KUDITRAKA TECHNOLOGIES.AI, [address]. Email: kuditraka.ai@gmail.com. WhatsApp: Misa, +234 816 112 2458. You can
+        KUDITRAKA TECHNOLOGIES.AI, Gbagada, Lagos. Email: kuditraka.ai@gmail.com. WhatsApp: Misa, +234 816 112 2458. You can
         contact our Data Protection Officer at kuditraka.ai@gmail.com.
       </p>
     </LegalPage>
