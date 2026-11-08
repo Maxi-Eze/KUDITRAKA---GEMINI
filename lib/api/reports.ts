@@ -102,6 +102,8 @@ export const reportsApi = {
   getDaily: () => client.get<DailyReport>('/reports/daily'),
   getAnalytics: () => client.get<Analytics>('/reports/analytics'),
   getWeeklyCheckup: () => client.get<WeeklyCheckup>('/reports/weekly-checkup'),
+  /** Recent days that had records (the server returns at most 36). */
+  getDailyActivity: () => client.get<Analytics>('/reports/analytics?period=daily&limit=36'),
   /** The month's report as a PDF (month is 1-12). */
   getMonthlyPdf: (year: number, month: number) =>
     client.getFile(`/reports/monthly-pdf?year=${year}&month=${month}`),

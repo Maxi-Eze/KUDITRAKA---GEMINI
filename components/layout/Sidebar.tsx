@@ -12,6 +12,7 @@ import {
   Clock,
   User,
   HandCoins,
+  Landmark,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
@@ -27,6 +28,7 @@ const navItems = [
   { href: '/debts', label: 'Debts', icon: HandCoins },
   { href: '/inventory', label: 'Inventory', icon: Package },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/loans', label: 'Misa Loans', icon: Landmark },
   { href: '/chat-history', label: 'Chat History', icon: Clock },
   { href: '/profile', label: 'Profile', icon: User },
 ];
