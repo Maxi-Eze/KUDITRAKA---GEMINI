@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { authApi } from '@/lib/api';
 import type { ProfileUpdateData } from '@/lib/api/auth';
 
+import { markAccountOnDevice } from '@/lib/welcome';
 import { queryKeys } from './keys';
 import type { StaffRight, StaffRole, User } from '@/lib/types';
 
@@ -59,6 +60,7 @@ export function useLogin() {
     mutationFn: authApi.login,
     onSuccess: (res) => {
       localStorage.setItem('ai-bk-token', res.token);
+      markAccountOnDevice();
       const mapped = mapUser(res.user as unknown as Record<string, unknown>);
       qc.setQueryData(queryKeys.auth.user(), mapped);
       toast.success('Logged in successfully');
@@ -79,6 +81,7 @@ export function useStaffLogin() {
     mutationFn: authApi.staffLogin,
     onSuccess: async (res) => {
       localStorage.setItem('ai-bk-token', res.token);
+      markAccountOnDevice();
       // Load the staff profile (business + role) before opening the app.
       qc.removeQueries({ queryKey: queryKeys.auth.user() });
       const raw = (await authApi.getProfile()) as unknown as Record<string, unknown>;
@@ -99,6 +102,7 @@ export function useSignup() {
   return useMutation({
     mutationFn: authApi.register,
     onSuccess: async (_data, variables) => {
+      markAccountOnDevice();
       // Sign the new user straight in with the details they just typed, so they go on to set up
       // their business. If that fails, the account still exists: fall back to the login page.
       try {

@@ -71,11 +71,37 @@ export interface Analytics {
   };
 }
 
+/** Last week (Mon–Sun) vs the week before: the same numbers as Misa's Monday WhatsApp check-up. */
+export interface WeeklyCheckup {
+  hasActivity: boolean;
+  text: string | null;
+  week: {
+    start_date: string;
+    end_date: string;
+    sales: number;
+    spent: number;
+    sales_minus_spending: number;
+    sales_before: number;
+    spent_before: number;
+    sales_change_pct: number | null;
+    spent_change_pct: number | null;
+    records: number;
+    top_item: { name: string; quantity: number } | null;
+    best_day: { date: string; weekday: string; sales: number } | null;
+    owed_total: number;
+    debtor_count: number;
+    late_count: number;
+    running_low: string[];
+    tip: string | null;
+  };
+}
+
 export const reportsApi = {
   getSummary: (period: ReportPeriod = 'daily') =>
     client.get<ReportSummary>(`/reports/summary?period=${period}`),
   getDaily: () => client.get<DailyReport>('/reports/daily'),
   getAnalytics: () => client.get<Analytics>('/reports/analytics'),
+  getWeeklyCheckup: () => client.get<WeeklyCheckup>('/reports/weekly-checkup'),
   /** The month's report as a PDF (month is 1-12). */
   getMonthlyPdf: (year: number, month: number) =>
     client.getFile(`/reports/monthly-pdf?year=${year}&month=${month}`),

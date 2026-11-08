@@ -18,6 +18,16 @@ export function useDailyReport() {
   });
 }
 
+/** Last week's check-up. Fails quietly (no retry) when the server doesn't have it yet or the person can't see reports. */
+export function useWeeklyCheckup() {
+  return useQuery({
+    queryKey: queryKeys.reports.weeklyCheckup(),
+    queryFn: reportsApi.getWeeklyCheckup,
+    retry: false,
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
 export function useAnalytics() {
   return useQuery({
     queryKey: queryKeys.reports.analytics(),
