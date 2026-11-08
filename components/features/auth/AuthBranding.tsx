@@ -1,4 +1,4 @@
-import { Mic, Globe, TrendingUp } from 'lucide-react';
+import { Mic, Globe, TrendingUp, HandCoins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 
@@ -21,6 +21,11 @@ const features = [
     icon: TrendingUp,
     title: 'Smart Insights',
     description: 'AI-powered business advice',
+  },
+  {
+    icon: HandCoins,
+    title: 'Interest-free Business Loans',
+    description: 'Use Misa consistently to qualify for business loans. No interest, we only take a share of the profit.',
   },
 ];
 
