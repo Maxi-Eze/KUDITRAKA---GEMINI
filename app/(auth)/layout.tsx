@@ -1,5 +1,6 @@
 import { AuthBranding } from '@/components/features/auth/AuthBranding';
 import { CobwebCanvas } from '@/components/features/auth/CobwebCanvas';
+import { PhoneWelcome } from '@/components/features/auth/PhoneWelcome';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,6 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="absolute inset-0 z-20 pointer-events-none">
         <CobwebCanvas />
       </div>
+      <PhoneWelcome />
     </div>
   );
 }
