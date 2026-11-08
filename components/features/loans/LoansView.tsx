@@ -77,7 +77,7 @@ function GettingReady({ progress: p }: { progress: LoanProgress }) {
     <>
       <section className="space-y-2 rounded-2xl border border-border bg-card p-5">
         <h2 className="text-2xl font-bold leading-tight">Business loans with no interest</h2>
-        <p className="text-sm text-muted-foreground">We only take a share of the profit. You see the terms before you agree.</p>
+        <p className="text-sm text-muted-foreground">We only take a share of the profit.</p>
       </section>
 
       <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
@@ -114,9 +114,7 @@ function GettingReady({ progress: p }: { progress: LoanProgress }) {
         <Steps progress={p} />
       </section>
 
-      <p className="text-xs text-muted-foreground">
-        These steps get you ready. We may ask for more when you ask for a loan, and we review each business before we decide.
-      </p>
+      <p className="text-xs text-muted-foreground">Terms and conditions apply.</p>
     </>
   );
 }
@@ -129,7 +127,7 @@ function CanAsk({ progress: p }: { progress: LoanProgress }) {
           <Check className="h-6 w-6" strokeWidth={3} />
         </span>
         <h2 className="text-2xl font-bold leading-tight">You can now ask for a loan</h2>
-        <p className="text-sm">No interest. We only take a share of the profit. You see the terms before you agree.</p>
+        <p className="text-sm">No interest. We only take a share of the profit.</p>
         <Button className="h-12 w-full" nativeButton={false} render={<a href="mailto:kuditraka.ai@gmail.com?subject=Misa%20Loans" />}>
           Ask for a loan
         </Button>
@@ -140,9 +138,7 @@ function CanAsk({ progress: p }: { progress: LoanProgress }) {
         <Steps progress={p} />
       </section>
 
-      <p className="text-xs text-muted-foreground">
-        We may ask for more when you ask for a loan, and we review each business before we decide.
-      </p>
+      <p className="text-xs text-muted-foreground">Terms and conditions apply.</p>
     </>
   );
 }

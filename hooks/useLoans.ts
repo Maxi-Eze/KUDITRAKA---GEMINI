@@ -21,6 +21,12 @@ export function useLoanProgress(): { progress: LoanProgress; isLoading: boolean 
     queryKey: queryKeys.reports.dailyActivity(),
     queryFn: reportsApi.getDailyActivity,
   });
+  // Fails quietly until the server has it; the screen then says the count is coming.
+  const server = useQuery({
+    queryKey: queryKeys.reports.loanProgress(),
+    queryFn: reportsApi.getLoanProgress,
+    retry: false,
+  });
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
@@ -32,11 +38,10 @@ export function useLoanProgress(): { progress: LoanProgress; isLoading: boolean 
 
   const list = Array.isArray(items.data) ? items.data : [];
   return {
-    isLoading: items.isLoading || counts.isLoading || days.isLoading,
+    isLoading: items.isLoading || counts.isLoading || days.isLoading || server.isLoading,
     progress: {
-      // Counting whole months needs a small server part; until then the screen says so.
-      activeMonths: null,
-      daysThisMonth: daysRecordedThisMonth(days.data?.timeline ?? []),
+      activeMonths: server.data?.active_months ?? null,
+      daysThisMonth: server.data?.days_this_month ?? daysRecordedThisMonth(days.data?.timeline ?? []),
       itemsTotal: list.length,
       itemsWithCost: itemsWithCostPrice(list),
       countWeeks: weeksWithCount(Array.isArray(counts.data) ? counts.data : []),

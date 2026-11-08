@@ -96,12 +96,22 @@ export interface WeeklyCheckup {
   };
 }
 
+export interface LoanProgressData {
+  active_months: number;
+  active_months_needed: number;
+  active_days_needed: number;
+  days_this_month: number;
+  months: { month: string; days: number; active: boolean }[];
+}
+
 export const reportsApi = {
   getSummary: (period: ReportPeriod = 'daily') =>
     client.get<ReportSummary>(`/reports/summary?period=${period}`),
   getDaily: () => client.get<DailyReport>('/reports/daily'),
   getAnalytics: () => client.get<Analytics>('/reports/analytics'),
   getWeeklyCheckup: () => client.get<WeeklyCheckup>('/reports/weekly-checkup'),
+  /** Active months towards Misa Loans (owner only). */
+  getLoanProgress: () => client.get<LoanProgressData>('/loans/progress'),
   /** Recent days that had records (the server returns at most 36). */
   getDailyActivity: () => client.get<Analytics>('/reports/analytics?period=daily&limit=36'),
   /** The month's report as a PDF (month is 1-12). */
