@@ -12,6 +12,7 @@ import {
   Clock,
   User,
   HandCoins,
+  Landmark,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
@@ -27,6 +28,7 @@ const navItems = [
   { href: '/debts', label: 'Debts', icon: HandCoins },
   { href: '/inventory', label: 'Inventory', icon: Package },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/loans', label: 'Misa Loans', icon: Landmark },
   { href: '/chat-history', label: 'Chat History', icon: Clock },
   { href: '/profile', label: 'Profile', icon: User },
 ];
@@ -34,10 +36,12 @@ const navItems = [
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  /** Called when a section is tapped (the phone menu closes itself). */
+  onNavigate?: () => void;
   className?: string;
 }
 
-export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, onNavigate, className }: SidebarProps) {
   const pathname = usePathname();
   const { data: user } = useUser();
   // Staff only see the pages they can use, with plainer names; the staff home links to their chats.
@@ -79,6 +83,7 @@ export function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               title={collapsed ? item.label : undefined}
               className={cn(
                 'flex items-center gap-3 rounded-lg text-sm font-medium transition-colors relative',

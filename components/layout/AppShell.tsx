@@ -61,8 +61,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile sidebar sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 p-0">
-          <Sidebar collapsed={false} onToggle={() => {}} />
+        {/* Exactly the menu's width. Tapping a section, or outside the menu, closes it. */}
+        <SheetContent side="left" showCloseButton={false} className="gap-0 p-0 data-[side=left]:w-64 data-[side=left]:sm:max-w-64">
+          <Sidebar collapsed={false} onToggle={() => {}} onNavigate={() => setMobileOpen(false)} />
         </SheetContent>
       </Sheet>
 

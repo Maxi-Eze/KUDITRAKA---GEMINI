@@ -25,6 +25,7 @@ const routeLabels: Record<string, string> = {
   '/debts': 'Debts',
   '/inventory': 'Inventory',
   '/reports': 'Reports',
+  '/loans': 'Misa Loans',
   '/chat-history': 'Chat History',
   '/profile': 'Profile',
 };
