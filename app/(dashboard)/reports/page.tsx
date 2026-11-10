@@ -7,6 +7,7 @@ import { MonthlyChart } from '@/components/features/reports/MonthlyChart';
 import { ReportOverview } from '@/components/features/reports/ReportOverview';
 import { MonthlyPdfCard } from '@/components/features/reports/MonthlyPdfCard';
 import { ProfitByItem } from '@/components/features/reports/ProfitPanel';
+import { BusinessStatementCard } from '@/components/features/reports/BusinessStatementCard';
 import { useUser } from '@/hooks/useAuth';
 import { isOwner } from '@/lib/permissions';
 import { useSummary, useAnalytics } from '@/hooks/useReports';
@@ -41,6 +42,7 @@ export default function ReportsPage() {
           analytics={analytics}
           isLoading={analyticsLoading}
         />
+        {isOwner(user) && <BusinessStatementCard />}
         <MonthlyPdfCard />
       </div>
     </div>

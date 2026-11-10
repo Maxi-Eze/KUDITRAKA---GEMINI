@@ -158,6 +158,13 @@ export interface ShopAlerts {
   mixed_prices: { item: string; low: number; high: number; prices: number[]; low_by: string | null }[];
 }
 
+/** The owner's business statement (numbers; the PDF comes from getStatementPdf). */
+export interface BusinessStatementData {
+  period_label: string;
+  months: { month: string; label: string; so_far: boolean; sales: number; profit_on_goods: number }[];
+  totals: { sales: number; profit_on_goods: number; running_costs: number; profit_after_running_costs: number; days_recorded: number };
+}
+
 export const reportsApi = {
   getSummary: (period: ReportPeriod = 'daily') =>
     client.get<ReportSummary>(`/reports/summary?period=${period}`),
@@ -168,6 +175,9 @@ export const reportsApi = {
   getProfit: (period: ProfitPeriod) => client.get<ProfitReport>(`/reports/profit?period=${period}`),
   /** Running out soon, money sleeping on the shelf, credit given, mixed prices (owner only). */
   getAlerts: () => client.get<ShopAlerts>('/reports/alerts'),
+  /** Business statement for 3, 6 or 12 months (owner only). */
+  getStatementData: (months: number) => client.get<BusinessStatementData>(`/reports/statement-data?months=${months}`),
+  getStatementPdf: (months: number) => client.getFile(`/reports/statement?months=${months}`),
   /** Active months towards Misa Loans (owner only). */
   getLoanProgress: () => client.get<LoanProgressData>('/loans/progress'),
   /** Recent days that had records (the server returns at most 36). */
