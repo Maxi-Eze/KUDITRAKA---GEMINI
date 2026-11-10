@@ -11,6 +11,7 @@ import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
 import { YourWeek } from '@/components/features/dashboard/YourWeek';
 import { LoansCard } from '@/components/features/loans/LoansCard';
 import { ProfitThisMonth } from '@/components/features/reports/ProfitPanel';
+import { ThingsToCheck } from '@/components/features/dashboard/ThingsToCheck';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
 import { StaffHome } from '@/components/features/team/StaffHome';
 import { isOwner, usesStaffHome } from '@/lib/permissions';
@@ -45,6 +46,8 @@ function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
       />
 
       {showGetStarted && <ProfitThisMonth />}
+
+      {showGetStarted && <ThingsToCheck />}
 
       {showGetStarted && <LoansCard />}
 
