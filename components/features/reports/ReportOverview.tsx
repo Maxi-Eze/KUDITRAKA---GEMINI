@@ -65,7 +65,7 @@ export function ReportOverview({ analytics, isLoading }: ReportOverviewProps) {
       color: 'text-red-500',
     },
     {
-      label: 'Net Profit',
+      label: 'Money in − out',
       value: formatCurrency(stats?.netProfit ?? 0),
       icon: Wallet,
       color: 'text-primary',
