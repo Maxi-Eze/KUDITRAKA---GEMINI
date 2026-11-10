@@ -61,7 +61,7 @@ export function DailySummaryCard({ period, onPeriodChange, summary, isLoading }:
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Calendar className="h-4 w-4 text-muted-foreground" />
-        <Select value={period} onValueChange={(value) => onPeriodChange(value as ReportPeriod)}>
+        <Select items={PERIODS} value={period} onValueChange={(value) => value && onPeriodChange(value as ReportPeriod)}>
           <SelectTrigger className="h-8 w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>

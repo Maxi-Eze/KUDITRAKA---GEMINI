@@ -104,12 +104,47 @@ export interface LoanProgressData {
   months: { month: string; days: number; active: boolean }[];
 }
 
+export type ProfitPeriod = 'this_week' | 'this_month' | 'last_month';
+
+export interface ItemProfit {
+  item: string;
+  quantity: number;
+  sales: number;
+  cost: number;
+  profit: number;
+  margin_percent: number;
+}
+
+/** Profit on goods: sales minus what those goods cost (owner only). */
+export interface ProfitReport {
+  label?: string;
+  total_sales: number;
+  goods_sales: number;
+  other_income: number;
+  sales_with_cost: number;
+  cost_of_goods_sold: number;
+  profit_on_goods: number;
+  margin_percent: number;
+  /** Share of goods sales whose cost is known (0-100). */
+  cost_coverage_percent: number;
+  no_cost_price: { sales: number; items: string[] };
+  cost_unclear: { sales: number; items: string[] };
+  stock_bought: number;
+  running_costs: number;
+  running_costs_recorded: boolean;
+  profit_after_running_costs: number;
+  items: ItemProfit[];
+  losing_items: ItemProfit[];
+}
+
 export const reportsApi = {
   getSummary: (period: ReportPeriod = 'daily') =>
     client.get<ReportSummary>(`/reports/summary?period=${period}`),
   getDaily: () => client.get<DailyReport>('/reports/daily'),
   getAnalytics: () => client.get<Analytics>('/reports/analytics'),
   getWeeklyCheckup: () => client.get<WeeklyCheckup>('/reports/weekly-checkup'),
+  /** Profit on goods for a period (owner only). */
+  getProfit: (period: ProfitPeriod) => client.get<ProfitReport>(`/reports/profit?period=${period}`),
   /** Active months towards Misa Loans (owner only). */
   getLoanProgress: () => client.get<LoanProgressData>('/loans/progress'),
   /** Recent days that had records (the server returns at most 36). */
