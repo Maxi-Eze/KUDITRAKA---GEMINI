@@ -147,6 +147,17 @@ export interface ProfitReport {
   losing_items: ItemProfit[];
 }
 
+/** Things to check over the last 7 days (owner only). */
+export interface ShopAlerts {
+  sleeping_stock: {
+    total_value: number;
+    items: { name: string; stock: number; value: number | null; days_since_sale: number | null }[];
+  };
+  running_out: { name: string; stock: number; days_left: number }[];
+  credit: { owed_total: number; new_credit: number; sales: number; share_percent: number | null };
+  mixed_prices: { item: string; low: number; high: number; prices: number[]; low_by: string | null }[];
+}
+
 export const reportsApi = {
   getSummary: (period: ReportPeriod = 'daily') =>
     client.get<ReportSummary>(`/reports/summary?period=${period}`),
@@ -155,6 +166,8 @@ export const reportsApi = {
   getWeeklyCheckup: () => client.get<WeeklyCheckup>('/reports/weekly-checkup'),
   /** Profit on goods for a period (owner only). */
   getProfit: (period: ProfitPeriod) => client.get<ProfitReport>(`/reports/profit?period=${period}`),
+  /** Running out soon, money sleeping on the shelf, credit given, mixed prices (owner only). */
+  getAlerts: () => client.get<ShopAlerts>('/reports/alerts'),
   /** Active months towards Misa Loans (owner only). */
   getLoanProgress: () => client.get<LoanProgressData>('/loans/progress'),
   /** Recent days that had records (the server returns at most 36). */

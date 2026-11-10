@@ -41,6 +41,15 @@ export function useProfit(period: ProfitPeriod, enabled = true) {
   });
 }
 
+/** Things to check (owners only). Fails quietly when the server doesn't have it yet. */
+export function useShopAlerts() {
+  return useQuery({
+    queryKey: queryKeys.reports.alerts(),
+    queryFn: reportsApi.getAlerts,
+    retry: false,
+  });
+}
+
 export function useAnalytics() {
   return useQuery({
     queryKey: queryKeys.reports.analytics(),

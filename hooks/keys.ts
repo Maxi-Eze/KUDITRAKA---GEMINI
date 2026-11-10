@@ -16,6 +16,7 @@ export const queryKeys = {
     dailyActivity: () => [...queryKeys.reports.all, 'daily-activity'] as const,
     loanProgress: () => [...queryKeys.reports.all, 'loan-progress'] as const,
     profit: (period: string) => [...queryKeys.reports.all, 'profit', period] as const,
+    alerts: () => [...queryKeys.reports.all, 'alerts'] as const,
   },
   customers: {
     all: ['customers'] as const,
