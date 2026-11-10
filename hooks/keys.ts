@@ -15,6 +15,9 @@ export const queryKeys = {
     weeklyCheckup: () => [...queryKeys.reports.all, 'weekly-checkup'] as const,
     dailyActivity: () => [...queryKeys.reports.all, 'daily-activity'] as const,
     loanProgress: () => [...queryKeys.reports.all, 'loan-progress'] as const,
+    profit: (period: string) => [...queryKeys.reports.all, 'profit', period] as const,
+    alerts: () => [...queryKeys.reports.all, 'alerts'] as const,
+    statement: (months: string) => [...queryKeys.reports.all, 'statement', months] as const,
   },
   customers: {
     all: ['customers'] as const,
@@ -43,6 +46,10 @@ export const queryKeys = {
     list: () => [...queryKeys.team.all, 'list'] as const,
     detail: (id: string) => [...queryKeys.team.all, 'detail', id] as const,
     me: () => [...queryKeys.team.all, 'me'] as const,
+  },
+  regularCosts: {
+    all: ['regular-costs'] as const,
+    list: () => [...queryKeys.regularCosts.all, 'list'] as const,
   },
   whatsapp: {
     all: ['whatsapp'] as const,

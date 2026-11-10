@@ -14,7 +14,7 @@ export const RIGHTS: { key: StaffRight; label: string; hint?: string; warn?: boo
   { key: 'change_prices', label: 'Change selling prices' },
   { key: 'see_cost_prices', label: 'See cost prices' },
   { key: 'see_shop_sales', label: "See everyone's sales" },
-  { key: 'see_reports', label: 'See profit and reports' },
+  { key: 'see_reports', label: 'See reports', hint: 'Sales and money in and out. Profit stays with you.' },
   { key: 'delete_sales', label: 'Delete sales', hint: 'Only for someone you trust fully', warn: true },
 ];
 

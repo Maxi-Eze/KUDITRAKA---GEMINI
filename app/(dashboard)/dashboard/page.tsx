@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransactions } from '@/hooks/useTransactions';
-import { useSummary, useAnalytics } from '@/hooks/useReports';
+import { useSummary, useAnalytics, useProfit } from '@/hooks/useReports';
 import { useUser } from '@/hooks/useAuth';
 import { KpiCards } from '@/components/features/dashboard/KpiCards';
 import { RevenueChart } from '@/components/features/dashboard/RevenueChart';
@@ -10,6 +10,8 @@ import { RecentTransactions } from '@/components/features/dashboard/RecentTransa
 import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
 import { YourWeek } from '@/components/features/dashboard/YourWeek';
 import { LoansCard } from '@/components/features/loans/LoansCard';
+import { ProfitThisMonth } from '@/components/features/reports/ProfitPanel';
+import { ThingsToCheck } from '@/components/features/dashboard/ThingsToCheck';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
 import { StaffHome } from '@/components/features/team/StaffHome';
 import { isOwner, usesStaffHome } from '@/lib/permissions';
@@ -25,6 +27,8 @@ function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
   const { data: summary, isLoading: summaryLoading } = useSummary('daily');
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
   const { data: transactions, isLoading: txLoading } = useTransactions();
+  // Profit and cost prices are for the owner only (showGetStarted is true only for owners)
+  const { data: profit } = useProfit('this_month', showGetStarted);
 
   const isAnyLoading = summaryLoading || analyticsLoading || txLoading;
   // New business with nothing recorded yet: show what to do first.
@@ -38,7 +42,12 @@ function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
         analytics={analytics}
         transactionCount={Array.isArray(transactions) ? transactions.length : 0}
         isLoading={isAnyLoading}
+        profit={showGetStarted ? profit : undefined}
       />
+
+      {showGetStarted && <ProfitThisMonth />}
+
+      {showGetStarted && <ThingsToCheck />}
 
       {showGetStarted && <LoansCard />}
 
