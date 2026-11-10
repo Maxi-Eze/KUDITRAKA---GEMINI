@@ -38,6 +38,7 @@ export function YourWeek() {
   const { data } = useWeeklyCheckup();
   if (!data?.hasActivity) return null;
   const w = data.week;
+  const p = w.profit;
 
   return (
     <Card>
@@ -52,13 +53,44 @@ export function YourWeek() {
             <Row label="Sales">
               {formatCurrency(w.sales)} <Change pct={w.sales_change_pct} goodWhenUp />
             </Row>
-            <Row label="Spent">
-              {formatCurrency(w.spent)} <Change pct={w.spent_change_pct} goodWhenUp={false} />
-            </Row>
-            <Row label="Sales minus spending">{formatCurrency(w.sales_minus_spending)}</Row>
+            {p ? (
+              <>
+                <Row label="Profit">
+                  <span className={cn(p.profit_on_goods < 0 && 'text-red-500')}>{formatCurrency(p.profit_on_goods)}</span>
+                  {p.cost_coverage_percent < 100 && (
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      counts {Math.floor(p.cost_coverage_percent)}% of sales
+                    </span>
+                  )}
+                </Row>
+                {p.stock_bought > 0 && <Row label="Put into stock">{formatCurrency(p.stock_bought)}</Row>}
+                {p.running_costs > 0 && <Row label="Running costs">{formatCurrency(p.running_costs)}</Row>}
+              </>
+            ) : (
+              <>
+                <Row label="Spent">
+                  {formatCurrency(w.spent)} <Change pct={w.spent_change_pct} goodWhenUp={false} />
+                </Row>
+                <Row label="Sales minus spending">{formatCurrency(w.sales_minus_spending)}</Row>
+              </>
+            )}
           </div>
           <div className="divide-y divide-border">
-            {w.top_item && <Row label="Sold most">{`${w.top_item.name} (${w.top_item.quantity.toLocaleString()})`}</Row>}
+            {p && p.best_items.length > 0 ? (
+              <Row label="Best">{p.best_items.map((i) => `${i.item} ${formatCurrency(i.profit)}`).join(', ')}</Row>
+            ) : (
+              w.top_item && <Row label="Sold most">{`${w.top_item.name} (${w.top_item.quantity.toLocaleString()})`}</Row>
+            )}
+            {p && p.losing_items.length > 0 && (
+              <Row label="Selling below cost">
+                <span className="text-red-500">
+                  {p.losing_items
+                    .slice(0, 3)
+                    .map((i) => `${i.item} (loss ${formatCurrency(i.loss)})`)
+                    .join(', ')}
+                </span>
+              </Row>
+            )}
             {w.best_day && <Row label="Best day">{`${w.best_day.weekday} (${formatCurrency(w.best_day.sales)})`}</Row>}
             {w.debtor_count > 0 && (
               <Row label="Customers owe you">
