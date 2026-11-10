@@ -92,6 +92,16 @@ export interface WeeklyCheckup {
     debtor_count: number;
     late_count: number;
     running_low: string[];
+    /** Real profit (owners only, once the server has it; null when no sale had a cost price). */
+    profit?: {
+      profit_on_goods: number;
+      cost_coverage_percent: number;
+      stock_bought: number;
+      running_costs: number;
+      best_items: { item: string; profit: number }[];
+      losing_items: { item: string; loss: number; unit_price: number; unit_cost: number }[];
+      no_cost_items: string[];
+    } | null;
     tip: string | null;
   };
 }
