@@ -46,6 +46,10 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.team.all, 'detail', id] as const,
     me: () => [...queryKeys.team.all, 'me'] as const,
   },
+  regularCosts: {
+    all: ['regular-costs'] as const,
+    list: () => [...queryKeys.regularCosts.all, 'list'] as const,
+  },
   whatsapp: {
     all: ['whatsapp'] as const,
     status: () => [...queryKeys.whatsapp.all, 'status'] as const,
