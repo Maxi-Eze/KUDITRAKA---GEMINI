@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Check, X } from 'lucide-react';
 import { parsedTransactionSchema } from '@/lib/validations/transaction';
 import type { ParsedTransaction, TransactionType, PaymentMethod } from '@/lib/types';
+import { needsQuantity } from './ParsedCard';
 
 interface ParsedCardEditProps {
   parsed: ParsedTransaction;
@@ -19,12 +20,14 @@ const typeOptions: TransactionType[] = ['income', 'expense'];
 const paymentOptions: PaymentMethod[] = ['cash', 'transfer', 'pos', 'card', 'cheque', 'other'];
 
 export function ParsedCardEdit({ parsed, onSave, onCancel }: ParsedCardEditProps) {
+  // Misa didn't hear a number for a countable item: leave it empty and make the trader fill it in.
+  const askHowMany = needsQuantity(parsed);
   const [formData, setFormData] = useState({
     type: parsed.type,
     amount: parsed.amount.toString(),
     item: parsed.item,
-    quantity: parsed.quantity?.toString() || '',
-    customer: parsed.customer,
+    quantity: askHowMany ? '' : parsed.quantity?.toString() || '',
+    customer: parsed.customer || '',
     payment_method: parsed.payment_method,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -32,6 +35,11 @@ export function ParsedCardEdit({ parsed, onSave, onCancel }: ParsedCardEditProps
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const result = parsedTransactionSchema.safeParse(formData);
+
+    if (result.success && askHowMany && !result.data.quantity) {
+      setErrors({ quantity: formData.type === 'expense' ? 'How many did you buy?' : 'How many did you sell?' });
+      return;
+    }
 
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -54,6 +62,7 @@ export function ParsedCardEdit({ parsed, onSave, onCancel }: ParsedCardEditProps
       customer: result.data.customer || '',
       quantity: result.data.quantity,
       payment_method: result.data.payment_method,
+      missing_fields: undefined,
     });
   };
 
@@ -109,9 +118,10 @@ export function ParsedCardEdit({ parsed, onSave, onCancel }: ParsedCardEditProps
               type="number"
               min="0"
               value={formData.quantity}
-              placeholder="Optional"
+              placeholder={askHowMany ? 'e.g. 3' : 'Optional'}
+              autoFocus={askHowMany}
               aria-invalid={!!errors.quantity}
-              className={cn('h-8 w-24', errors.quantity && 'border-destructive')}
+              className={cn('h-8', askHowMany ? 'w-28' : 'w-24', errors.quantity && 'border-destructive')}
               onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
             />
           </div>

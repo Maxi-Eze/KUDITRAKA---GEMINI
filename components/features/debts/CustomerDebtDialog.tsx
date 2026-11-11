@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { lagosYmd } from '@/lib/lagosDate';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Banknote, Loader2, MessageCircle, Plus, Trash2 } from 'lucide-react';
@@ -180,7 +181,7 @@ function CreditSaleForm({ name, onDone }: { name: string; onDone: () => void }) 
           quantity: qty,
           customer_id: customer.id,
           payment_method: 'credit',
-          date: new Date().toISOString().split('T')[0],
+          date: lagosYmd(),
           raw_input: '',
           is_credit: true,
         },
