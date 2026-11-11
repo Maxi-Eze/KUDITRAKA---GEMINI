@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { lagosYmd } from '@/lib/lagosDate';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -70,7 +71,7 @@ function toFormValues(transaction: Transaction): TransactionFormInput {
     customer: transaction.customer_name || '',
     quantity: transaction.quantity ? String(transaction.quantity) : '',
     payment_method: transaction.payment_method as PaymentMethod,
-    date: transaction.date.split('T')[0],
+    date: lagosYmd(transaction.date),
   };
 }
 

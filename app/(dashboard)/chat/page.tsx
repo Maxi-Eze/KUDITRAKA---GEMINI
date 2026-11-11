@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
+import { lagosYmd } from '@/lib/lagosDate';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -291,7 +292,8 @@ function ChatPageContent() {
           item: parsed.item,
           customer_id: customerId,
           payment_method: parsed.payment_method,
-          date: new Date().toISOString().split('T')[0],
+          // The day Misa understood ("yesterday"), else today in Lagos
+          date: parsed.date || lagosYmd(),
           raw_input: '',
           quantity: parsed.quantity,
           // Sold on credit: the server also adds it to the debtors book (same as WhatsApp).

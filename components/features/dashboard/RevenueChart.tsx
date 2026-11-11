@@ -14,6 +14,7 @@ import {
   Filler,
 } from 'chart.js';
 import type { Transaction } from '@/lib/types';
+import { lagosLastDays, lagosYmd } from '@/lib/lagosDate';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
@@ -22,19 +23,12 @@ interface RevenueChartProps {
   isLoading?: boolean;
 }
 
-function getLast7Days(): string[] {
-  const days: string[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    days.push(d.toISOString().split('T')[0]);
-  }
-  return days;
-}
+// The last 7 days in Lagos time, so a sale at 12:30 am shows on its own day.
+const getLast7Days = (): string[] => lagosLastDays(7);
 
 function formatDateLabel(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
+  const d = new Date(dateStr + 'T12:00:00Z');
+  return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 }
 
 export function RevenueChart({ transactions, isLoading }: RevenueChartProps) {
@@ -48,7 +42,7 @@ export function RevenueChart({ transactions, isLoading }: RevenueChartProps) {
 
     for (const tx of transactions) {
       if (tx.type !== 'income') continue;
-      const day = tx.date.split('T')[0];
+      const day = lagosYmd(tx.date);
       if (day in incomeByDate) {
         incomeByDate[day] += typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
       }
