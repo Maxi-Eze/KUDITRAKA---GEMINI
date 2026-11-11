@@ -5,6 +5,9 @@ import { Check, Pencil, X } from 'lucide-react';
 import { StockNoteLine, TrackItemPrompt } from '@/components/features/stock/StockFeedback';
 import type { ParsedTransaction, StockResult } from '@/lib/types';
 
+/** The server flagged a countable item with no number said. */
+export const needsQuantity = (parsed: ParsedTransaction) => Boolean(parsed.missing_fields?.includes('quantity'));
+
 interface ParsedCardProps {
   parsed: ParsedTransaction;
   onConfirm: () => void;
@@ -16,6 +19,8 @@ interface ParsedCardProps {
 }
 
 export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming, isConfirmed, stock }: ParsedCardProps) {
+  // "Sold Indomie 18k": Misa doesn't know how many, so she asks before saving instead of guessing 1.
+  const askHowMany = needsQuantity(parsed) && !isConfirmed;
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-3">
       <div className="flex items-center gap-2">
@@ -43,7 +48,12 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
           <span className="font-medium">{parsed.item}</span>
         </div>
 
-        {parsed.quantity && (
+        {askHowMany ? (
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">Quantity</span>
+            <span className="font-medium text-amber-500">How many?</span>
+          </div>
+        ) : parsed.quantity && (
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">Quantity</span>
             <span className="font-medium">{parsed.quantity}</span>
@@ -85,12 +95,12 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
         <div className="flex gap-2 pt-2">
           <Button
             size="sm"
-            onClick={onConfirm}
+            onClick={askHowMany ? onEdit : onConfirm}
             disabled={isConfirming}
             className="flex-1"
           >
             <Check className="h-4 w-4" />
-            {isConfirming ? 'Saving...' : 'Confirm'}
+            {isConfirming ? 'Saving...' : askHowMany ? 'Add how many' : 'Confirm'}
           </Button>
           <Button
             size="sm"

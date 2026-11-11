@@ -1,4 +1,5 @@
 import { ParsedTransaction, PaymentMethod } from './types';
+import { lagosYmd } from '@/lib/lagosDate';
 
 const incomeKeywords = ['sold', 'received', 'earned', 'sale', 'income', 'got', 'collected', 'revenue'];
 const expenseKeywords = ['bought', 'paid', 'purchased', 'spent', 'expense', 'cost', 'payment', 'fee', 'bill'];
@@ -140,7 +141,7 @@ export function generateId(): string {
 }
 
 export function getTodayDate(): string {
-  return new Date().toISOString().split('T')[0];
+  return lagosYmd();
 }
 
 export function formatDate(dateStr: string): string {

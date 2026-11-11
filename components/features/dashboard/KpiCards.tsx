@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
+import { lagosMonth } from '@/lib/lagosDate';
 import type { ReportSummary, Analytics, ProfitReport } from '@/lib/api/reports';
 
 interface KpiCardsProps {
@@ -14,8 +15,7 @@ interface KpiCardsProps {
 }
 
 function getMonthNet(analytics: Analytics): number {
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonth = lagosMonth();
   const point = analytics.timeline.find((p) => p.period.slice(0, 7) === currentMonth);
   return point?.net_profit ?? 0;
 }

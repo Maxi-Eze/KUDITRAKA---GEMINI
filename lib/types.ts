@@ -107,6 +107,10 @@ export interface ParsedTransaction {
   customer: string;
   payment_method: string;
   quantity?: number;
+  /** A day the trader said ("yesterday"), as YYYY-MM-DD. */
+  date?: string | null;
+  /** Details the trader didn't say: "quantity" = a countable item with no number, so the card asks "How many?". */
+  missing_fields?: string[];
   /** Sold on credit: the customer still owes (all or credit_amount). */
   is_credit?: boolean;
   credit_amount?: number | null;

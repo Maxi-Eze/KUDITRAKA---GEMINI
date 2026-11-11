@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { lagosMonth } from '@/lib/lagosDate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Doughnut } from 'react-chartjs-2';
@@ -19,8 +20,7 @@ export function ExpenseChart({ analytics, isLoading }: ExpenseChartProps) {
   const chartData = useMemo(() => {
     if (!analytics) return null;
 
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const currentMonth = lagosMonth();
     const point = analytics.timeline.find((p) => p.period.slice(0, 7) === currentMonth);
     const income = point?.income ?? 0;
     const expense = point?.expense ?? 0;
