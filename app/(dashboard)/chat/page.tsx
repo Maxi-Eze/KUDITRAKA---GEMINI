@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
 import { lagosYmd } from '@/lib/lagosDate';
 import { useSearchParams } from 'next/navigation';
@@ -382,6 +383,9 @@ function ChatPageContent() {
           <span className="text-sm font-medium truncate">
             {sessionList.find((s) => s.id === activeSessionId)?.title || 'New Chat'}
           </span>
+          <Link href="/chat-history" className="ml-auto shrink-0 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground">
+            Past chats
+          </Link>
         </div>
 
         <div className="flex-1 min-h-0">
