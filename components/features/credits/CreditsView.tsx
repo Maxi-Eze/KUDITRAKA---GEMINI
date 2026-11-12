@@ -5,9 +5,8 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { useCreditPricing, useCreditUsage } from '@/hooks/useCredits';
+import { useCreditUsage } from '@/hooks/useCredits';
 import { formatCredits, LOW_CREDITS } from '@/lib/credits';
-import type { CreditPricing } from '@/lib/api/credits';
 import { TopUpSheet } from './TopUpSheet';
 
 const PERIODS = [
@@ -15,12 +14,11 @@ const PERIODS = [
   { days: 30, label: 'Last 30 days' },
 ];
 
-/** Owner's credits page: balance and Add credits, where credits went (and who used them), prices. */
+/** Owner's credits page, kept short: balance and Add credits, then where credits went (and who used them). */
 export function CreditsView() {
   const [days, setDays] = useState(7);
   const [topUpOpen, setTopUpOpen] = useState(false);
   const { data: usage, isLoading } = useCreditUsage(days);
-  const { data: pricing } = useCreditPricing();
   const balance = usage?.balance ?? 0;
   const low = !!usage && !usage.shadow && balance < LOW_CREDITS;
 
@@ -33,7 +31,6 @@ export function CreditsView() {
         ) : (
           <p className={cn('text-3xl font-bold', low && 'text-amber-500')}>{formatCredits(balance)}</p>
         )}
-        <p className="mt-1 text-xs text-muted-foreground">1 credit = ₦1. Credits can't be withdrawn or sent to anyone.</p>
         {usage && usage.on_credit.count > 0 && (
           <p className="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
             {usage.on_credit.count} {usage.on_credit.count === 1 ? 'record was' : 'records were'} saved on credit (
@@ -107,68 +104,13 @@ export function CreditsView() {
           </>
         )}
 
-        {usage && usage.added.length > 0 && (
-          <div className="space-y-1 pt-2">
-            <p className="text-sm font-medium">Credits added</p>
-            <ul className="divide-y divide-border">
-              {usage.added.map((a, i) => (
-                <li key={`${a.date}-${i}`} className="flex items-center justify-between py-2 text-sm">
-                  <span>
-                    {a.label}{' '}
-                    <span className="text-xs text-muted-foreground">
-                      {new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'Africa/Lagos' }).format(
-                        new Date(a.date),
-                      )}
-                    </span>
-                  </span>
-                  <span className="font-medium text-primary">+{formatCredits(a.credits)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <p className="pt-2 text-xs text-muted-foreground">
+          Free: checking your credits, adding credits, help and the menu, greetings, and the reminders Misa sends you. Misa asks
+          before anything big, like reading a receipt.
+        </p>
       </section>
-
-      {pricing && <PriceList pricing={pricing} />}
 
       <TopUpSheet open={topUpOpen} onOpenChange={setTopUpOpen} />
     </div>
-  );
-}
-
-function PriceList({ pricing }: { pricing: CreditPricing }) {
-  const p = pricing.pricing;
-  const v = pricing.variablePricing;
-  const rows: [string, string][] = [
-    ['Record a sale', formatCredits(p.record_sale)],
-    ['Record an expense', formatCredits(p.record_expense)],
-    ['Record a restock', formatCredits(p.record_restock)],
-    ['A report question to Misa', formatCredits(p.business_analytics)],
-    ['A settings change in chat', formatCredits(p.settings_update)],
-    [
-      'A bigger AI request',
-      `${v.complex_ai_operation.standard}–${formatCredits(v.complex_ai_operation.voice_or_multi_agent)}`,
-    ],
-    [
-      'Reading a receipt photo or PDF',
-      `${v.receipt_extraction.image}–${formatCredits(v.receipt_extraction.pdf_document)}`,
-    ],
-  ];
-  return (
-    <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
-      <h2 className="text-base font-semibold">What uses credits</h2>
-      <ul className="divide-y divide-border">
-        {rows.map(([label, cost]) => (
-          <li key={label} className="flex items-center justify-between gap-3 py-2 text-sm">
-            <span>{label}</span>
-            <span className="shrink-0 font-medium">{cost}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="text-xs text-muted-foreground">
-        Free: checking your credits, adding credits, help and the menu, greetings, and the reminders Misa sends you. Misa asks
-        before anything big, like reading a receipt.
-      </p>
-    </section>
   );
 }

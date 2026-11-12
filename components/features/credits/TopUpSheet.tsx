@@ -43,7 +43,7 @@ export function TopUpSheet({ open, onOpenChange }: TopUpSheetProps) {
       <SheetContent side="right" className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Add credits</SheetTitle>
-          <SheetDescription>1 credit = ₦1. Pay by bank transfer from any bank app.</SheetDescription>
+          <SheetDescription>Pay by bank transfer from any bank app.</SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-6">
           {paid !== null ? (
@@ -127,11 +127,6 @@ function ChooseAmount({
           {valid && quote ? formatNaira(quote.total) : valid && isFetching ? '…' : '—'}
         </p>
         <p className="text-xs text-muted-foreground">Includes payment fees.</p>
-        {valid && quote && (
-          <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-            {formatNaira(quote.credits)} for credits + {formatNaira(quote.payment_fee + quote.service_charge)} payment fees.
-          </p>
-        )}
       </div>
 
       <Button
@@ -227,12 +222,7 @@ function PayToAccount({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1">
-        <p className="text-sm font-medium">Transfer exactly {formatNaira(account.amount)}</p>
-        <p className="text-xs text-muted-foreground">
-          For {formatCredits(account.credits)} (includes payment fees). The bank only accepts this exact amount.
-        </p>
-      </div>
+      <p className="text-sm font-medium">Send this exact amount. Your credits are added once it lands.</p>
 
       <div className="space-y-4 rounded-xl border border-border bg-card p-4">
         <div>
@@ -241,12 +231,6 @@ function PayToAccount({
         </div>
         {account.accountNumber && <CopyRow label="Account number" value={account.accountNumber} />}
         <CopyRow label="Amount" value={String(Math.round(account.amount))} shown={formatNaira(account.amount)} />
-        {account.accountName && (
-          <div>
-            <p className="text-xs text-muted-foreground">Account name</p>
-            <p className="text-sm font-medium">{account.accountName}</p>
-          </div>
-        )}
       </div>
 
       <p className="text-xs text-muted-foreground">
@@ -264,7 +248,6 @@ function PayToAccount({
       <Button className="h-11 w-full" variant="outline" disabled={checking} onClick={() => check(false)}>
         {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : "I've sent the money"}
       </Button>
-      <p className="text-center text-xs text-muted-foreground">Your credits are added by themselves once the money lands.</p>
     </div>
   );
 }
