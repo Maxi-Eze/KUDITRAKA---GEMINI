@@ -147,11 +147,11 @@ function PriceList({ pricing }: { pricing: CreditPricing }) {
     ['A settings change in chat', formatCredits(p.settings_update)],
     [
       'A bigger AI request',
-      `${formatCredits(v.complex_ai_operation.standard)}–${formatCredits(v.complex_ai_operation.voice_or_multi_agent)}`,
+      `${v.complex_ai_operation.standard}–${formatCredits(v.complex_ai_operation.voice_or_multi_agent)}`,
     ],
     [
       'Reading a receipt photo or PDF',
-      `${formatCredits(v.receipt_extraction.image)}–${formatCredits(v.receipt_extraction.pdf_document)}`,
+      `${v.receipt_extraction.image}–${formatCredits(v.receipt_extraction.pdf_document)}`,
     ],
   ];
   return (
