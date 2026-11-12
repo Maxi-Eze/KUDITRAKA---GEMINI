@@ -51,6 +51,15 @@ export const queryKeys = {
     all: ['regular-costs'] as const,
     list: () => [...queryKeys.regularCosts.all, 'list'] as const,
   },
+  credits: {
+    all: ['credits'] as const,
+    balance: () => [...queryKeys.credits.all, 'balance'] as const,
+    pricing: () => [...queryKeys.credits.all, 'pricing'] as const,
+    usage: (days: number) => [...queryKeys.credits.all, 'usage', days] as const,
+    quote: (credits: number) => [...queryKeys.credits.all, 'quote', credits] as const,
+    admin: () => [...queryKeys.credits.all, 'admin'] as const,
+    adminBusinesses: (search: string) => [...queryKeys.credits.all, 'admin-businesses', search] as const,
+  },
   whatsapp: {
     all: ['whatsapp'] as const,
     status: () => [...queryKeys.whatsapp.all, 'status'] as const,

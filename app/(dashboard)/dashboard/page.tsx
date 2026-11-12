@@ -13,6 +13,7 @@ import { LoansCard } from '@/components/features/loans/LoansCard';
 import { ProfitThisMonth } from '@/components/features/reports/ProfitPanel';
 import { ThingsToCheck } from '@/components/features/dashboard/ThingsToCheck';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
+import { CreditsBanner } from '@/components/features/credits/CreditsBanner';
 import { StaffHome } from '@/components/features/team/StaffHome';
 import { isOwner, usesStaffHome } from '@/lib/permissions';
 
@@ -36,6 +37,7 @@ function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
 
   return (
     <div className="space-y-6">
+      {showGetStarted && <CreditsBanner />}
       {showGetStarted && isNewUser && <GetStarted />}
       <KpiCards
         summary={summary}
