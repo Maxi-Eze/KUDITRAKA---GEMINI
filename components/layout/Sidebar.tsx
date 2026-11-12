@@ -13,12 +13,16 @@ import {
   User,
   HandCoins,
   Landmark,
+  Coins,
+  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useUser } from '@/hooks/useAuth';
 import { canOpenPage, staffPageLabel, usesStaffHome } from '@/lib/permissions';
+import { useCreditBalance, useCreditsActive, useIsCreditsAdmin } from '@/hooks/useCredits';
+import { formatCredits } from '@/lib/credits';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -45,7 +49,16 @@ export function Sidebar({ collapsed, onToggle, onNavigate, className }: SidebarP
   const pathname = usePathname();
   const { data: user } = useUser();
   // Staff only see the pages they can use, with plainer names; the staff home links to their chats.
-  const items = navItems
+  // Credits show once charging is switched on (owners only; staff can't open the page).
+  const creditsActive = useCreditsActive();
+  const { data: credit } = useCreditBalance(creditsActive);
+  const isCreditsAdmin = useIsCreditsAdmin();
+  const extra = [
+    ...(creditsActive ? [{ href: '/credits', label: 'Credits', icon: Coins }] : []),
+    ...(isCreditsAdmin ? [{ href: '/admin/credits', label: 'Give credits', icon: Gift }] : []),
+  ];
+  const all = [...navItems.slice(0, -1), ...extra, navItems[navItems.length - 1]];
+  const items = all
     .filter((item) => canOpenPage(user, item.href) && !(usesStaffHome(user) && item.href === '/chat-history'))
     .map((item) => ({ ...item, label: staffPageLabel(user, item.href) || item.label }));
 
@@ -98,6 +111,11 @@ export function Sidebar({ collapsed, onToggle, onNavigate, className }: SidebarP
               )}
               <item.icon size={18} className="shrink-0" />
               {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && item.href === '/credits' && credit && (
+                <span className="ml-auto shrink-0 text-xs font-normal text-sidebar-foreground/50">
+                  {formatCredits(credit.balance).replace(/ credits?$/, '')}
+                </span>
+              )}
             </Link>
           );
         })}
