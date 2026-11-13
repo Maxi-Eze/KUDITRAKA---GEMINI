@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { AlertTriangle, Clock, HandCoins, Tags } from 'lucide-react';
+import { AlertTriangle, Clock, HandCoins, Tag, Tags } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useShopAlerts } from '@/hooks/useReports';
+import { useProfit, useShopAlerts } from '@/hooks/useReports';
 import { formatCurrency } from '@/lib/utils';
 
 const daysText = (d: number) => (d < 1 ? 'less than a day left' : `about ${d} day${d === 1 ? '' : 's'} left`);
@@ -25,14 +25,21 @@ function Section({ icon: Icon, title, children }: { icon: typeof Clock; title: s
   );
 }
 
-/** Owner's Dashboard: running out soon, money sleeping on the shelf, credit given, mixed prices (last 7 days). */
+/**
+ * Owner's Home: running out soon, money sleeping on the shelf, credit given, mixed prices (last 7
+ * days), and items sold this month with no cost price (so profit can't count them).
+ */
 export function ThingsToCheck() {
   const { data: a } = useShopAlerts();
-  if (!a) return null;
+  const { data: profit } = useProfit('this_month');
+  const noCost = profit ? [...profit.no_cost_price.items, ...profit.cost_unclear.items] : [];
+  if (!a && !noCost.length) return null;
 
-  const sleeping = a.sleeping_stock.items;
-  const showCredit = a.credit.new_credit > 0;
-  if (!a.running_out.length && !sleeping.length && !showCredit && !a.mixed_prices.length) return null;
+  const sleeping = a?.sleeping_stock.items ?? [];
+  const showCredit = !!a && a.credit.new_credit > 0;
+  const runningOut = a?.running_out ?? [];
+  const mixed = a?.mixed_prices ?? [];
+  if (!runningOut.length && !sleeping.length && !showCredit && !mixed.length && !noCost.length) return null;
 
   return (
     <Card>
@@ -40,9 +47,9 @@ export function ThingsToCheck() {
         <CardTitle className="text-base">Things to check</CardTitle>
       </CardHeader>
       <CardContent className="divide-y divide-border">
-        {a.running_out.length > 0 && (
+        {runningOut.length > 0 && (
           <Section icon={Clock} title="Running out soon">
-            {a.running_out.slice(0, 4).map((r) => (
+            {runningOut.slice(0, 4).map((r) => (
               <p key={r.name}>
                 {r.name}: <span className="text-muted-foreground">{daysText(r.days_left)} at your pace</span>
               </p>
@@ -50,7 +57,7 @@ export function ThingsToCheck() {
           </Section>
         )}
 
-        {sleeping.length > 0 && (
+        {a && sleeping.length > 0 && (
           <Section icon={AlertTriangle} title="Money sleeping on the shelf">
             <p>
               {a.sleeping_stock.total_value > 0 && (
@@ -68,7 +75,7 @@ export function ThingsToCheck() {
           </Section>
         )}
 
-        {showCredit && (
+        {a && showCredit && (
           <Section icon={HandCoins} title="Credit given">
             <p>
               You gave <span className="font-semibold">{formatCurrency(a.credit.new_credit)}</span> on credit in the last 7 days
@@ -83,15 +90,28 @@ export function ThingsToCheck() {
           </Section>
         )}
 
-        {a.mixed_prices.length > 0 && (
+        {mixed.length > 0 && (
           <Section icon={Tags} title="Same item, different prices">
-            {a.mixed_prices.slice(0, 3).map((m) => (
+            {mixed.slice(0, 3).map((m) => (
               <p key={m.item}>
                 {m.item} went for {joinPrices(m.prices)} each.
                 {m.low_by && <span className="text-muted-foreground"> The lowest was recorded by {m.low_by}.</span>}
               </p>
             ))}
             <p className="text-muted-foreground">If these were discounts, agree one price so you don&apos;t lose money.</p>
+          </Section>
+        )}
+
+        {noCost.length > 0 && (
+          <Section icon={Tag} title="No cost price yet">
+            <p>
+              {noCost.slice(0, 4).join(', ')}
+              {noCost.length > 4 && ` and ${noCost.length - 4} more`}.{' '}
+              <Link href="/inventory" className="font-semibold text-primary hover:underline">
+                Add cost prices
+              </Link>
+            </p>
+            <p className="text-muted-foreground">Profit can only count items with a cost price.</p>
           </Section>
         )}
       </CardContent>
