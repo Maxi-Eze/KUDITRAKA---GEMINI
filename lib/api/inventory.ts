@@ -48,6 +48,12 @@ export const inventoryApi = {
     discount?: number | null;
   }) =>
     client.post<StockSaveResult>('/inventory/bulk', data),
+  /** Chat: should Misa ask "Did you pay for delivery?" under these saved records? (the server decides) */
+  deliveryQuestion: (transactionIds: string[]) =>
+    client.post<{ ask: boolean }>('/inventory/delivery-question', { transaction_ids: transactionIds }),
+  /** The answer: an amount is shared into the stock's cost; null = no delivery. */
+  deliveryAnswer: (data: { transaction_ids: string[]; amount: number | null }) =>
+    client.post<{ added: number; items: { name: string; unit: number }[] }>('/inventory/delivery', data),
   /** "Did you mean Milo 500g?" → Yes: take a saved sale off that item and remember the name. */
   link: (data: { transaction_id: string; item_id: string }) => client.post<StockResult>('/inventory/link', data),
   /** Evening count: the real number for each counted item, saved together. */
