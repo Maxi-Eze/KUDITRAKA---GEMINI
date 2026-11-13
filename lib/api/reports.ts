@@ -158,6 +158,10 @@ export interface ShopAlerts {
   running_out: { name: string; stock: number; days_left: number }[];
   credit: { owed_total: number; new_credit: number; sales: number; share_percent: number | null };
   mixed_prices: { item: string; low: number; high: number; prices: number[]; low_by: string | null }[];
+  /** Sold for less than it cost (per unit). Servers before average cost leave it out. */
+  below_cost?: { item: string; sold_at: number; cost: number }[];
+  /** Margin (%) in the last 7 days against the usual. */
+  margin_drops?: { item: string; usual_margin: number; margin_now: number }[];
 }
 
 /** The owner's business statement (numbers; the PDF comes from getStatementPdf). */

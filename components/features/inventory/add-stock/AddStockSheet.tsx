@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/hooks/useAuth';
+import { useShopAlerts } from '@/hooks/useReports';
 import { queryKeys } from '@/hooks/keys';
 import { hasRight } from '@/lib/permissions';
 import { inventoryApi, type StockSource } from '@/lib/api/inventory';
@@ -36,7 +37,11 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
   const [step, setStep] = useState<Step>('choose');
   const [source, setSource] = useState<StockSource>('list');
   const [rows, setRows] = useState<CheckRow[]>([]);
-  const [read, setRead] = useState<Pick<StockReadResult, 'supplier' | 'unreadable'>>({ supplier: null, unreadable: [] });
+  const [read, setRead] = useState<Pick<StockReadResult, 'supplier' | 'unreadable' | 'delivery' | 'discount'>>({ supplier: null, unreadable: [] });
+  // Delivery and Discount boxes only once the server can use them (it answers with these new fields).
+  const { data: alerts } = useShopAlerts();
+  const [serverReadsExtras, setServerReadsExtras] = useState(false);
+  const showExtras = serverReadsExtras || Boolean(alerts && 'below_cost' in alerts);
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
@@ -61,7 +66,8 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
 
   const showResult = (result: StockReadResult) => {
     setRows(result.items.map(toCheckRow));
-    setRead({ supplier: result.supplier, unreadable: result.unreadable });
+    setRead({ supplier: result.supplier, unreadable: result.unreadable, delivery: result.delivery, discount: result.discount });
+    if ('delivery' in result) setServerReadsExtras(true);
     setStep('check');
   };
 
@@ -154,10 +160,20 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
     setListening(true);
   };
 
-  const save = async (lines: StockSaveLine[], recordExpense: boolean) => {
+  const save = async (
+    lines: StockSaveLine[],
+    recordExpense: boolean,
+    extras: { delivery: number | null; discount: number | null },
+  ) => {
     setSaving(true);
     try {
-      const result = await inventoryApi.saveMany({ items: lines, record_expense: recordExpense, source });
+      const result = await inventoryApi.saveMany({
+        items: lines,
+        record_expense: recordExpense,
+        source,
+        ...(extras.delivery ? { delivery: extras.delivery } : {}),
+        ...(extras.discount ? { discount: extras.discount } : {}),
+      });
       const parts = [
         result.added.length && `${result.added.length} new ${result.added.length === 1 ? 'item' : 'items'} added`,
         result.restocked.length && `${result.restocked.length} restocked`,
@@ -285,6 +301,9 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
               onRowsChange={setRows}
               supplier={read.supplier}
               unreadable={read.unreadable}
+              showExtras={showExtras}
+              delivery={read.delivery}
+              discount={read.discount}
               canRestock={hasRight(user, 'change_stock')}
               canRecordExpense={hasRight(user, 'record_sales')}
               defaultRecordExpense={source === 'photo' || source === 'file'}

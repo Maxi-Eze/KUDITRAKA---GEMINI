@@ -39,7 +39,14 @@ export const inventoryApi = {
     confirm_credits?: boolean;
   }) => client.post<StockReadResult>('/inventory/read', data),
   /** Add the checked lines to stock. */
-  saveMany: (data: { items: StockSaveLine[]; record_expense?: boolean; source?: StockSource }) =>
+  saveMany: (data: {
+    items: StockSaveLine[];
+    record_expense?: boolean;
+    source?: StockSource;
+    /** Delivery or loading paid, and a discount on the whole invoice: spread into the items' cost. */
+    delivery?: number | null;
+    discount?: number | null;
+  }) =>
     client.post<StockSaveResult>('/inventory/bulk', data),
   /** "Did you mean Milo 500g?" → Yes: take a saved sale off that item and remember the name. */
   link: (data: { transaction_id: string; item_id: string }) => client.post<StockResult>('/inventory/link', data),
