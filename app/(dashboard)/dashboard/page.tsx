@@ -7,6 +7,7 @@ import { KpiCards } from '@/components/features/dashboard/KpiCards';
 import { RecentTransactions } from '@/components/features/dashboard/RecentTransactions';
 import { LoansCard } from '@/components/features/loans/LoansCard';
 import { ThingsToCheck } from '@/components/features/dashboard/ThingsToCheck';
+import { FromStaff } from '@/components/features/dashboard/FromStaff';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
 import { CreditsBanner } from '@/components/features/credits/CreditsBanner';
 import { StaffHome } from '@/components/features/team/StaffHome';
@@ -46,6 +47,8 @@ function BusinessDashboard({ owner }: { owner: boolean }) {
         isLoading={isAnyLoading}
         profit={owner ? profit : undefined}
       />
+
+      {owner && <FromStaff />}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {owner && <ThingsToCheck />}
