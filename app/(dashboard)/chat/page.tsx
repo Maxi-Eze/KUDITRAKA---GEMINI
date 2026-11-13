@@ -14,6 +14,7 @@ import {
   useDeleteSession,
 } from '@/hooks/useChat';
 import { useCreateTransaction } from '@/hooks/useTransactions';
+import { inventoryApi } from '@/lib/api/inventory';
 import { SessionList } from '@/components/features/chat/SessionList';
 import { ChatWindow } from '@/components/features/chat/ChatWindow';
 import type { CardState } from '@/components/features/chat/ChatMessage';
@@ -313,6 +314,22 @@ function ChatPageContent() {
             toast.success(
               saved?.debt ? `Saved. ${saved.debt.customer_name} now owes ${formatCurrency(saved.debt.balance)}` : 'Transaction saved'
             );
+            // A restock: the server may want to ask "Did you pay for delivery?" (once a day at most).
+            // Older servers don't have the question; that fails quietly.
+            const restocked = saved?.type === 'expense' && saved?.stock?.status === 'updated' && (saved.stock.change ?? 0) > 0;
+            if (messageId && restocked && saved?.id) {
+              inventoryApi
+                .deliveryQuestion([saved.id])
+                .then(({ ask }) => {
+                  if (!ask) return;
+                  const current = cardStatesRef.current[messageId];
+                  if (current?.status !== 'confirmed') return;
+                  const state: CardState = { ...current, askDeliveryFor: [saved.id] };
+                  cardStatesRef.current[messageId] = state;
+                  setCardState(messageId, state);
+                })
+                .catch(() => undefined);
+            }
           },
           onError: () => {
             // Let the user try again.

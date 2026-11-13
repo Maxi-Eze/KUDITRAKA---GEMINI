@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency, cn } from '@/lib/utils';
 import { Check, Pencil, X } from 'lucide-react';
 import { StockNoteLine, TrackItemPrompt } from '@/components/features/stock/StockFeedback';
+import { DeliveryPrompt } from './DeliveryPrompt';
 import type { ParsedTransaction, StockResult } from '@/lib/types';
 
 /** The server flagged a countable item with no number said. */
@@ -16,9 +17,11 @@ interface ParsedCardProps {
   isConfirming?: boolean;
   isConfirmed?: boolean;
   stock?: StockResult;
+  /** Saved restock ids to ask "Did you pay for delivery?" about. */
+  askDeliveryFor?: string[];
 }
 
-export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming, isConfirmed, stock }: ParsedCardProps) {
+export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming, isConfirmed, stock, askDeliveryFor }: ParsedCardProps) {
   // "Sold Indomie 18k": Misa doesn't know how many, so she asks before saving instead of guessing 1.
   const askHowMany = needsQuantity(parsed) && !isConfirmed;
   return (
@@ -90,6 +93,7 @@ export function ParsedCard({ parsed, onConfirm, onEdit, onDiscard, isConfirming,
           </div>
           <StockNoteLine stock={stock} />
           <TrackItemPrompt stock={stock} />
+          {askDeliveryFor?.length ? <DeliveryPrompt transactionIds={askDeliveryFor} /> : null}
         </div>
       ) : (
         <div className="flex gap-2 pt-2">
