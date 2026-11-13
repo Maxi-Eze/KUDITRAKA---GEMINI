@@ -46,7 +46,7 @@ export function RecentTransactions({ transactions, isLoading }: RecentTransactio
   const sorted = transactions
     ? [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     : [];
-  const recent = sorted.slice(0, 6);
+  const recent = sorted.slice(0, 5);
 
   return (
     <Card>
