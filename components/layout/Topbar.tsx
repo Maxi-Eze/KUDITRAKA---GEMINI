@@ -30,7 +30,7 @@ const routeLabels: Record<string, string> = {
   '/reports': 'Reports',
   '/loans': 'Misa Loans',
   '/credits': 'Credits',
-  '/admin/credits': 'Give credits',
+  '/admin/credits': 'Credits admin',
   '/chat-history': 'Chat History',
   '/profile': 'Profile',
 };
@@ -225,7 +225,7 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
                       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-accent hover:text-foreground transition-colors"
                     >
                       <Gift className="h-4 w-4" />
-                      Give credits
+                      Credits admin
                     </Link>
                   )}
                   <button

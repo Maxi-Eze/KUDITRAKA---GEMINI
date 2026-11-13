@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { useAdminBusinesses, useGiveCredits, useIsCreditsAdmin } from '@/hooks/useCredits';
+import { useAdminBusinesses, useGiveCredits } from '@/hooks/useCredits';
 import { formatCredits } from '@/lib/credits';
 import type { BusinessCredits } from '@/lib/api/credits';
 
@@ -18,14 +18,13 @@ import type { BusinessCredits } from '@/lib/api/credits';
  * "Tell them on WhatsApp" is off (for quietly fixing a mistake).
  */
 export function GiveCreditsView() {
-  const isAdmin = useIsCreditsAdmin();
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const [picked, setPicked] = useState<BusinessCredits | null>(null);
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [notify, setNotify] = useState(true);
-  const list = useAdminBusinesses(search, isAdmin);
+  const list = useAdminBusinesses(search, true);
   const give = useGiveCredits();
 
   // Search after the typing stops for a moment.
@@ -33,10 +32,6 @@ export function GiveCreditsView() {
     const t = setTimeout(() => setSearch(query.trim()), 350);
     return () => clearTimeout(t);
   }, [query]);
-
-  if (!isAdmin) {
-    return <p className="mx-auto max-w-2xl text-sm text-muted-foreground">This page is only for the Kuditraka team.</p>;
-  }
 
   const credits = Math.round(Number(amount.replace(/[^\d]/g, '')) || 0);
   const canGive = !!picked && credits > 0 && reason.trim().length >= 3 && !give.isPending;
@@ -57,11 +52,8 @@ export function GiveCreditsView() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Give credits</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Free credits for a business. Each gift is recorded with your name and the reason.</p>
-      </div>
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">Free credits for a business. Each gift is recorded with your name and the reason.</p>
 
       <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
         <p className="text-sm font-medium">1. Find the business</p>
