@@ -111,7 +111,9 @@ export interface LoanProgressData {
   active_months_needed: number;
   active_days_needed: number;
   days_this_month: number;
-  months: { month: string; days: number; active: boolean }[];
+  /** A paid top-up this month (needed for the month to count). Older servers leave it out. */
+  bought_this_month?: boolean;
+  months: { month: string; days: number; bought_credits?: boolean; active: boolean }[];
 }
 
 export type ProfitPeriod = 'this_week' | 'this_month' | 'last_month';

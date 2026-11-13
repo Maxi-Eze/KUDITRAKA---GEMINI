@@ -10,6 +10,8 @@ export interface LoanProgress {
   /** Months where Misa was used well on enough days. null until the server can count them. */
   activeMonths: number | null;
   daysThisMonth: number;
+  /** Credits bought this month (each active month needs it). null until the server says. */
+  boughtThisMonth: boolean | null;
   itemsTotal: number;
   itemsWithCost: number;
   countWeeks: number;
@@ -59,6 +61,7 @@ export function nextStep(p: LoanProgress): { title: string; action: string; href
   if (missing > 0) {
     return { title: `Add cost prices to ${missing} more item${missing === 1 ? '' : 's'}`, action: 'Add cost prices', href: '/inventory' };
   }
+  if (p.boughtThisMonth === false) return { title: 'Buy credits this month', action: 'Add credits', href: '/credits' };
   if (p.countWeeks < COUNT_WEEKS_CHECKED) return { title: 'Count your stock this week', action: 'Count stock', href: '/inventory' };
   return { title: "Record today's sales", action: 'Record a sale', href: '/chat' };
 }

@@ -9,8 +9,8 @@ import { daysRecordedThisMonth, itemsWithCostPrice, weeksWithCount, type LoanPro
 
 /** On this computer only: /loans?demo=getting or ?demo=ready shows sample numbers, to review the screens. */
 const DEMO: Record<string, LoanProgress> = {
-  getting: { activeMonths: 4, daysThisMonth: 11, itemsTotal: 30, itemsWithCost: 12, countWeeks: 2 },
-  ready: { activeMonths: 9, daysThisMonth: 24, itemsTotal: 30, itemsWithCost: 30, countWeeks: 4 },
+  getting: { activeMonths: 4, daysThisMonth: 11, boughtThisMonth: false, itemsTotal: 30, itemsWithCost: 12, countWeeks: 2 },
+  ready: { activeMonths: 9, daysThisMonth: 24, boughtThisMonth: true, itemsTotal: 30, itemsWithCost: 30, countWeeks: 4 },
 };
 
 export function useLoanProgress(): { progress: LoanProgress; isLoading: boolean } {
@@ -42,6 +42,7 @@ export function useLoanProgress(): { progress: LoanProgress; isLoading: boolean 
     progress: {
       activeMonths: server.data?.active_months ?? null,
       daysThisMonth: server.data?.days_this_month ?? daysRecordedThisMonth(days.data?.timeline ?? []),
+      boughtThisMonth: server.data?.bought_this_month ?? null,
       itemsTotal: list.length,
       itemsWithCost: itemsWithCostPrice(list),
       countWeeks: weeksWithCount(Array.isArray(counts.data) ? counts.data : []),
