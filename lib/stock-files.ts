@@ -113,7 +113,7 @@ export async function readXlsx(buffer: ArrayBuffer): Promise<string[][]> {
     .filter((r) => r.some((c) => c));
 }
 
-const HEADERS: Record<keyof Omit<StockIntakeLine, never>, RegExp> = {
+const HEADERS: Record<keyof Omit<StockIntakeLine, 'free'>, RegExp> = {
   name: /^(item|items|name|product|products|description|goods|item name|product name)$/i,
   quantity: /^(qty|quantity|stock|units?|count|no\.?|number|pcs|in stock|amount in stock)$/i,
   unit_cost: /^(cost|cost price|unit cost|buying price|purchase price|cp|price paid|rate)$/i,
