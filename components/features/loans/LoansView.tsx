@@ -57,6 +57,13 @@ function Steps({ progress: p }: { progress: LoanProgress }) {
         title={`Stay active for ${ACTIVE_MONTHS_NEEDED} months`}
         detail={months === null ? `Use Misa well on ${ACTIVE_DAYS_NEEDED} days every month` : `${months} of ${ACTIVE_MONTHS_NEEDED} active months`}
       />
+      {p.boughtThisMonth !== null && (
+        <Step
+          done={p.boughtThisMonth}
+          title="Buy credits in the month"
+          detail={p.boughtThisMonth ? 'Done for this month' : 'Needed for this month to count'}
+        />
+      )}
       <Step
         done={p.itemsTotal > 0 && p.itemsWithCost === p.itemsTotal}
         title="Add cost prices to your stock"
@@ -94,7 +101,8 @@ function GettingReady({ progress: p }: { progress: LoanProgress }) {
         )}
         <MonthBlocks active={p.activeMonths ?? 0} />
         <p className="text-sm text-muted-foreground">
-          A month counts when you use Misa well on at least {ACTIVE_DAYS_NEEDED} days: recording your real sales on the day you make them.
+          A month counts when you use Misa well on at least {ACTIVE_DAYS_NEEDED} days (recording your real sales on the day you make
+          them){p.boughtThisMonth !== null ? ' and buy credits that month' : ''}.
         </p>
         <p className="text-sm">This month so far: {p.daysThisMonth} of {ACTIVE_DAYS_NEEDED} days</p>
       </section>
