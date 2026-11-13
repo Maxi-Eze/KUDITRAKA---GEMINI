@@ -1,7 +1,7 @@
 'use client';
 
-import { GiveCreditsView } from '@/components/features/credits/GiveCreditsView';
+import { CreditsAdminView } from '@/components/features/credits/CreditsAdminView';
 
-export default function GiveCreditsPage() {
-  return <GiveCreditsView />;
+export default function CreditsAdminPage() {
+  return <CreditsAdminView />;
 }

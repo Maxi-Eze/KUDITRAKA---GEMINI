@@ -103,3 +103,39 @@ export function useGiveCredits() {
     onError: (error: Error) => toast.error(error.message || 'Could not give the credits'),
   });
 }
+
+export function useAdminPayments(search: string, status: string, enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.credits.adminPayments(search, status),
+    queryFn: () => creditsApi.adminPayments(search, status),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useAdminCheckPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: creditsApi.adminCheckPayment,
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.credits.all }),
+    onError: (error: Error) => toast.error(error.message || 'Could not check the payment'),
+  });
+}
+
+export function useAdminSettings(enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.credits.adminSettings(),
+    queryFn: creditsApi.adminSettings,
+    enabled,
+    retry: false,
+  });
+}
+
+export function useSaveAdminSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: creditsApi.adminSaveSettings,
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.credits.all }),
+    onError: (error: Error) => toast.error(error.message || 'Could not save the settings'),
+  });
+}

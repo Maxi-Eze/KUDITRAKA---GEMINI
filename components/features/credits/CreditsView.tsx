@@ -31,6 +31,15 @@ export function CreditsView() {
         ) : (
           <p className={cn('text-3xl font-bold', low && 'text-amber-500')}>{formatCredits(balance)}</p>
         )}
+        {usage?.expiring_soon && (
+          <p className="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
+            {formatCredits(usage.expiring_soon.credits)} expire on{' '}
+            {new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'Africa/Lagos' }).format(
+              new Date(usage.expiring_soon.date),
+            )}
+            .
+          </p>
+        )}
         {usage && usage.on_credit.count > 0 && (
           <p className="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
             {usage.on_credit.count} {usage.on_credit.count === 1 ? 'record was' : 'records were'} saved on credit (

@@ -59,6 +59,8 @@ export const queryKeys = {
     quote: (credits: number) => [...queryKeys.credits.all, 'quote', credits] as const,
     admin: () => [...queryKeys.credits.all, 'admin'] as const,
     adminBusinesses: (search: string) => [...queryKeys.credits.all, 'admin-businesses', search] as const,
+    adminPayments: (search: string, status: string) => [...queryKeys.credits.all, 'admin-payments', search, status] as const,
+    adminSettings: () => [...queryKeys.credits.all, 'admin-settings'] as const,
   },
   whatsapp: {
     all: ['whatsapp'] as const,
