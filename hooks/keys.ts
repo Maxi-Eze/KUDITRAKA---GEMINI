@@ -17,6 +17,7 @@ export const queryKeys = {
     loanProgress: () => [...queryKeys.reports.all, 'loan-progress'] as const,
     profit: (period: string) => [...queryKeys.reports.all, 'profit', period] as const,
     alerts: () => [...queryKeys.reports.all, 'alerts'] as const,
+    staffChecks: () => [...queryKeys.reports.all, 'staff-checks'] as const,
     statement: (months: string) => [...queryKeys.reports.all, 'statement', months] as const,
   },
   customers: {

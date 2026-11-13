@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { AlertTriangle, Clock, HandCoins, Tag, Tags } from 'lucide-react';
+import { AlertTriangle, Clock, HandCoins, Tag, Tags, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProfit, useShopAlerts } from '@/hooks/useReports';
 import { formatCurrency } from '@/lib/utils';
@@ -25,6 +25,17 @@ function Section({ icon: Icon, title, children }: { icon: typeof Clock; title: s
   );
 }
 
+function ChangePrices() {
+  return (
+    <p>
+      <Link href="/inventory" className="font-semibold text-primary hover:underline">
+        Change price
+      </Link>
+      <span className="text-muted-foreground"> (often the cost went up)</span>
+    </p>
+  );
+}
+
 /**
  * Owner's Home: running out soon, money sleeping on the shelf, credit given, mixed prices (last 7
  * days), and items sold this month with no cost price (so profit can't count them).
@@ -39,7 +50,11 @@ export function ThingsToCheck() {
   const showCredit = !!a && a.credit.new_credit > 0;
   const runningOut = a?.running_out ?? [];
   const mixed = a?.mixed_prices ?? [];
-  if (!runningOut.length && !sleeping.length && !showCredit && !mixed.length && !noCost.length) return null;
+  const belowCost = a?.below_cost ?? [];
+  const marginDrops = a?.margin_drops ?? [];
+  if (!runningOut.length && !sleeping.length && !showCredit && !mixed.length && !noCost.length && !belowCost.length && !marginDrops.length) {
+    return null;
+  }
 
   return (
     <Card>
@@ -47,6 +62,28 @@ export function ThingsToCheck() {
         <CardTitle className="text-base">Things to check</CardTitle>
       </CardHeader>
       <CardContent className="divide-y divide-border">
+        {belowCost.length > 0 && (
+          <Section icon={TrendingDown} title="Selling below cost">
+            {belowCost.slice(0, 3).map((b) => (
+              <p key={b.item}>
+                {b.item}: sold at {formatCurrency(b.sold_at)}, <span className="text-muted-foreground">cost you {formatCurrency(b.cost)}</span>
+              </p>
+            ))}
+            <ChangePrices />
+          </Section>
+        )}
+
+        {marginDrops.length > 0 && (
+          <Section icon={TrendingDown} title="Profit dropped">
+            {marginDrops.slice(0, 3).map((m) => (
+              <p key={m.item}>
+                {m.item}: <span className="text-muted-foreground">usually {Math.round(m.usual_margin)}% profit, now {Math.round(m.margin_now)}%</span>
+              </p>
+            ))}
+            <ChangePrices />
+          </Section>
+        )}
+
         {runningOut.length > 0 && (
           <Section icon={Clock} title="Running out soon">
             {runningOut.slice(0, 4).map((r) => (

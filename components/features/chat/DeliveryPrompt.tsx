@@ -13,7 +13,7 @@ import { formatCurrency } from '@/lib/utils';
  * Under a saved restock in chat: "Did you pay for delivery or loading on this stock?" An amount is
  * shared into the stock's cost; "No" is fine. The server decides when to ask (once a day at most).
  */
-export function DeliveryPrompt({ transactionIds }: { transactionIds: string[] }) {
+export function DeliveryPrompt({ transactionIds, onDone }: { transactionIds: string[]; onDone?: () => void }) {
   const qc = useQueryClient();
   const [amount, setAmount] = useState('');
   const [busy, setBusy] = useState(false);
@@ -36,6 +36,8 @@ export function DeliveryPrompt({ transactionIds }: { transactionIds: string[] })
       } else {
         setDone('Okay, no delivery added.');
       }
+      qc.invalidateQueries({ queryKey: queryKeys.reports.staffChecks() });
+      onDone?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save that. Please try again.');
     } finally {

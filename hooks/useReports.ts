@@ -50,6 +50,15 @@ export function useShopAlerts() {
   });
 }
 
+/** "From your staff" (owners only). Fails quietly when the server doesn't have it yet. */
+export function useStaffChecks() {
+  return useQuery({
+    queryKey: queryKeys.reports.staffChecks(),
+    queryFn: reportsApi.getStaffChecks,
+    retry: false,
+  });
+}
+
 export function useAnalytics() {
   return useQuery({
     queryKey: queryKeys.reports.analytics(),
