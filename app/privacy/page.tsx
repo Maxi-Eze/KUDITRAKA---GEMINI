@@ -150,7 +150,7 @@ export default function PrivacyPage() {
 
       <h2>Contact</h2>
 
-      <p>KUDITRAKA TECHNOLOGIES.AI, Gbagada, Lagos. Email: <a href="mailto:kuditraka.ai@gmail.com" className="text-primary hover:underline">kuditraka.ai@gmail.com</a>. WhatsApp: Misa, +234 816 112 2458. You can contact our Data Protection Officer at <a href="mailto:kuditraka.ai@gmail.com" className="text-primary hover:underline">kuditraka.ai@gmail.com</a>.</p>
+      <p>KUDITRAKA TECHNOLOGIES.AI, Gbagada, Lagos. Email: <a href="mailto:kuditraka.ai@gmail.com" className="text-primary hover:underline">kuditraka.ai@gmail.com</a>. Website: misa.kuditraka.name.ng. You can contact our Data Protection Officer at <a href="mailto:kuditraka.ai@gmail.com" className="text-primary hover:underline">kuditraka.ai@gmail.com</a>.</p>
     </LegalPage>
   );
 }

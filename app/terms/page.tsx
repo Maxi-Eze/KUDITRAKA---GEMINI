@@ -10,7 +10,7 @@ export default function TermsPage() {
     <LegalPage title="Terms of Use">
       <p><strong>In short:</strong>{' '}Misa helps you keep your books, but you stay responsible for your business and for checking your figures.</p>
 
-      <p>By creating an account or using Misa on WhatsApp, you agree to these terms and to the <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link> above.</p>
+      <p>By creating an account or using Misa on WhatsApp, you agree to these terms and to the <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.</p>
 
       <h2>What Misa is</h2>
 

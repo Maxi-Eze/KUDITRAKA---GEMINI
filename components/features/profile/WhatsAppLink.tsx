@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/field';
 import { useWhatsAppStatus, useLinkWhatsApp } from '@/hooks';
 import { PHONE_ERROR, PHONE_HINT, toNigerianInternational } from '@/lib/phone';
+import { ChatOnWhatsApp } from '@/components/features/whatsapp/ChatOnWhatsApp';
 
 export function WhatsAppLink() {
   const { data: status, isLoading, isError } = useWhatsAppStatus();
@@ -128,6 +129,8 @@ export function WhatsAppLink() {
             </div>
           </div>
         )}
+        {/* Grey until the number is linked, then green and opens WhatsApp to Misa */}
+        {!isLoading && !isError && <ChatOnWhatsApp className="mt-4 border-t border-border pt-4" />}
       </CardContent>
     </Card>
   );
