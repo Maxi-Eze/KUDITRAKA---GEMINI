@@ -17,6 +17,7 @@ export const queryKeys = {
     loanProgress: () => [...queryKeys.reports.all, 'loan-progress'] as const,
     profit: (period: string) => [...queryKeys.reports.all, 'profit', period] as const,
     alerts: () => [...queryKeys.reports.all, 'alerts'] as const,
+    staffChecks: () => [...queryKeys.reports.all, 'staff-checks'] as const,
     statement: (months: string) => [...queryKeys.reports.all, 'statement', months] as const,
   },
   customers: {
@@ -50,6 +51,17 @@ export const queryKeys = {
   regularCosts: {
     all: ['regular-costs'] as const,
     list: () => [...queryKeys.regularCosts.all, 'list'] as const,
+  },
+  credits: {
+    all: ['credits'] as const,
+    balance: () => [...queryKeys.credits.all, 'balance'] as const,
+    pricing: () => [...queryKeys.credits.all, 'pricing'] as const,
+    usage: (days: number) => [...queryKeys.credits.all, 'usage', days] as const,
+    quote: (credits: number) => [...queryKeys.credits.all, 'quote', credits] as const,
+    admin: () => [...queryKeys.credits.all, 'admin'] as const,
+    adminBusinesses: (search: string) => [...queryKeys.credits.all, 'admin-businesses', search] as const,
+    adminPayments: (search: string, status: string) => [...queryKeys.credits.all, 'admin-payments', search, status] as const,
+    adminSettings: () => [...queryKeys.credits.all, 'admin-settings'] as const,
   },
   whatsapp: {
     all: ['whatsapp'] as const,

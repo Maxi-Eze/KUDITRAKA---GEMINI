@@ -17,6 +17,8 @@ export interface CheckRow {
   unitCost: string;
   sellingPrice: string;
   barcode?: string | null;
+  /** Free or bonus goods: no cost. */
+  free?: boolean;
   match: StockLineMatch;
   /** existing: add to `item` · new: a new stock item · undecided: still asking "Did you mean…?" */
   choice: 'existing' | 'new' | 'undecided';
@@ -35,6 +37,7 @@ export function toCheckRow(line: StockIntakeLine & { match: StockLineMatch }): C
     unitCost: line.unit_cost != null ? String(line.unit_cost) : '',
     sellingPrice: line.selling_price != null ? String(line.selling_price) : '',
     barcode: line.barcode ?? null,
+    free: Boolean(line.free),
     match: line.match,
     choice: existing ? 'existing' : line.match.type === 'suggest' ? 'undecided' : 'new',
     item: existing ? line.match.item : undefined,
@@ -51,6 +54,11 @@ interface CheckStockListProps {
   onRowsChange: (rows: CheckRow[]) => void;
   supplier?: string | null;
   unreadable?: string[];
+  /** Show the Delivery and Discount boxes (the server can use them). */
+  showExtras: boolean;
+  /** What the invoice showed, to fill the boxes in. */
+  delivery?: number | null;
+  discount?: number | null;
   /** Staff without "Change stock counts" can only add new items. */
   canRestock: boolean;
   /** Staff without "Record sales and expenses" can't record what was paid. */
@@ -58,7 +66,7 @@ interface CheckStockListProps {
   defaultRecordExpense: boolean;
   saving: boolean;
   onBack: () => void;
-  onSave: (lines: StockSaveLine[], recordExpense: boolean) => void;
+  onSave: (lines: StockSaveLine[], recordExpense: boolean, extras: { delivery: number | null; discount: number | null }) => void;
 }
 
 export function CheckStockList({
@@ -66,6 +74,9 @@ export function CheckStockList({
   onRowsChange,
   supplier,
   unreadable = [],
+  showExtras,
+  delivery: readDelivery,
+  discount: readDiscount,
   canRestock,
   canRecordExpense,
   defaultRecordExpense,
@@ -74,6 +85,8 @@ export function CheckStockList({
   onSave,
 }: CheckStockListProps) {
   const [recordExpense, setRecordExpense] = useState(defaultRecordExpense && canRecordExpense);
+  const [delivery, setDelivery] = useState(readDelivery ? String(readDelivery) : '');
+  const [discount, setDiscount] = useState(readDiscount ? String(readDiscount) : '');
 
   const update = (key: string, patch: Partial<CheckRow>) =>
     onRowsChange(rows.map((r) => (r.key === key ? { ...r, ...patch } : r)));
@@ -91,7 +104,12 @@ export function CheckStockList({
     [rows, canRestock]
   );
   const ready = rows.length > 0 && problems.every((p) => !p);
-  const totalCost = rows.reduce((sum, r) => sum + (positive(r.unitCost) ?? 0) * (positive(r.quantity) ?? 0), 0);
+  const itemsCost = rows.reduce((sum, r) => sum + (r.free ? 0 : (positive(r.unitCost) ?? 0) * (positive(r.quantity) ?? 0)), 0);
+  // Delivery and discount only count when there are costs to spread them over.
+  const extrasOn = showExtras && itemsCost > 0;
+  const deliveryAmount = extrasOn ? positive(delivery) : null;
+  const discountAmount = extrasOn ? positive(discount) : null;
+  const totalCost = Math.max(0, itemsCost + (deliveryAmount ?? 0) - (discountAmount ?? 0));
   const newCount = rows.filter((r) => r.choice === 'new').length;
   const restockCount = rows.filter((r) => r.choice === 'existing').length;
 
@@ -100,13 +118,15 @@ export function CheckStockList({
       rows.map((r) => ({
         name: r.choice === 'existing' ? r.item!.name : r.name.trim(),
         quantity: Math.round(positive(r.quantity)!),
-        unit_cost: positive(r.unitCost),
+        unit_cost: r.free ? null : positive(r.unitCost),
         selling_price: r.choice === 'new' ? positive(r.sellingPrice) : null,
         barcode: r.barcode || null,
         item_id: r.choice === 'existing' ? r.item!.id : null,
         original_name: r.choice === 'existing' && r.original !== r.item!.name ? r.original : null,
+        ...(r.free ? { free: true } : {}),
       })),
-      recordExpense
+      recordExpense,
+      { delivery: deliveryAmount, discount: discountAmount }
     );
 
   return (
@@ -174,15 +194,22 @@ export function CheckStockList({
                       placeholder="0"
                     />
                   </label>
-                  <label className="space-y-1 text-xs text-muted-foreground">
-                    Cost each
-                    <Input
-                      inputMode="decimal"
-                      value={r.unitCost}
-                      onChange={(e) => update(r.key, { unitCost: e.target.value })}
-                      placeholder="₦"
-                    />
-                  </label>
+                  {r.free ? (
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      Cost each
+                      <p className="flex h-9 items-center text-sm text-foreground">Free</p>
+                    </div>
+                  ) : (
+                    <label className="space-y-1 text-xs text-muted-foreground">
+                      Cost each
+                      <Input
+                        inputMode="decimal"
+                        value={r.unitCost}
+                        onChange={(e) => update(r.key, { unitCost: e.target.value })}
+                        placeholder="₦"
+                      />
+                    </label>
+                  )}
                   {r.choice === 'new' && (
                     <label className="space-y-1 text-xs text-muted-foreground">
                       Sell for
@@ -197,6 +224,11 @@ export function CheckStockList({
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   {r.choice === 'new' && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">New item</span>}
+                  {r.free && (
+                    <button type="button" className="text-muted-foreground underline" onClick={() => update(r.key, { free: false })}>
+                      Not free? Add the cost
+                    </button>
+                  )}
                   {r.choice === 'existing' && (
                     <button type="button" className="text-muted-foreground underline" onClick={() => update(r.key, { choice: 'new', name: r.original })}>
                       Not this item? Make it new
@@ -223,6 +255,26 @@ export function CheckStockList({
             ))}
           </ul>
           <p className="mt-1 text-xs text-muted-foreground">Go back and write them like &quot;Indomie 20&quot;.</p>
+        </div>
+      )}
+
+      {extrasOn && (
+        <div className="space-y-2 rounded-lg border border-border p-3">
+          <div className="grid grid-cols-2 gap-2">
+            <label className="space-y-1 text-xs text-muted-foreground">
+              Delivery
+              <Input inputMode="decimal" value={delivery} onChange={(e) => setDelivery(e.target.value)} placeholder="₦" />
+            </label>
+            <label className="space-y-1 text-xs text-muted-foreground">
+              Discount
+              <Input inputMode="decimal" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="₦" />
+            </label>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {deliveryAmount || discountAmount
+              ? 'Shared across these items, so their cost is right.'
+              : 'Paid for delivery or loading? Add it here.'}
+          </p>
         </div>
       )}
 

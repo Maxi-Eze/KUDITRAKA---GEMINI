@@ -73,6 +73,17 @@ instance.interceptors.response.use(
       error.message ||
       'Request failed';
     const status = error.response?.status || 500;
+    if (status === 402) {
+      // Staff are told to ask their employer (keep the server's words); owners get the website way.
+      const forStaff = /employer/i.test(String(message));
+      throw new ApiError(
+        forStaff
+          ? 'Your business is out of credits. Please ask your employer to add more credits.'
+          : "You're out of credits. Open Credits in the menu to add more.",
+        status,
+        body?.details ?? body?.errors,
+      );
+    }
     throw new ApiError(message, status, body?.details ?? body?.errors);
   },
 );

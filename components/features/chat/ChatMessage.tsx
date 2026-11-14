@@ -12,6 +12,8 @@ export interface CardState {
   parsed?: ParsedTransaction;
   /** What saving this card did to stock (from the server). */
   stock?: StockResult;
+  /** A restock the server wants to ask "Did you pay for delivery?" about. */
+  askDeliveryFor?: string[];
 }
 
 interface ChatMessageProps {
@@ -77,6 +79,7 @@ export function ChatMessage({ message, cardState, onConfirmParsed, onDiscardPars
                 isConfirming={isConfirming}
                 isConfirmed={isConfirmed}
                 stock={cardState?.stock}
+                askDeliveryFor={cardState?.askDeliveryFor}
                 onConfirm={() => onConfirmParsed?.(shownParsed, message.id)}
                 onEdit={() => setIsEditing(true)}
                 onDiscard={() => onDiscardParsed?.(message.id)}

@@ -1,9 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SessionItem } from './SessionItem';
-import { Plus, MessageSquare } from 'lucide-react';
+import { Plus, MessageSquare, Clock } from 'lucide-react';
 import type { ChatSession } from '@/lib/types';
 
 interface SessionListProps {
@@ -73,6 +74,16 @@ export function SessionList({
             ))}
           </div>
         )}
+      </div>
+
+      <div className="border-t border-border p-2">
+        <Link
+          href="/chat-history"
+          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+        >
+          <Clock className="h-4 w-4" />
+          Past chats
+        </Link>
       </div>
     </div>
   );

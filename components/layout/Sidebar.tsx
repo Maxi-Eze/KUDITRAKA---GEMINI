@@ -9,7 +9,6 @@ import {
   Users,
   Package,
   BarChart3,
-  Clock,
   User,
   HandCoins,
   Landmark,
@@ -18,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { UserCard } from './UserCard';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useUser } from '@/hooks/useAuth';
-import { canOpenPage, staffPageLabel, usesStaffHome } from '@/lib/permissions';
+import { canOpenPage, staffPageLabel } from '@/lib/permissions';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -29,7 +28,6 @@ const navItems = [
   { href: '/inventory', label: 'Inventory', icon: Package },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/loans', label: 'Misa Loans', icon: Landmark },
-  { href: '/chat-history', label: 'Chat History', icon: Clock },
   { href: '/profile', label: 'Profile', icon: User },
 ];
 
@@ -45,8 +43,9 @@ export function Sidebar({ collapsed, onToggle, onNavigate, className }: SidebarP
   const pathname = usePathname();
   const { data: user } = useUser();
   // Staff only see the pages they can use, with plainer names; the staff home links to their chats.
+  // Credits live in the top bar; past chats open from the Chat page.
   const items = navItems
-    .filter((item) => canOpenPage(user, item.href) && !(usesStaffHome(user) && item.href === '/chat-history'))
+    .filter((item) => canOpenPage(user, item.href))
     .map((item) => ({ ...item, label: staffPageLabel(user, item.href) || item.label }));
 
   return (
@@ -98,6 +97,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate, className }: SidebarP
               )}
               <item.icon size={18} className="shrink-0" />
               {!collapsed && <span className="truncate">{item.label}</span>}
+
             </Link>
           );
         })}

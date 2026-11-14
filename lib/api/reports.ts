@@ -111,7 +111,9 @@ export interface LoanProgressData {
   active_months_needed: number;
   active_days_needed: number;
   days_this_month: number;
-  months: { month: string; days: number; active: boolean }[];
+  /** A paid top-up this month (needed for the month to count). Older servers leave it out. */
+  bought_this_month?: boolean;
+  months: { month: string; days: number; bought_credits?: boolean; active: boolean }[];
 }
 
 export type ProfitPeriod = 'this_week' | 'this_month' | 'last_month';
@@ -156,6 +158,17 @@ export interface ShopAlerts {
   running_out: { name: string; stock: number; days_left: number }[];
   credit: { owed_total: number; new_credit: number; sales: number; share_percent: number | null };
   mixed_prices: { item: string; low: number; high: number; prices: number[]; low_by: string | null }[];
+  /** Sold for less than it cost (per unit). Servers before average cost leave it out. */
+  below_cost?: { item: string; sold_at: number; cost: number }[];
+  /** Margin (%) in the last 7 days against the usual. */
+  margin_drops?: { item: string; usual_margin: number; margin_now: number }[];
+}
+
+/** "From your staff": what only the employer can answer about staff restocks. */
+export interface StaffChecks {
+  delivery: { key: string; member: string; date: string; restock_ids: string[]; items: string[]; total: number }[];
+  prices: { item_id: string; item: string; member: string; price_now: number | null; suggested: number }[];
+  count: number;
 }
 
 /** The owner's business statement (numbers; the PDF comes from getStatementPdf). */
@@ -175,6 +188,10 @@ export const reportsApi = {
   getProfit: (period: ProfitPeriod) => client.get<ProfitReport>(`/reports/profit?period=${period}`),
   /** Running out soon, money sleeping on the shelf, credit given, mixed prices (owner only). */
   getAlerts: () => client.get<ShopAlerts>('/reports/alerts'),
+  /** Delivery and prices only the employer can answer (owner only). */
+  getStaffChecks: () => client.get<StaffChecks>('/reports/staff-checks'),
+  keepStaffCheckPrice: (itemId: string, price: number) =>
+    client.post<unknown>('/reports/staff-checks/keep-price', { item_id: itemId, price }),
   /** Business statement for 3, 6 or 12 months (owner only). */
   getStatementData: (months: number) => client.get<BusinessStatementData>(`/reports/statement-data?months=${months}`),
   getStatementPdf: (months: number) => client.getFile(`/reports/statement?months=${months}`),
