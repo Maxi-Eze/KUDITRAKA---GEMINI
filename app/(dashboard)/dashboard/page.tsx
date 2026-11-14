@@ -8,6 +8,7 @@ import { RecentTransactions } from '@/components/features/dashboard/RecentTransa
 import { LoansCard } from '@/components/features/loans/LoansCard';
 import { ThingsToCheck } from '@/components/features/dashboard/ThingsToCheck';
 import { FromStaff } from '@/components/features/dashboard/FromStaff';
+import { ChatOnWhatsApp } from '@/components/features/whatsapp/ChatOnWhatsApp';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
 import { CreditsBanner } from '@/components/features/credits/CreditsBanner';
 import { StaffHome } from '@/components/features/team/StaffHome';
@@ -40,6 +41,7 @@ function BusinessDashboard({ owner }: { owner: boolean }) {
     <div className="space-y-6">
       {owner && <CreditsBanner />}
       {owner && isNewUser && <GetStarted />}
+      {owner && <ChatOnWhatsApp showHint />}
       <KpiCards
         summary={summary}
         analytics={analytics}
