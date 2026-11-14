@@ -31,11 +31,29 @@ export const inventoryApi = {
   /** "Not a stock item": stop offering to track it. */
   ignore: (name: string) => client.post<{ name: string }>('/inventory/ignore', { name }),
   /** Read a list, a photo/PDF (base64) or spreadsheet rows into lines to check. Saves nothing. */
-  read: (data: { text?: string; file?: { data: string; media_type: string }; items?: Partial<StockIntakeLine>[] }) =>
-    client.post<StockReadResult>('/inventory/read', data),
+  read: (data: {
+    text?: string;
+    file?: { data: string; media_type: string };
+    items?: Partial<StockIntakeLine>[];
+    /** Yes to "Reading this uses N credits. Go ahead?" (asked only when charging is on). */
+    confirm_credits?: boolean;
+  }) => client.post<StockReadResult>('/inventory/read', data),
   /** Add the checked lines to stock. */
-  saveMany: (data: { items: StockSaveLine[]; record_expense?: boolean; source?: StockSource }) =>
+  saveMany: (data: {
+    items: StockSaveLine[];
+    record_expense?: boolean;
+    source?: StockSource;
+    /** Delivery or loading paid, and a discount on the whole invoice: spread into the items' cost. */
+    delivery?: number | null;
+    discount?: number | null;
+  }) =>
     client.post<StockSaveResult>('/inventory/bulk', data),
+  /** Chat: should Misa ask "Did you pay for delivery?" under these saved records? (the server decides) */
+  deliveryQuestion: (transactionIds: string[]) =>
+    client.post<{ ask: boolean }>('/inventory/delivery-question', { transaction_ids: transactionIds }),
+  /** The answer: an amount is shared into the stock's cost; null = no delivery. */
+  deliveryAnswer: (data: { transaction_ids: string[]; amount: number | null }) =>
+    client.post<{ added: number; items: { name: string; unit: number }[] }>('/inventory/delivery', data),
   /** "Did you mean Milo 500g?" → Yes: take a saved sale off that item and remember the name. */
   link: (data: { transaction_id: string; item_id: string }) => client.post<StockResult>('/inventory/link', data),
   /** Evening count: the real number for each counted item, saved together. */

@@ -1,15 +1,15 @@
 'use client';
 
 import { useTransactions } from '@/hooks/useTransactions';
-import { useSummary, useAnalytics } from '@/hooks/useReports';
+import { useSummary, useAnalytics, useProfit } from '@/hooks/useReports';
 import { useUser } from '@/hooks/useAuth';
 import { KpiCards } from '@/components/features/dashboard/KpiCards';
-import { RevenueChart } from '@/components/features/dashboard/RevenueChart';
-import { ExpenseChart } from '@/components/features/dashboard/ExpenseChart';
 import { RecentTransactions } from '@/components/features/dashboard/RecentTransactions';
-import { TopCustomers } from '@/components/features/dashboard/TopCustomers';
-import { YourWeek } from '@/components/features/dashboard/YourWeek';
+import { LoansCard } from '@/components/features/loans/LoansCard';
+import { ThingsToCheck } from '@/components/features/dashboard/ThingsToCheck';
+import { FromStaff } from '@/components/features/dashboard/FromStaff';
 import { GetStarted } from '@/components/features/dashboard/GetStarted';
+import { CreditsBanner } from '@/components/features/credits/CreditsBanner';
 import { StaffHome } from '@/components/features/team/StaffHome';
 import { isOwner, usesStaffHome } from '@/lib/permissions';
 
@@ -17,48 +17,45 @@ export default function DashboardPage() {
   const { data: user } = useUser();
   // Staff without the reports right get their own simple home.
   if (usesStaffHome(user)) return <StaffHome />;
-  return <BusinessDashboard showGetStarted={isOwner(user)} />;
+  return <BusinessDashboard owner={isOwner(user)} />;
 }
 
-function BusinessDashboard({ showGetStarted }: { showGetStarted: boolean }) {
+/**
+ * Home is a glance: today's numbers, what needs attention, the latest sales. Profit details,
+ * your week, charts and top customers are in Reports (one tap away).
+ */
+function BusinessDashboard({ owner }: { owner: boolean }) {
   const { data: summary, isLoading: summaryLoading } = useSummary('daily');
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
   const { data: transactions, isLoading: txLoading } = useTransactions();
+  // Profit and cost prices are for the owner only
+  const { data: profit } = useProfit('this_month', owner);
 
   const isAnyLoading = summaryLoading || analyticsLoading || txLoading;
   // New business with nothing recorded yet: show what to do first.
   const isNewUser = !txLoading && Array.isArray(transactions) && transactions.length === 0;
+  const list = Array.isArray(transactions) ? transactions : undefined;
 
   return (
     <div className="space-y-6">
-      {showGetStarted && isNewUser && <GetStarted />}
+      {owner && <CreditsBanner />}
+      {owner && isNewUser && <GetStarted />}
       <KpiCards
         summary={summary}
         analytics={analytics}
-        transactionCount={Array.isArray(transactions) ? transactions.length : 0}
+        transactionCount={list ? list.length : 0}
         isLoading={isAnyLoading}
+        profit={owner ? profit : undefined}
       />
 
-      <YourWeek />
+      {owner && <FromStaff />}
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <RevenueChart
-          transactions={Array.isArray(transactions) ? transactions : undefined}
-          isLoading={txLoading}
-        />
-        <ExpenseChart analytics={analytics} isLoading={analyticsLoading} />
+        {owner && <ThingsToCheck />}
+        <RecentTransactions transactions={list} isLoading={txLoading} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <RecentTransactions
-          transactions={Array.isArray(transactions) ? transactions : undefined}
-          isLoading={txLoading}
-        />
-        <TopCustomers
-          transactions={Array.isArray(transactions) ? transactions : undefined}
-          isLoading={txLoading}
-        />
-      </div>
+      {owner && <LoansCard />}
     </div>
   );
 }

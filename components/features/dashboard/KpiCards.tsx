@@ -2,18 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, cn } from '@/lib/utils';
-import type { ReportSummary, Analytics } from '@/lib/api/reports';
+import { lagosMonth } from '@/lib/lagosDate';
+import type { ReportSummary, Analytics, ProfitReport } from '@/lib/api/reports';
 
 interface KpiCardsProps {
   summary?: ReportSummary;
   analytics?: Analytics;
   transactionCount?: number;
   isLoading?: boolean;
+  /** Real profit this month (owners, once the server has it). Without it the card shows money in − out. */
+  profit?: ProfitReport;
 }
 
 function getMonthNet(analytics: Analytics): number {
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonth = lagosMonth();
   const point = analytics.timeline.find((p) => p.period.slice(0, 7) === currentMonth);
   return point?.net_profit ?? 0;
 }
@@ -31,7 +33,7 @@ function SkeletonCard() {
   );
 }
 
-export function KpiCards({ summary, analytics, transactionCount, isLoading }: KpiCardsProps) {
+export function KpiCards({ summary, analytics, transactionCount, isLoading, profit }: KpiCardsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -57,12 +59,19 @@ export function KpiCards({ summary, analytics, transactionCount, isLoading }: Kp
       icon: TrendingDown,
       color: 'text-red-500',
     },
-    {
-      label: 'This Month Net',
-      value: formatCurrency(monthNet),
-      icon: Wallet,
-      color: 'text-primary',
-    },
+    profit
+      ? {
+          label: 'Profit This Month',
+          value: formatCurrency(profit.profit_on_goods),
+          icon: Wallet,
+          color: 'text-primary',
+        }
+      : {
+          label: 'This Month: In − Out',
+          value: formatCurrency(monthNet),
+          icon: Wallet,
+          color: 'text-primary',
+        },
     {
       label: 'Transactions',
       value: String(transactionCount ?? 0),

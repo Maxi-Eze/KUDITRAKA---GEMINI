@@ -107,6 +107,10 @@ export interface ParsedTransaction {
   customer: string;
   payment_method: string;
   quantity?: number;
+  /** A day the trader said ("yesterday"), as YYYY-MM-DD. */
+  date?: string | null;
+  /** Details the trader didn't say: "quantity" = a countable item with no number, so the card asks "How many?". */
+  missing_fields?: string[];
   /** Sold on credit: the customer still owes (all or credit_amount). */
   is_credit?: boolean;
   credit_amount?: number | null;
@@ -243,6 +247,8 @@ export interface StockIntakeLine {
   unit_cost: number | null;
   selling_price: number | null;
   barcode?: string | null;
+  /** Free or bonus goods on the invoice: stock goes up, the cost doesn't. */
+  free?: boolean;
 }
 
 export interface StockRef {
@@ -262,6 +268,9 @@ export interface StockReadResult {
   items: (StockIntakeLine & { match: StockLineMatch })[];
   supplier: string | null;
   total: number | null;
+  /** Delivery and a discount on the whole invoice, when it shows them. Older servers leave them out. */
+  delivery?: number | null;
+  discount?: number | null;
   unreadable: string[];
   used_ai: boolean;
 }
@@ -274,6 +283,7 @@ export interface StockSaveLine {
   barcode?: string | null;
   item_id?: string | null;
   original_name?: string | null;
+  free?: boolean;
 }
 
 export interface StockSaveResult {

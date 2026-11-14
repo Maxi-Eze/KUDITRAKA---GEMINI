@@ -1,6 +1,7 @@
 'use client';
 
 import { useForm, Controller } from 'react-hook-form';
+import { lagosYmd } from '@/lib/lagosDate';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Sheet,
@@ -84,7 +85,7 @@ function getDefaults(): TransactionFormInput {
     customer: '',
     quantity: '',
     payment_method: 'transfer',
-    date: new Date().toISOString().split('T')[0],
+    date: lagosYmd(),
   };
 }
 

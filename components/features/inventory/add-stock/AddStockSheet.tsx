@@ -5,8 +5,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Camera, FileSpreadsheet, Keyboard, ListPlus, Loader2, Mic, MicOff, ScanBarcode } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/hooks/useAuth';
+import { useShopAlerts } from '@/hooks/useReports';
 import { queryKeys } from '@/hooks/keys';
 import { hasRight } from '@/lib/permissions';
 import { inventoryApi, type StockSource } from '@/lib/api/inventory';
@@ -35,7 +37,11 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
   const [step, setStep] = useState<Step>('choose');
   const [source, setSource] = useState<StockSource>('list');
   const [rows, setRows] = useState<CheckRow[]>([]);
-  const [read, setRead] = useState<Pick<StockReadResult, 'supplier' | 'unreadable'>>({ supplier: null, unreadable: [] });
+  const [read, setRead] = useState<Pick<StockReadResult, 'supplier' | 'unreadable' | 'delivery' | 'discount'>>({ supplier: null, unreadable: [] });
+  // Delivery and Discount boxes only once the server can use them (it answers with these new fields).
+  const { data: alerts } = useShopAlerts();
+  const [serverReadsExtras, setServerReadsExtras] = useState(false);
+  const showExtras = serverReadsExtras || Boolean(alerts && 'below_cost' in alerts);
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
@@ -43,6 +49,8 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
   const photoInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const speech = useRef<any>(null);
+  // Charging on: the server asks before reading a receipt ("Reading this receipt uses 30 credits. Go ahead?").
+  const [askCredits, setAskCredits] = useState<{ message: string; again: () => void } | null>(null);
 
   const reset = () => {
     speech.current?.stop?.();
@@ -58,16 +66,27 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
 
   const showResult = (result: StockReadResult) => {
     setRows(result.items.map(toCheckRow));
-    setRead({ supplier: result.supplier, unreadable: result.unreadable });
+    setRead({ supplier: result.supplier, unreadable: result.unreadable, delivery: result.delivery, discount: result.discount });
+    if ('delivery' in result) setServerReadsExtras(true);
     setStep('check');
   };
 
-  const readWith = async (from: StockSource, run: () => Promise<StockReadResult>, back: Step = 'choose') => {
+  const readWith = async (
+    from: StockSource,
+    run: (confirmCredits: boolean) => Promise<StockReadResult>,
+    back: Step = 'choose',
+    confirmCredits = false,
+  ) => {
     setSource(from);
     setStep('reading');
     try {
-      showResult(await run());
+      showResult(await run(confirmCredits));
     } catch (e) {
+      if (e instanceof ApiError && e.status === 428) {
+        setStep(back);
+        setAskCredits({ message: e.message, again: () => readWith(from, run, back, true) });
+        return;
+      }
       toast.error(errorText(e, "Couldn't read that. Please try again."));
       setStep(back);
     }
@@ -75,13 +94,13 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
 
   const onPhoto = (file?: File) => {
     if (!file) return;
-    readWith('photo', async () => inventoryApi.read({ file: await fileForReading(file) }));
+    readWith('photo', async (confirm_credits) => inventoryApi.read({ file: await fileForReading(file), confirm_credits }));
   };
 
   const onFile = (file?: File) => {
     if (!file) return;
     if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-      readWith('file', async () => inventoryApi.read({ file: await fileForReading(file) }));
+      readWith('file', async (confirm_credits) => inventoryApi.read({ file: await fileForReading(file), confirm_credits }));
     } else {
       readWith('file', async () => {
         const lines = await readSpreadsheet(file);
@@ -141,10 +160,20 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
     setListening(true);
   };
 
-  const save = async (lines: StockSaveLine[], recordExpense: boolean) => {
+  const save = async (
+    lines: StockSaveLine[],
+    recordExpense: boolean,
+    extras: { delivery: number | null; discount: number | null },
+  ) => {
     setSaving(true);
     try {
-      const result = await inventoryApi.saveMany({ items: lines, record_expense: recordExpense, source });
+      const result = await inventoryApi.saveMany({
+        items: lines,
+        record_expense: recordExpense,
+        source,
+        ...(extras.delivery ? { delivery: extras.delivery } : {}),
+        ...(extras.discount ? { discount: extras.discount } : {}),
+      });
       const parts = [
         result.added.length && `${result.added.length} new ${result.added.length === 1 ? 'item' : 'items'} added`,
         result.restocked.length && `${result.restocked.length} restocked`,
@@ -173,6 +202,7 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
   ];
 
   return (
+    <>
     <Sheet open={open} onOpenChange={close}>
       <SheetContent side="right" className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md">
         <SheetHeader>
@@ -258,7 +288,7 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
                 <Button variant="outline" onClick={reset}>
                   Back
                 </Button>
-                <Button className="flex-1" disabled={!text.trim()} onClick={() => readWith('list', () => inventoryApi.read({ text }), 'list')}>
+                <Button className="flex-1" disabled={!text.trim()} onClick={() => readWith('list', (confirm_credits) => inventoryApi.read({ text, confirm_credits }), 'list')}>
                   Read my list
                 </Button>
               </div>
@@ -271,6 +301,9 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
               onRowsChange={setRows}
               supplier={read.supplier}
               unreadable={read.unreadable}
+              showExtras={showExtras}
+              delivery={read.delivery}
+              discount={read.discount}
               canRestock={hasRight(user, 'change_stock')}
               canRecordExpense={hasRight(user, 'record_sales')}
               defaultRecordExpense={source === 'photo' || source === 'file'}
@@ -282,5 +315,28 @@ export function AddStockSheet({ open, onOpenChange, onManual }: AddStockSheetPro
         </div>
       </SheetContent>
     </Sheet>
+    <Dialog open={!!askCredits} onOpenChange={(o) => !o && setAskCredits(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Read it with Misa?</DialogTitle>
+          <DialogDescription>{askCredits?.message}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setAskCredits(null)}>
+            Not now
+          </Button>
+          <Button
+            onClick={() => {
+              const again = askCredits?.again;
+              setAskCredits(null);
+              again?.();
+            }}
+          >
+            Go ahead
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

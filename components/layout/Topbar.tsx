@@ -12,10 +12,13 @@ import {
   Bell,
   User as UserIcon,
   LogOut,
+  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROLE_LABEL, staffPageLabel } from '@/lib/permissions';
 import { useUser, useLogout } from '@/hooks/useAuth';
+import { useCreditBalance, useCreditsActive, useIsCreditsAdmin } from '@/hooks/useCredits';
+import { LOW_CREDITS } from '@/lib/credits';
 
 const routeLabels: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -25,6 +28,9 @@ const routeLabels: Record<string, string> = {
   '/debts': 'Debts',
   '/inventory': 'Inventory',
   '/reports': 'Reports',
+  '/loans': 'Misa Loans',
+  '/credits': 'Credits',
+  '/admin/credits': 'Credits admin',
   '/chat-history': 'Chat History',
   '/profile': 'Profile',
 };
@@ -44,6 +50,9 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
   const notifRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const creditsActive = useCreditsActive();
+  const { data: credit } = useCreditBalance(creditsActive);
+  const isCreditsAdmin = useIsCreditsAdmin();
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -126,8 +135,24 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
         </div>
       </div>
 
-      {/* Right: notifications + avatar */}
+      {/* Right: credits + notifications + avatar */}
       <div className="flex items-center gap-1.5 ml-auto">
+        {/* Credits, like airtime: always in sight once charging is on (owners only). Amber when low. */}
+        {creditsActive && credit && (
+          <Link
+            href="/credits"
+            title="Your credits"
+            aria-label={`${Math.round(credit.balance).toLocaleString('en-NG')} credits. Open Credits`}
+            className={cn(
+              'flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold transition-colors',
+              credit.balance < LOW_CREDITS
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300'
+                : 'border-border text-foreground/80 hover:bg-accent',
+            )}
+          >
+            {Math.round(credit.balance).toLocaleString('en-NG')} credits
+          </Link>
+        )}
         {/* Notification bell */}
         <div className="relative" ref={notifRef}>
           <button
@@ -192,6 +217,16 @@ export function Topbar({ onMenuClick, collapsed, onToggle, className }: TopbarPr
                     <UserIcon className="h-4 w-4" />
                     Profile
                   </Link>
+                  )}
+                  {isCreditsAdmin && (
+                    <Link
+                      href="/admin/credits"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-accent hover:text-foreground transition-colors"
+                    >
+                      <Gift className="h-4 w-4" />
+                      Credits admin
+                    </Link>
                   )}
                   <button
                     onClick={() => {

@@ -8,6 +8,7 @@ import { ProfileForm } from '@/components/features/profile/ProfileForm';
 import { ProfileInfo } from '@/components/features/profile/ProfileInfo';
 import { BusinessSettings } from '@/components/features/profile/BusinessSettings';
 import { BankDetails } from '@/components/features/profile/BankDetails';
+import { RegularCosts } from '@/components/features/profile/RegularCosts';
 import { WhatsAppLink } from '@/components/features/profile/WhatsAppLink';
 import { TeamPanel } from '@/components/features/team/TeamPanel';
 import { useUser } from '@/hooks/useAuth';
@@ -86,6 +87,7 @@ export default function ProfilePage() {
         <TabsContent value="business" className="space-y-4">
           <BusinessSettings />
           <BankDetails />
+          <RegularCosts />
         </TabsContent>
 
         <TabsContent value="whatsapp">

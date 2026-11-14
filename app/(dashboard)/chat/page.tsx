@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { Suspense, useState, useCallback, useEffect, useRef } from 'react';
+import { lagosYmd } from '@/lib/lagosDate';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -12,6 +14,7 @@ import {
   useDeleteSession,
 } from '@/hooks/useChat';
 import { useCreateTransaction } from '@/hooks/useTransactions';
+import { inventoryApi } from '@/lib/api/inventory';
 import { SessionList } from '@/components/features/chat/SessionList';
 import { ChatWindow } from '@/components/features/chat/ChatWindow';
 import type { CardState } from '@/components/features/chat/ChatMessage';
@@ -291,7 +294,8 @@ function ChatPageContent() {
           item: parsed.item,
           customer_id: customerId,
           payment_method: parsed.payment_method,
-          date: new Date().toISOString().split('T')[0],
+          // The day Misa understood ("yesterday"), else today in Lagos
+          date: parsed.date || lagosYmd(),
           raw_input: '',
           quantity: parsed.quantity,
           // Sold on credit: the server also adds it to the debtors book (same as WhatsApp).
@@ -310,6 +314,22 @@ function ChatPageContent() {
             toast.success(
               saved?.debt ? `Saved. ${saved.debt.customer_name} now owes ${formatCurrency(saved.debt.balance)}` : 'Transaction saved'
             );
+            // A restock: the server may want to ask "Did you pay for delivery?" (once a day at most).
+            // Older servers don't have the question; that fails quietly.
+            const restocked = saved?.type === 'expense' && saved?.stock?.status === 'updated' && (saved.stock.change ?? 0) > 0;
+            if (messageId && restocked && saved?.id) {
+              inventoryApi
+                .deliveryQuestion([saved.id])
+                .then(({ ask }) => {
+                  if (!ask) return;
+                  const current = cardStatesRef.current[messageId];
+                  if (current?.status !== 'confirmed') return;
+                  const state: CardState = { ...current, askDeliveryFor: [saved.id] };
+                  cardStatesRef.current[messageId] = state;
+                  setCardState(messageId, state);
+                })
+                .catch(() => undefined);
+            }
           },
           onError: () => {
             // Let the user try again.
@@ -380,6 +400,9 @@ function ChatPageContent() {
           <span className="text-sm font-medium truncate">
             {sessionList.find((s) => s.id === activeSessionId)?.title || 'New Chat'}
           </span>
+          <Link href="/chat-history" className="ml-auto shrink-0 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground">
+            Past chats
+          </Link>
         </div>
 
         <div className="flex-1 min-h-0">
