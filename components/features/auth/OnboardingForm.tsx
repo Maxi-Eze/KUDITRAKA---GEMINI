@@ -18,14 +18,8 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useCompleteOnboarding } from '@/hooks/useAuth';
 import { onboardingSchema, type OnboardingFormData } from '@/lib/validations/auth';
 import type { User, BusinessSector } from '@/lib/types';
+import { sectorOptions } from '@/lib/business';
 
-const sectors: { value: BusinessSector; label: string }[] = [
-  { value: 'Retail & Trade', label: 'Retail & Trade' },
-  { value: 'Professional Services', label: 'Professional Services' },
-  { value: 'Food & Catering', label: 'Food & Catering' },
-  { value: 'Manufacturing', label: 'Manufacturing' },
-  { value: 'Other', label: 'Other' },
-];
 
 interface OnboardingFormProps {
   user: User;
@@ -82,7 +76,7 @@ export function OnboardingForm({ user }: OnboardingFormProps) {
                 <SelectValue placeholder="Select your sector" />
               </SelectTrigger>
               <SelectContent>
-                {sectors.map((s) => (
+                {sectorOptions(user.businessSector).map((s) => (
                   <SelectItem key={s.value} value={s.value}>
                     {s.label}
                   </SelectItem>

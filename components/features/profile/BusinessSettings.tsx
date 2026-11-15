@@ -21,14 +21,8 @@ import {
 import { useUpdateProfile, useUser } from '@/hooks/useAuth';
 import { getFieldErrors } from '@/lib/api/errors';
 import type { BusinessSector } from '@/lib/types';
+import { sectorOptions } from '@/lib/business';
 
-const sectors: { value: BusinessSector; label: string }[] = [
-  { value: 'Retail & Trade', label: 'Retail & Trade' },
-  { value: 'Professional Services', label: 'Professional Services' },
-  { value: 'Food & Catering', label: 'Food & Catering' },
-  { value: 'Manufacturing', label: 'Manufacturing' },
-  { value: 'Other', label: 'Other' },
-];
 
 export function BusinessSettings() {
   const { data: user } = useUser();
@@ -81,7 +75,7 @@ export function BusinessSettings() {
                 <SelectValue placeholder="Select your sector" />
               </SelectTrigger>
               <SelectContent>
-                {sectors.map((s) => (
+                {sectorOptions(user?.businessSector).map((s) => (
                   <SelectItem key={s.value} value={s.value}>
                     {s.label}
                   </SelectItem>
