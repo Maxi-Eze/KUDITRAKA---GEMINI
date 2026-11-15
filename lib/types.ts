@@ -122,7 +122,8 @@ export interface ParsedTransaction {
   queryTimeframe?: string;
 }
 
-export type BusinessSector = 'Retail & Trade' | 'Professional Services' | 'Food & Catering' | 'Manufacturing' | 'Other';
+/** One of BUSINESS_SECTORS (lib/business.ts), or a type saved from an older list. */
+export type BusinessSector = string;
 
 export interface User {
   id: string;
