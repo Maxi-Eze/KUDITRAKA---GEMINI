@@ -20,7 +20,7 @@ function mapUser(raw: Record<string, unknown>): User {
     onboarded: (raw.onboarded as boolean) || false,
     email: (raw.email as string) || '',
     phone: raw.phone as string,
-    address: raw.address as string,
+    address: ((raw.business_address ?? raw.address) as string) || undefined,
     cacNumber: raw.cac_number as string,
     businessType: raw.business_type as string,
     businessSize: raw.business_size as string,
@@ -28,6 +28,7 @@ function mapUser(raw: Record<string, unknown>): User {
     bankName: raw.bank_name as string | null | undefined,
     bankAccountNumber: raw.bank_account_number as string | null | undefined,
     bankAccountName: raw.bank_account_name as string | null | undefined,
+    businessAddress: raw.business_address as string | null | undefined,
     staff: raw.staff
       ? {
           memberId: (raw.staff as Record<string, string>).member_id,

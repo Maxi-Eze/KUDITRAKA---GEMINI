@@ -143,6 +143,8 @@ export interface User {
   bankName?: string | null;
   bankAccountNumber?: string | null;
   bankAccountName?: string | null;
+  /** Printed on receipts the business gives customers. undefined = the server can't save it yet (receipts not live). */
+  businessAddress?: string | null;
   /** Set when a staff member is logged in (not the owner). */
   staff?: StaffInfo | null;
 }

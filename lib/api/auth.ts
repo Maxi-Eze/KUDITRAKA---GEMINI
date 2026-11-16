@@ -40,6 +40,7 @@ export interface ProfileUpdateData {
   bank_name?: string | null;
   bank_account_number?: string | null;
   bank_account_name?: string | null;
+  business_address?: string | null;
 }
 
 export interface OnboardingData {
