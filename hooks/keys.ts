@@ -57,6 +57,7 @@ export const queryKeys = {
     balance: () => [...queryKeys.credits.all, 'balance'] as const,
     pricing: () => [...queryKeys.credits.all, 'pricing'] as const,
     usage: (days: number) => [...queryKeys.credits.all, 'usage', days] as const,
+    payments: () => [...queryKeys.credits.all, 'payments'] as const,
     quote: (credits: number) => [...queryKeys.credits.all, 'quote', credits] as const,
     admin: () => [...queryKeys.credits.all, 'admin'] as const,
     adminBusinesses: (search: string) => [...queryKeys.credits.all, 'admin-businesses', search] as const,

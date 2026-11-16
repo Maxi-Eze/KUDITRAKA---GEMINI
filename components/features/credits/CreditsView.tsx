@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useCreditUsage } from '@/hooks/useCredits';
 import { formatCredits, LOW_CREDITS } from '@/lib/credits';
 import { TopUpSheet } from './TopUpSheet';
+import { PaymentsList } from './PaymentsList';
 
 const PERIODS = [
   { days: 7, label: 'Last 7 days' },
@@ -118,6 +119,8 @@ export function CreditsView() {
           before anything big, like reading a receipt.
         </p>
       </section>
+
+      <PaymentsList />
 
       <TopUpSheet open={topUpOpen} onOpenChange={setTopUpOpen} />
     </div>
