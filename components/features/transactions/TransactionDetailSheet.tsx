@@ -26,7 +26,9 @@ import { useUpdateTransaction } from '@/hooks/useTransactions';
 import { customersApi } from '@/lib/api';
 import { getFieldErrors } from '@/lib/api/errors';
 import { formatCurrency, formatTxDate, cn } from '@/lib/utils';
-import { Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, X, Check, Loader2, ReceiptText } from 'lucide-react';
+import { useUser } from '@/hooks/useAuth';
+import { ReceiptDialog } from '@/components/features/receipts/ReceiptDialog';
 import {
   transactionSchema,
   PAYMENT_METHODS,
@@ -83,7 +85,11 @@ export function TransactionDetailSheet({
   canEdit = true,
 }: TransactionDetailSheetProps) {
   const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [receiptOpen, setReceiptOpen] = useState(false);
   const updateMutation = useUpdateTransaction();
+  const { data: user } = useUser();
+  // Receipts: owners, sales only, and only once the server can make them (it then returns businessAddress).
+  const canReceipt = !!user && !user.staff && user.businessAddress !== undefined && transaction?.type === 'income';
 
   const {
     register,
@@ -242,6 +248,16 @@ export function TransactionDetailSheet({
             </div>
 
             <Separator />
+
+            {canReceipt && transaction && (
+              <>
+                <Button variant="outline" className="h-11" onClick={() => setReceiptOpen(true)}>
+                  <ReceiptText className="h-4 w-4" />
+                  Receipt for the customer
+                </Button>
+                <ReceiptDialog transactionIds={[transaction.id]} open={receiptOpen} onOpenChange={setReceiptOpen} />
+              </>
+            )}
 
             {(canEdit || onDelete) && (
             <div className="flex gap-2">
